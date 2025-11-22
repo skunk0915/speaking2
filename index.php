@@ -33,7 +33,7 @@
 <body>
     <div class="app-container">
         <header class="app-header">
-            <h1>English Training</h1>
+            <h1>EnTra</h1>
             <div class="controls-top">
                 <button id="btn-new" class="btn btn-primary">新しい会話を生成</button>
             </div>
