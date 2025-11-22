@@ -1,0 +1,4 @@
+config.php
+/audio/*
+!/audio/.gitkeep
+.DS_Store
