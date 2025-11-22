@@ -43,10 +43,6 @@
             <!-- Conversation items will be injected here -->
         </main>
 
-        <div class="controls-bottom">
-            <button id="btn-continue" class="btn btn-secondary">会話を続ける</button>
-        </div>
-
         <div class="settings-panel">
             <div class="setting-item">
                 <label for="voice-select">Voice</label>
@@ -65,6 +61,10 @@
                 <label for="length-range">Length: <span id="length-val">100</span> chars</label>
                 <input type="range" id="length-range" min="50" max="500" step="10" value="100">
             </div>
+        </div>
+
+        <div class="controls-bottom">
+            <button id="btn-continue" class="btn btn-secondary">会話を続ける</button>
         </div>
     </div>
 
