@@ -47,9 +47,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             });
 
-            if (!response.ok) throw new Error('API Error');
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API Error Response:', errorText);
+                throw new Error('API Error: ' + response.status + ' ' + response.statusText);
+            }
 
             const data = await response.json();
+
+            if (!data || typeof data !== 'object') {
+                throw new Error('Invalid data format');
+            }
+
+            if (!data.japanese) {
+                console.error('Missing japanese text', data);
+                data.japanese = "（テキスト生成エラー）";
+            }
+            if (!data.english) {
+                console.error('Missing english text', data);
+                data.english = "Error: No text generated";
+            }
+
             addConversationItem(data);
             conversationHistory.push(data);
 
@@ -88,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Speech
         let audioUrl = null;
-        
+
         const playAudio = async (forceRegenerate = false) => {
             const iconPlay = btnSpeak.querySelector('.icon-play');
             const iconPause = btnSpeak.querySelector('.icon-pause');
@@ -105,11 +123,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Generate Speech
                 iconPlay.classList.add('hidden');
                 loader.classList.remove('hidden');
-                
+
                 try {
                     const speed = speedRange.value;
                     const voice = voiceSelect.value;
-                    
+
                     const res = await fetch('api/generate_speech.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -119,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             speed: speed
                         })
                     });
-                    
+
                     const resData = await res.json();
                     audioUrl = resData.audio_url;
                 } catch (e) {
@@ -134,18 +152,18 @@ document.addEventListener('DOMContentLoaded', () => {
             // Play
             currentAudio = new Audio(audioUrl);
             currentAudioBtn = btnSpeak;
-            
+
             currentAudio.addEventListener('play', () => {
                 iconPlay.classList.add('hidden');
                 iconPause.classList.remove('hidden');
                 loader.classList.add('hidden');
             });
-            
+
             currentAudio.addEventListener('pause', () => {
                 iconPlay.classList.remove('hidden');
                 iconPause.classList.add('hidden');
             });
-            
+
             currentAudio.addEventListener('ended', () => {
                 if (isRepeating && btnRepeat.classList.contains('active')) {
                     currentAudio.currentTime = 0;
@@ -160,9 +178,9 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         btnSpeak.addEventListener('click', () => playAudio(false));
-        
+
         btnRegenerate.addEventListener('click', () => {
-            if(confirm('現在の設定（声・速度）で音声を再生成しますか？')) {
+            if (confirm('現在の設定（声・速度）で音声を再生成しますか？')) {
                 playAudio(true);
             }
         });
@@ -183,10 +201,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         container.appendChild(item);
-        
+
         // Auto-scroll
         item.scrollIntoView({ behavior: 'smooth' });
-        
+
         // Auto-play speech immediately after text generation?
         // Requirement: "音声は生成後、ただちに再生する" -> This implies when "Speak" is clicked?
         // Or when text is generated? 

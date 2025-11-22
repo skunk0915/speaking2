@@ -1,95 +1,142 @@
-$primary-color: #4a90e2;
-$secondary-color: #f5f7fa;
-$text-color: #333;
-$accent-color: #e74c3c;
-$success-color: #2ecc71;
-$border-radius: 12px;
-$shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+// Variables - iOS Inspired System Colors
+$primary-color: #007AFF; // iOS System Blue
+$primary-gradient: linear-gradient(135deg, #007AFF, #0056b3);
+$secondary-color: #F2F2F7; // iOS System Gray 6
+$surface-color: rgba(255, 255, 255, 0.85); // Glassmorphism base
+$text-primary: #1C1C1E; // iOS System Gray 6 Dark Mode Text equivalent for light mode
+$text-secondary: #8E8E93; // iOS System Gray
+$success-color: #34C759; // iOS System Green
+$danger-color: #FF3B30; // iOS System Red
+$border-radius-lg: 20px;
+$border-radius-md: 14px;
+$border-radius-sm: 10px;
+$shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+$shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+$shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.12);
+$blur-effect: blur(20px);
+$font-stack: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+// Global Reset & Base
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
 
 body {
-    font-family: 'Inter', 'Noto Sans JP', sans-serif;
-    background-color: #f0f2f5;
-    color: $text-color;
+    font-family: $font-stack;
+    background-color: #F5F5F7; // Apple background gray
+    color: $text-primary;
     margin: 0;
     padding: 0;
     display: flex;
     justify-content: center;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
+// App Container
 .app-container {
     width: 100%;
-    max-width: 600px;
-    background: white;
-    box-shadow: $shadow;
+    max-width: 640px;
+    background: #FFFFFF;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
+    box-shadow: none;
 
-    @media (min-width: 600px) {
-        margin: 20px;
-        border-radius: $border-radius;
-        min-height: calc(100vh - 40px);
-        height: fit-content;
+    @media (min-width: 640px) {
+        margin: 40px auto;
+        border-radius: 32px; // Super rounded corners like iPad
+        min-height: calc(100vh - 80px);
+        height: 85vh; // Fixed height on desktop for better feel
+        box-shadow: $shadow-lg;
+        overflow: hidden; // Clip children to border radius
+        border: 1px solid rgba(0, 0, 0, 0.05);
     }
 }
 
+// Glassmorphism Header
 .app-header {
-    padding: 20px;
-    background: white;
-    border-bottom: 1px solid #eee;
-    position: sticky;
+    padding: 16px 24px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: $blur-effect;
+    -webkit-backdrop-filter: $blur-effect;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    position: absolute; // Overlay on top
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 100;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    height: 60px;
 
     h1 {
         margin: 0;
-        font-size: 1.2rem;
+        font-size: 17px;
         font-weight: 600;
+        letter-spacing: -0.02em;
+        color: $text-primary;
     }
 }
 
+// Scrollable Content Area
 .conversation-container {
     flex: 1;
-    padding: 20px;
+    padding: 80px 20px 180px 20px; // Top padding for header, bottom for controls
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    padding-bottom: 180px; // Space for bottom controls
+    gap: 24px;
+    background: #FFFFFF;
+    scroll-behavior: smooth;
+
+    // Hide scrollbar but keep functionality
+    &::-webkit-scrollbar {
+        width: 0px;
+        background: transparent;
+    }
 }
 
+// Conversation Items (Cards)
 .conversation-item {
-    background: $secondary-color;
-    padding: 16px;
-    border-radius: $border-radius;
-    animation: fadeIn 0.5s ease;
+    background: #FFFFFF;
+    padding: 0; // Padding handled by children or removed for cleaner look
+    border-radius: $border-radius-lg;
+    animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
 
     .text-content {
-        margin-bottom: 12px;
+        margin-bottom: 16px;
+        padding: 0 4px;
 
         p {
-            margin: 0 0 8px;
-            line-height: 1.6;
+            margin: 0;
+            line-height: 1.5;
         }
 
         .japanese {
-            font-size: 1rem;
-            font-weight: 500;
+            font-size: 18px;
+            font-weight: 600;
+            color: $text-primary;
+            margin-bottom: 8px;
+            letter-spacing: 0.01em;
         }
 
         .english {
-            font-size: 0.9rem;
-            color: #666;
-            transition: opacity 0.3s ease;
+            font-size: 16px;
+            color: $text-secondary;
+            font-weight: 400;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-origin: top;
 
             &.hidden {
                 opacity: 0;
                 height: 0;
+                transform: translateY(-10px);
                 margin: 0;
                 overflow: hidden;
             }
@@ -98,31 +145,41 @@ body {
 
     .actions {
         display: flex;
-        gap: 10px;
+        gap: 12px;
         align-items: center;
 
         button {
-            background: white;
-            border: 1px solid #ddd;
+            background: $secondary-color;
+            border: none;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 44px; // Larger touch target
+            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.2s;
-            color: #555;
+            transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+            color: $primary-color;
+
+            svg {
+                stroke-width: 2.5px; // Bolder icons
+                width: 20px;
+                height: 20px;
+            }
 
             &:hover {
-                background: #f8f9fa;
-                border-color: #ccc;
+                background: darken($secondary-color, 3%);
+                transform: scale(1.05);
+            }
+
+            &:active {
+                transform: scale(0.95);
             }
 
             &.active {
                 background: $primary-color;
                 color: white;
-                border-color: $primary-color;
+                box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
             }
 
             &:disabled {
@@ -133,100 +190,159 @@ body {
     }
 }
 
+// Bottom Controls (Glassmorphism)
 .controls-bottom {
-    position: fixed;
+    position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 20px;
-    background: white;
-    border-top: 1px solid #eee;
+    padding: 20px 24px 34px 24px; // Extra bottom padding for Home Indicator area
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: $blur-effect;
+    -webkit-backdrop-filter: $blur-effect;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
     display: flex;
     justify-content: center;
     z-index: 90;
-
-    @media (min-width: 600px) {
-        position: absolute;
-        border-radius: 0 0 $border-radius $border-radius;
-    }
 }
 
+// Settings Panel (Floating Glass Card)
 .settings-panel {
-    position: fixed;
-    bottom: 80px;
-    left: 0;
-    right: 0;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    padding: 15px 20px;
-    border-top: 1px solid #eee;
+    position: absolute;
+    bottom: 100px; // Above bottom controls
+    left: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    padding: 20px;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-md;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     z-index: 80;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-
-    @media (min-width: 600px) {
-        position: absolute;
-        bottom: 80px;
-    }
+    gap: 16px;
 
     .setting-item {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        font-size: 0.9rem;
+        font-size: 14px;
+        font-weight: 500;
+        color: $text-primary;
 
         label {
-            min-width: 100px;
+            min-width: 80px;
         }
 
-        input[type="range"],
+        // Custom Range Slider
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            margin-left: 16px;
+
+            &:focus {
+                outline: none;
+            }
+
+            &::-webkit-slider-runnable-track {
+                width: 100%;
+                height: 4px;
+                cursor: pointer;
+                background: #E5E5EA;
+                border-radius: 2px;
+            }
+
+            &::-webkit-slider-thumb {
+                height: 20px;
+                width: 20px;
+                border-radius: 50%;
+                background: #FFFFFF;
+                cursor: pointer;
+                -webkit-appearance: none;
+                margin-top: -8px;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+                border: 0.5px solid rgba(0, 0, 0, 0.04);
+            }
+        }
+
+        // Custom Select
         select {
-            flex: 1;
-            margin-left: 10px;
+            appearance: none;
+            background-color: rgba(0, 0, 0, 0.05);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            color: $primary-color;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: right;
+
+            &:focus {
+                outline: none;
+                background-color: rgba(0, 0, 0, 0.08);
+            }
         }
     }
 }
 
+// Buttons
 .btn {
-    padding: 10px 20px;
-    border-radius: 20px;
+    padding: 14px 28px;
+    border-radius: 100px; // Pill shape
     border: none;
     font-weight: 600;
+    font-size: 15px;
     cursor: pointer;
-    transition: transform 0.1s;
+    transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+    letter-spacing: -0.01em;
 
     &:active {
-        transform: scale(0.98);
+        transform: scale(0.96);
     }
 
     &-primary {
         background: $primary-color;
         color: white;
+        box-shadow: 0 4px 14px rgba(0, 122, 255, 0.3);
+
+        &:hover {
+            background: lighten($primary-color, 2%);
+            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+        }
     }
 
     &-secondary {
-        background: $secondary-color;
-        color: $text-color;
-        border: 1px solid #ddd;
+        background: $primary-color; // Make main action prominent
+        color: white;
         width: 100%;
-        max-width: 300px;
+        max-width: 320px;
+        box-shadow: 0 4px 14px rgba(0, 122, 255, 0.3);
+
+        &:hover {
+            background: lighten($primary-color, 2%);
+        }
     }
 }
 
+// Loader
 .loader {
-    border: 2px solid #f3f3f3;
-    border-top: 2px solid $primary-color;
+    border: 2.5px solid rgba(0, 0, 0, 0.1);
+    border-top: 2.5px solid $primary-color;
     border-radius: 50%;
-    width: 16px;
-    height: 16px;
-    animation: spin 1s linear infinite;
+    width: 18px;
+    height: 18px;
+    animation: spin 0.8s linear infinite;
 }
 
 .hidden {
     display: none !important;
 }
 
+// Animations
 @keyframes spin {
     0% {
         transform: rotate(0deg);
@@ -237,14 +353,14 @@ body {
     }
 }
 
-@keyframes fadeIn {
+@keyframes slideUpFade {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(20px) scale(0.98);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
 }

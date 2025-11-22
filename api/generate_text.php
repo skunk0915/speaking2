@@ -71,15 +71,60 @@ curl_close($ch);
 
 if ($httpCode !== 200) {
     http_response_code(500);
-    echo json_encode(['error' => 'API Error', 'details' => $response]);
+    $errorMsg = 'API Request Failed with HTTP Code: ' . $httpCode;
+    file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nDetails: " . $response . "\n", FILE_APPEND);
+    http_response_code(500);
+    echo json_encode(['error' => $errorMsg, 'details' => $response]);
     exit;
 }
 
-$result = json_decode($response, true);
-if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
-    $text = $result['candidates'][0]['content']['parts'][0]['text'];
-    echo $text; // Already JSON
-} else {
+try {
+    $result = json_decode($response, true);
+    if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+        $text = $result['candidates'][0]['content']['parts'][0]['text'];
+        
+        // Log raw response for debugging
+        file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Raw API Response: " . $text . "\n", FILE_APPEND);
+
+        // Strip markdown code blocks if present
+        $text = preg_replace('/^```json\s*|\s*```$/', '', $text);
+        
+        // Validate JSON content
+        $json = json_decode($text, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $errorMsg = 'Invalid JSON from Gemini: ' . json_last_error_msg();
+            file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nRaw: " . $text . "\n", FILE_APPEND);
+            
+            http_response_code(500);
+            echo json_encode(['error' => $errorMsg, 'raw' => $text]);
+            exit;
+        }
+        
+        // Handle case where Gemini returns an array of objects
+        if (isset($json[0]) && is_array($json[0])) {
+            $json = $json[0];
+        }
+        
+        if (empty($json['japanese']) || empty($json['english'])) {
+            $errorMsg = 'Incomplete data from Gemini';
+            file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nData: " . print_r($json, true) . "\n", FILE_APPEND);
+
+            http_response_code(500);
+            echo json_encode(['error' => $errorMsg, 'data' => $json]);
+            exit;
+        }
+
+        echo json_encode($json);
+    } else {
+        $errorMsg = 'Invalid API Response Structure';
+        file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nFull Response: " . $response . "\n", FILE_APPEND);
+
+        http_response_code(500);
+        echo json_encode(['error' => $errorMsg]);
+    }
+} catch (Exception $e) {
+    $errorMsg = 'An unexpected error occurred: ' . $e->getMessage();
+    file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Exception: " . $errorMsg . "\nTrace: " . $e->getTraceAsString() . "\n", FILE_APPEND);
     http_response_code(500);
-    echo json_encode(['error' => 'Invalid API Response']);
+    echo json_encode(['error' => $errorMsg]);
 }
