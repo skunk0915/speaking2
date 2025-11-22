@@ -1,20 +1,68 @@
-// Variables - iOS Inspired System Colors
-$primary-color: #007AFF; // iOS System Blue
-$primary-gradient: linear-gradient(135deg, #007AFF, #0056b3);
-$secondary-color: #F2F2F7; // iOS System Gray 6
-$surface-color: rgba(255, 255, 255, 0.85); // Glassmorphism base
-$text-primary: #1C1C1E; // iOS System Gray 6 Dark Mode Text equivalent for light mode
-$text-secondary: #8E8E93; // iOS System Gray
-$success-color: #34C759; // iOS System Green
-$danger-color: #FF3B30; // iOS System Red
+// Variables - Neumorphism System
+$bg-color: #e0e5ec;
+$primary-color: #007AFF; // Keep blue as accent
+$text-primary: #4a4a4a;
+$text-secondary: #8d97a5;
+$success-color: #34C759;
+$danger-color: #FF3B30;
+
+$shadow-light: #ffffff;
+$shadow-dark: #a3b1c6;
+
 $border-radius-lg: 20px;
 $border-radius-md: 14px;
 $border-radius-sm: 10px;
-$shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
-$shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
-$shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.12);
-$blur-effect: blur(20px);
+
 $font-stack: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+// Mixins
+@mixin neumorphism-flat {
+    background: $bg-color;
+    box-shadow: 9px 9px 16px $shadow-dark,
+        -9px -9px 16px $shadow-light;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@mixin neumorphism-pressed {
+    background: $bg-color;
+    box-shadow: inset 6px 6px 10px $shadow-dark,
+        inset -6px -6px 10px $shadow-light;
+    border: none;
+}
+
+@mixin neumorphism-convex {
+    background: linear-gradient(145deg, #f0f5fd, #caced4);
+    box-shadow: 9px 9px 16px $shadow-dark,
+        -9px -9px 16px $shadow-light;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@mixin neumorphism-icon-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: $bg-color;
+    box-shadow: 7px 7px 14px $shadow-dark,
+        -7px -7px 14px $shadow-light;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $text-primary;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    &:active,
+    &.active {
+        box-shadow: inset 4px 4px 8px $shadow-dark,
+            inset -4px -4px 8px $shadow-light;
+        color: $primary-color;
+    }
+
+    &:hover {
+        color: $primary-color;
+        transform: translateY(-1px);
+    }
+}
 
 // Global Reset & Base
 * {
@@ -24,7 +72,7 @@ $font-stack: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Hel
 
 body {
     font-family: $font-stack;
-    background-color: #F5F5F7; // Apple background gray
+    background-color: $bg-color;
     color: $text-primary;
     margin: 0;
     padding: 0;
@@ -39,32 +87,27 @@ body {
 .app-container {
     width: 100%;
     max-width: 640px;
-    background: #FFFFFF;
+    background: $bg-color;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
-    box-shadow: none;
 
     @media (min-width: 640px) {
         margin: 40px auto;
-        border-radius: 32px; // Super rounded corners like iPad
+        border-radius: 32px;
         min-height: calc(100vh - 80px);
-        height: 85vh; // Fixed height on desktop for better feel
-        box-shadow: $shadow-lg;
-        overflow: hidden; // Clip children to border radius
-        border: 1px solid rgba(0, 0, 0, 0.05);
+        height: 85vh;
+        @include neumorphism-flat;
+        overflow: hidden;
     }
 }
 
-// Glassmorphism Header
+// Header
 .app-header {
     padding: 16px 24px;
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: $blur-effect;
-    -webkit-backdrop-filter: $blur-effect;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    position: absolute; // Overlay on top
+    background: $bg-color;
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
@@ -72,29 +115,29 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 60px;
+    height: 70px;
+    box-shadow: 5px 5px 10px $shadow-dark, -5px -5px 10px $shadow-light; // Subtle separation
 
     h1 {
         margin: 0;
-        font-size: 17px;
-        font-weight: 600;
-        letter-spacing: -0.02em;
+        font-size: 18px;
+        font-weight: 700;
         color: $text-primary;
+        text-shadow: 1px 1px 1px $shadow-light;
     }
 }
 
 // Scrollable Content Area
 .conversation-container {
     flex: 1;
-    padding: 80px 20px 180px 20px; // Top padding for header, bottom for controls
+    padding: 90px 20px 180px 20px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 24px;
-    background: #FFFFFF;
+    gap: 30px;
+    background: $bg-color;
     scroll-behavior: smooth;
 
-    // Hide scrollbar but keep functionality
     &::-webkit-scrollbar {
         width: 0px;
         background: transparent;
@@ -103,133 +146,99 @@ body {
 
 // Conversation Items (Cards)
 .conversation-item {
-    background: #FFFFFF;
-    padding: 0; // Padding handled by children or removed for cleaner look
+    @include neumorphism-flat;
     border-radius: $border-radius-lg;
+    padding: 20px;
     animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
 
     .text-content {
-        margin-bottom: 16px;
-        padding: 0 4px;
+        margin-bottom: 20px;
 
         p {
             margin: 0;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
         .japanese {
             font-size: 18px;
             font-weight: 600;
             color: $text-primary;
-            margin-bottom: 8px;
-            letter-spacing: 0.01em;
+            margin-bottom: 10px;
         }
 
         .english {
             font-size: 16px;
             color: $text-secondary;
             font-weight: 400;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            transform-origin: top;
 
             &.hidden {
-                opacity: 0;
-                height: 0;
-                transform: translateY(-10px);
-                margin: 0;
-                overflow: hidden;
+                display: none;
             }
         }
     }
 
     .actions {
         display: flex;
-        gap: 12px;
+        gap: 16px;
         align-items: center;
+        justify-content: flex-end;
 
         button {
-            background: $secondary-color;
-            border: none;
-            border-radius: 50%;
-            width: 44px; // Larger touch target
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            @include neumorphism-icon-btn;
+            border: none; // Reset default border
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
-            color: $primary-color;
 
             svg {
-                stroke-width: 2.5px; // Bolder icons
                 width: 20px;
                 height: 20px;
-            }
-
-            &:hover {
-                background: darken($secondary-color, 3%);
-                transform: scale(1.05);
-            }
-
-            &:active {
-                transform: scale(0.95);
-            }
-
-            &.active {
-                background: $primary-color;
-                color: white;
-                box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+                stroke-width: 2px;
             }
 
             &:disabled {
                 opacity: 0.5;
+                box-shadow: none;
                 cursor: not-allowed;
             }
         }
     }
 }
 
-// Bottom Controls (Glassmorphism)
+// Bottom Controls
 .controls-bottom {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 20px 24px 34px 24px; // Extra bottom padding for Home Indicator area
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: $blur-effect;
-    -webkit-backdrop-filter: $blur-effect;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 20px 24px 40px 24px;
+    background: $bg-color;
     display: flex;
     justify-content: center;
     z-index: 90;
+    // Top shadow to separate from content
+    box-shadow: 0 -5px 10px rgba(163, 177, 198, 0.3);
 }
 
-// Settings Panel (Floating Glass Card)
+// Settings Panel
 .settings-panel {
     position: absolute;
-    bottom: 100px; // Above bottom controls
+    bottom: 110px;
     left: 20px;
     right: 20px;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(30px) saturate(180%);
-    -webkit-backdrop-filter: blur(30px) saturate(180%);
-    padding: 20px;
+    @include neumorphism-convex;
+    padding: 24px;
     border-radius: $border-radius-lg;
-    box-shadow: $shadow-md;
-    border: 1px solid rgba(255, 255, 255, 0.2);
     z-index: 80;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
 
     .setting-item {
         display: flex;
         align-items: center;
         justify-content: space-between;
         font-size: 14px;
-        font-weight: 500;
+        font-weight: 600;
         color: $text-primary;
 
         label {
@@ -249,92 +258,92 @@ body {
 
             &::-webkit-slider-runnable-track {
                 width: 100%;
-                height: 4px;
+                height: 8px;
                 cursor: pointer;
-                background: #E5E5EA;
-                border-radius: 2px;
+                border-radius: 4px;
+                // Concave track
+                box-shadow: inset 2px 2px 5px $shadow-dark, inset -2px -2px 5px $shadow-light;
+                background: $bg-color;
             }
 
             &::-webkit-slider-thumb {
-                height: 20px;
-                width: 20px;
+                height: 24px;
+                width: 24px;
                 border-radius: 50%;
-                background: #FFFFFF;
+                background: $bg-color;
                 cursor: pointer;
                 -webkit-appearance: none;
                 margin-top: -8px;
-                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-                border: 0.5px solid rgba(0, 0, 0, 0.04);
+                // Convex thumb
+                box-shadow: 3px 3px 6px $shadow-dark, -3px -3px 6px $shadow-light;
+                border: 1px solid rgba(255, 255, 255, 0.1);
             }
         }
 
         // Custom Select
         select {
             appearance: none;
-            background-color: rgba(0, 0, 0, 0.05);
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
+            @include neumorphism-pressed;
+            padding: 10px 16px;
+            border-radius: 12px;
             color: $primary-color;
             font-weight: 600;
             font-size: 14px;
             cursor: pointer;
             text-align: right;
+            border: 1px solid rgba(255, 255, 255, 0.1);
 
             &:focus {
                 outline: none;
-                background-color: rgba(0, 0, 0, 0.08);
             }
         }
     }
 }
 
-// Buttons
+// Buttons (Primary/Secondary)
 .btn {
-    padding: 14px 28px;
-    border-radius: 100px; // Pill shape
+    padding: 16px 32px;
+    border-radius: 50px;
     border: none;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 15px;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
-    letter-spacing: -0.01em;
+    letter-spacing: 0.02em;
+    transition: all 0.2s ease;
+
+    // Default Neumorphic Button
+    background: $bg-color;
+    color: $primary-color;
+    box-shadow: 6px 6px 12px $shadow-dark,
+        -6px -6px 12px $shadow-light;
 
     &:active {
-        transform: scale(0.96);
+        box-shadow: inset 4px 4px 8px $shadow-dark,
+            inset -4px -4px 8px $shadow-light;
+        transform: translateY(1px);
     }
 
     &-primary {
-        background: $primary-color;
-        color: white;
-        box-shadow: 0 4px 14px rgba(0, 122, 255, 0.3);
+        color: $primary-color;
 
         &:hover {
-            background: lighten($primary-color, 2%);
-            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+            color: lighten($primary-color, 5%);
         }
     }
 
     &-secondary {
-        background: $primary-color; // Make main action prominent
-        color: white;
         width: 100%;
         max-width: 320px;
-        box-shadow: 0 4px 14px rgba(0, 122, 255, 0.3);
-
-        &:hover {
-            background: lighten($primary-color, 2%);
-        }
     }
 }
 
 // Loader
 .loader {
-    border: 2.5px solid rgba(0, 0, 0, 0.1);
-    border-top: 2.5px solid $primary-color;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top: 3px solid $primary-color;
     border-radius: 50%;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     animation: spin 0.8s linear infinite;
 }
 
@@ -356,11 +365,11 @@ body {
 @keyframes slideUpFade {
     from {
         opacity: 0;
-        transform: translateY(20px) scale(0.98);
+        transform: translateY(20px);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateY(0);
     }
 }

@@ -1,0 +1,56 @@
+2025-11-23 07:37:23 Raw API Response: [
+  {
+    "japanese": "ああ、今日は本当に疲れた。早く家に帰ってゆっくりしたいなあ。何か美味しいものでも作って、のんびり過ごそう。",
+    "english": "Ah, I'm really tired today. I want to go home and relax soon. Maybe I'll make something delicious and take it easy."
+  }
+]
+2025-11-23 07:37:23 Error: Incomplete data from Gemini
+Data: Array
+(
+    [0] => Array
+        (
+            [japanese] => ああ、今日は本当に疲れた。早く家に帰ってゆっくりしたいなあ。何か美味しいものでも作って、のんびり過ごそう。
+            [english] => Ah, I'm really tired today. I want to go home and relax soon. Maybe I'll make something delicious and take it easy.
+        )
+
+)
+
+2025-11-23 07:39:39 Raw API Response: [
+  {
+    "japanese": "ああ、今日は疲れたな。早く家に帰ってゆっくりしたい。何か美味しいものでも作って食べようかな。",
+    "english": "Ah, I'm tired today. I want to go home and relax soon. Maybe I'll make something delicious to eat."
+  }
+]
+2025-11-23 07:39:39 Error: Incomplete data from Gemini
+Data: Array
+(
+    [0] => Array
+        (
+            [japanese] => ああ、今日は疲れたな。早く家に帰ってゆっくりしたい。何か美味しいものでも作って食べようかな。
+            [english] => Ah, I'm tired today. I want to go home and relax soon. Maybe I'll make something delicious to eat.
+        )
+
+)
+
+2025-11-23 07:42:22 Raw API Response: [
+  {
+    "japanese": "ああ、もうこんな時間か。そろそろ帰らないと、晩ご飯の支度もあるし。今日はカレーにしようかな。",
+    "english": "Oh, is it this late already? I should head home soon, I need to prepare dinner. Maybe I'll make curry tonight."
+  }
+]
+2025-11-23 07:45:28 Raw API Response: [
+  {
+    "japanese": "あ、そうだ。明日、駅前のカフェで10時に待ち合わせで大丈夫だよね？",
+    "english": "Oh, that's right. Meeting at the cafe in front of the station at 10:00 AM tomorrow works for you, right?"
+  }
+]
+2025-11-23 07:45:40 Raw API Response: {
+  "japanese": "うん、大丈夫だよ！10時に駅前のカフェでね。了解！明日が楽しみだね。",
+  "english": "Yeah, that's fine! At the cafe in front of the station at 10. Got it! Looking forward to tomorrow."
+}
+2025-11-23 07:48:25 Raw API Response: [
+  {
+    "japanese": "あ、そうだ。今度の日曜日、近くの公園でフリーマーケットがあるんだけど、一緒に行ってみない？",
+    "english": "Oh, that's right. There's a flea market at the nearby park next Sunday, would you like to go together?"
+  }
+]
