@@ -6,7 +6,7 @@ $text-secondary: #8d97a5;
 $success-color: #34C759;
 $danger-color: #FF3B30;
 
-$shadow-light: #ffffff;
+$shadow-light: #f5f5f5;
 $shadow-dark: #a3b1c6;
 
 $border-radius-lg: 20px;
@@ -120,6 +120,7 @@ body {
     min-height: 70px;
     height: auto;
     box-shadow: 5px 5px 10px $shadow-dark, -5px -5px 10px $shadow-light; // Subtle separation
+    border-radius: 32px 32px 0 0;
 
     h1 {
         margin: 0;
@@ -267,7 +268,7 @@ body {
                 border-radius: 4px;
                 // Concave track
                 box-shadow: inset 2px 2px 5px $shadow-dark, inset -2px -2px 5px $shadow-light;
-                background: $bg-color;
+                background: linear-gradient(to right, $primary-color var(--value, 0%), $bg-color var(--value, 0%));
             }
 
             &::-webkit-slider-thumb {

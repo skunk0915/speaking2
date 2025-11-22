@@ -31,7 +31,7 @@ body {
     border-radius: 32px;
     min-height: calc(100vh - 80px);
     background: #e0e5ec;
-    box-shadow: 9px 9px 16px #a3b1c6, -9px -9px 16px #ffffff;
+    box-shadow: 9px 9px 16px #a3b1c6, -9px -9px 16px #f5f5f5;
     border: 1px solid rgba(255, 255, 255, 0.2);
     padding-bottom: 40px;
   }
@@ -51,14 +51,15 @@ body {
   align-items: center;
   min-height: 70px;
   height: auto;
-  box-shadow: 5px 5px 10px #a3b1c6, -5px -5px 10px #ffffff;
+  box-shadow: 5px 5px 10px #a3b1c6, -5px -5px 10px #f5f5f5;
+  border-radius: 32px 32px 0 0;
 }
 .app-header h1 {
   margin: 0;
   font-size: 18px;
   font-weight: 700;
   color: #4a4a4a;
-  text-shadow: 1px 1px 1px #ffffff;
+  text-shadow: 1px 1px 1px #f5f5f5;
 }
 
 .conversation-container {
@@ -72,7 +73,7 @@ body {
 
 .conversation-item {
   background: #e0e5ec;
-  box-shadow: 9px 9px 16px #a3b1c6, -9px -9px 16px #ffffff;
+  box-shadow: 9px 9px 16px #a3b1c6, -9px -9px 16px #f5f5f5;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 20px;
   padding: 20px;
@@ -111,7 +112,7 @@ body {
   height: 44px;
   border-radius: 50%;
   background: #e0e5ec;
-  box-shadow: 7px 7px 14px #a3b1c6, -7px -7px 14px #ffffff;
+  box-shadow: 7px 7px 14px #a3b1c6, -7px -7px 14px #f5f5f5;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -122,7 +123,7 @@ body {
   cursor: pointer;
 }
 .conversation-item .actions button:active, .conversation-item .actions button.active {
-  box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #ffffff;
+  box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
   color: #007AFF;
 }
 .conversation-item .actions button:hover {
@@ -151,7 +152,7 @@ body {
 .settings-panel {
   margin: 20px;
   background: linear-gradient(145deg, #f0f5fd, #caced4);
-  box-shadow: 9px 9px 16px #a3b1c6, -9px -9px 16px #ffffff;
+  box-shadow: 9px 9px 16px #a3b1c6, -9px -9px 16px #f5f5f5;
   border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 24px;
   border-radius: 20px;
@@ -185,8 +186,8 @@ body {
   height: 8px;
   cursor: pointer;
   border-radius: 4px;
-  box-shadow: inset 2px 2px 5px #a3b1c6, inset -2px -2px 5px #ffffff;
-  background: #e0e5ec;
+  box-shadow: inset 2px 2px 5px #a3b1c6, inset -2px -2px 5px #f5f5f5;
+  background: linear-gradient(to right, #007AFF var(--value, 0%), #e0e5ec var(--value, 0%));
 }
 .settings-panel .setting-item input[type=range]::-webkit-slider-thumb {
   height: 24px;
@@ -196,7 +197,7 @@ body {
   cursor: pointer;
   -webkit-appearance: none;
   margin-top: -8px;
-  box-shadow: 3px 3px 6px #a3b1c6, -3px -3px 6px #ffffff;
+  box-shadow: 3px 3px 6px #a3b1c6, -3px -3px 6px #f5f5f5;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 .settings-panel .setting-item select {
@@ -204,7 +205,7 @@ body {
      -moz-appearance: none;
           appearance: none;
   background: #e0e5ec;
-  box-shadow: inset 6px 6px 10px #a3b1c6, inset -6px -6px 10px #ffffff;
+  box-shadow: inset 6px 6px 10px #a3b1c6, inset -6px -6px 10px #f5f5f5;
   border: none;
   padding: 10px 16px;
   border-radius: 12px;
@@ -230,10 +231,10 @@ body {
   transition: all 0.2s ease;
   background: #e0e5ec;
   color: #007AFF;
-  box-shadow: 6px 6px 12px #a3b1c6, -6px -6px 12px #ffffff;
+  box-shadow: 6px 6px 12px #a3b1c6, -6px -6px 12px #f5f5f5;
 }
 .btn:active {
-  box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #ffffff;
+  box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
   transform: translateY(1px);
 }
 .btn-primary {

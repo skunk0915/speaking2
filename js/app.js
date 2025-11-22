@@ -18,6 +18,22 @@ document.addEventListener('DOMContentLoaded', () => {
     speedRange.addEventListener('input', (e) => speedVal.textContent = e.target.value);
     lengthRange.addEventListener('input', (e) => lengthVal.textContent = e.target.value);
 
+    // Slider Progress Coloring
+    const rangeInputs = document.querySelectorAll('input[type="range"]');
+
+    function updateSlider(range) {
+        const min = parseFloat(range.min) || 0;
+        const max = parseFloat(range.max) || 100;
+        const val = parseFloat(range.value);
+        const percentage = (val - min) * 100 / (max - min);
+        range.style.setProperty('--value', percentage + '%');
+    }
+
+    rangeInputs.forEach(range => {
+        updateSlider(range);
+        range.addEventListener('input', () => updateSlider(range));
+    });
+
     // Initial Load
     generateText('new');
 
