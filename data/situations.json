@@ -1,0 +1,54 @@
+[
+    {
+        "category": "Daily Life",
+        "situation": "友人とカフェで最近見た映画について話している"
+    },
+    {
+        "category": "Daily Life",
+        "situation": "スーパーで夕食の献立について相談している"
+    },
+    {
+        "category": "Daily Life",
+        "situation": "電車が遅延して困っている"
+    },
+    {
+        "category": "Daily Life",
+        "situation": "新しい趣味を始めようか迷っている"
+    },
+    {
+        "category": "Travel",
+        "situation": "空港のチェックインカウンターで荷物を預ける"
+    },
+    {
+        "category": "Travel",
+        "situation": "ホテルのフロントでおすすめのレストランを聞く"
+    },
+    {
+        "category": "Travel",
+        "situation": "道に迷って通りすがりの人に道を尋ねる"
+    },
+    {
+        "category": "Business",
+        "situation": "同僚とプロジェクトの進捗について確認する"
+    },
+    {
+        "category": "Business",
+        "situation": "上司に休暇の申請をする"
+    },
+    {
+        "category": "Business",
+        "situation": "クライアントとの電話でアポイントメントを取る"
+    },
+    {
+        "category": "Emotions",
+        "situation": "試験に合格して喜びを伝えている"
+    },
+    {
+        "category": "Emotions",
+        "situation": "大切な物をなくして落ち込んでいる"
+    },
+    {
+        "category": "Emotions",
+        "situation": "サプライズパーティーを計画してワクワクしている"
+    }
+]

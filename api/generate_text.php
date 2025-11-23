@@ -17,7 +17,19 @@ $length = $input['length'] ?? 100; // Target length
 // Construct the prompt
 $prompt = "";
 if ($type === 'new') {
+    // Load situations
+    $situationsFile = __DIR__ . '/../data/situations.json';
+    $situationText = "";
+    if (file_exists($situationsFile)) {
+        $situations = json_decode(file_get_contents($situationsFile), true);
+        if ($situations && is_array($situations)) {
+            $randomSituation = $situations[array_rand($situations)];
+            $situationText = "シチュエーション: " . $randomSituation['situation'] . " (" . $randomSituation['category'] . ")";
+        }
+    }
+
     $prompt = "日常会話の文章を日本語で生成してください。
+    {$situationText}
     - 文字数は{$length}文字程度にしてください。
     - 1人の発話のみを含めてください。複数人の会話形式にはしないでください。
     - シーンの説明や話者名を含めないでください。
