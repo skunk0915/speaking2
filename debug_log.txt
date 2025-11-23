@@ -66,3 +66,52 @@ Data: Array
     "english": "I did it! I passed the exam! I'm so happy! My hard work paid off. I can't wait to tell my family and friends."
   }
 ]
+2025-11-23 05:57:45 Raw API Response: {
+  "answer": "「Why is that wrong?」は、「なぜそれが間違っているのですか？」という意味です。相手の言動や考えに対して、その理由を尋ねる際に使われます。\n\nいくつか例を挙げます。\n\n*   **状況:** 宿題で間違えた箇所を先生に指摘された。\n    *   **あなた:** Why is that wrong?\n    *   **先生:** Because you need to carry the one from the ones column to the tens column.\n    *   **日本語訳:**\n        *   **あなた:** なぜここが間違っているのですか？\n        *   **先生:** 一の位から十の位に繰り上げなければならないからです。\n\n*   **状況:** 友達が新しいレストランを批判している。\n    *   **あなた:** Why is that wrong?\n    *   **友達:** The service was terrible, and the food was cold.\n    *   **日本語訳:**\n        *   **あなた:** なぜダメなの？\n        *   **友達:** サービスが悪かったし、料理は冷たかったんだ。\n\nこの質問は、相手の意見や行動の根拠を尋ねる際に非常に便利です。ただし、使い方によっては攻撃的に聞こえる場合もあるので、状況に応じて丁寧な言い方に変えることも大切です。例えば、「Could you explain why that is wrong?（なぜそれが間違っているのか説明していただけますか？）」のようにすると、より丁寧な印象になります。"
+}
+2025-11-23 05:58:00 Raw API Response: {
+  "answer": "ご質問ありがとうございます。「Why is that wrong?」は、相手の言動や考えがなぜ間違っているのかを尋ねる、非常に直接的な表現です。状況によっては、相手を不快にさせたり、非難しているように聞こえたりする可能性があります。\n\nより丁寧な表現を使いたい場合や、相手との関係性を考慮したい場合は、以下のような言い換えを検討してみてください。\n\n*   **Could you explain why you think that?** (なぜそう思うのか説明していただけますか？)\n*   **I'm not sure I understand why you say that. Could you elaborate?** (なぜそう言うのかよくわかりません。詳しく説明していただけますか？)\n*   **Is there a specific reason why you believe that?** (そう考える具体的な理由がありますか？)\n*   **I see it differently. Would you mind sharing your perspective?** (私は違う見方をしています。あなたの視点を共有していただけますか？)\n\nこれらの表現は、相手の意見を尊重しつつ、自分の疑問や異なる視点を伝えることができます。\n\n例えば、会議中に誰かが提案したアイデアに疑問を感じた場合、\n\n*   Direct: \"Why is that wrong?\" (なぜそれが間違っているのですか？)\n*   Polite: \"I'm not sure I understand how that would work. Could you explain the potential benefits?\" (それがどのように機能するのかよくわかりません。潜在的な利点を説明していただけますか？)\n\nのように、より丁寧な表現を使うことで、建設的な議論につながる可能性が高まります。"
+}
+2025-11-23 11:06:25 Raw API Response: {
+  "answer": "ご質問ありがとうございます。あなたの回答「I want holiday」が修正された理由についてご説明します。\n\n「I want holiday」は文法的に間違いではありませんが、少し直接的すぎる言い方で、場合によっては失礼に聞こえる可能性があります。より丁寧でフォーマルな言い方として、「I would like to request some time off.」を提案しました。\n\n理由としては、以下の点が挙げられます。\n\n*   **wantよりwould likeの方が丁寧:** \"want\" はストレートな欲求を伝える表現ですが、\"would like\" はより丁寧で控えめな表現です。ビジネスシーンやフォーマルな場面では、\"would like\" を使う方が適切です。\n    *   例: \n        *   カジュアル: \"I want coffee.\"（コーヒーが欲しい。）\n        *   フォーマル: \"I would like some coffee, please.\"（コーヒーをいただけますか。）\n*   **requestを使うことで、よりフォーマルな印象に:** 「request」は「要請する」「お願いする」という意味で、休暇を申請する際に適した動詞です。\n*   **time offを使うことで、休暇であることが明確に:** \"holiday\" は一般的に休日や祝日を指すことが多いですが、\"time off\" は休暇という意味でより具体的に伝わります。\n\n他にも、以下のような表現を使うことができます。\n\n*   \"I would like to request a leave of absence.\"\n*   \"I am writing to request a vacation.\"\n*   \"I would be grateful if I could take some time off.\"\n\nこれらの表現を使うことで、より丁寧でスムーズなコミュニケーションにつながります。状況に合わせて使い分けてみてください。"
+}
+2025-11-23 11:09:30 Raw API Response: [
+  {
+    "japanese": "今夜は何にしましょうか？何か食べたいものあります？",
+    "english": "What should we have for dinner tonight? Is there anything you'd like to eat?",
+    "sample_user_japanese": "魚がいいかな。焼き魚とかどう？"
+  },
+  {
+    "japanese": "あら、美味しそうなナスね。今夜は麻婆茄子なんてどうかしら？",
+    "english": "Oh, these eggplants look delicious. How about Mapo eggplant for tonight?",
+    "sample_user_japanese": "いいね！ご飯が進みそう！"
+  },
+  {
+    "japanese": "今日はちょっと疲れたから、簡単に済ませたいな。何かいいものないかしら？",
+    "english": "I'm a little tired today, so I want to keep it simple. Is there anything good?",
+    "sample_user_japanese": "お惣菜コーナーで何か買ってく？"
+  },
+  {
+    "japanese": "この鶏肉、安売りしてるわ！唐揚げにするのはどうかしら？",
+    "english": "This chicken is on sale! How about making fried chicken?",
+    "sample_user_japanese": "いいね！子どもも喜びそう。"
+  },
+  {
+    "japanese": "カレーのルーがたくさんあるんだけど、今夜カレーにしない？",
+    "english": "We have a lot of curry roux, how about curry for tonight?",
+    "sample_user_japanese": "賛成！野菜もたっぷり入れよう。"
+  }
+]
+2025-11-23 11:33:25 Raw API Response: {
+  "japanese": "おかげさまで、元気です。あなたは、いかがですか？",
+  "english": "Thanks to you, I'm fine. How about you?",
+  "sample_user_japanese": "私も元気ですよ。"
+}
+2025-11-23 11:33:28 Raw API Response: {
+  "answer": "The change from \"How are you?\" to \"How are you doing?\" is very subtle, but \"How are you doing?\" is often considered a slightly more casual and friendly greeting.\n\nThink of it this way:\n\n*   **How are you?** - This is a standard, polite greeting suitable for most situations.\n*   **How are you doing?** - This is also very common, and often used when you know the person a little better, or want to sound a bit more relaxed.\n\nBoth are perfectly acceptable, and native speakers use them interchangeably often! There isn't a *huge* difference, but \"How are you doing?\" can be more conversational.\n\nExample:\n\n*   \"Hi John, how are you?\" (Standard Greeting)\n*   \"Hey Mary, how are you doing?\" (Slightly more casual/friendly)\n\nIn simple English: \"How are you doing?\" is just another way to say \"How are you?\" It's a little more friendly."
+}
+2025-11-23 11:50:17 Raw API Response: {
+  "japanese": "どういたしまして。お気をつけて。",
+  "english": "You're welcome. Take care.",
+  "sample_user_japanese": "はい、ありがとうございます！"
+}

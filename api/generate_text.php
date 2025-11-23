@@ -47,9 +47,44 @@ if ($type === 'new') {
       - 'japanese': 生成した日本語の会話文（相手の発話）
       - 'english': その英訳
       - 'sample_user_japanese': この発話に対する、ユーザーが返答する際の自然な日本語の回答例（短文で。ユーザーの立場に立った返答にすること）";
+} elseif ($type === 'question') {
+    $history = implode("\n", array_map(function($item) {
+        $role = $item['role'] === 'user' ? 'ユーザー' : 'AI';
+        return "{$role}: " . $item['text'];
+    }, $input['context']['history'] ?? []));
+
+    $situation = $input['context']['situation'] ?? '';
+    $userInput = $input['context']['user_input'] ?? '';
+    $correction = $input['context']['correction'] ?? '';
+
+    $prompt = "あなたは英語学習のアシスタントAIです。ユーザーからの質問に答えてください。
+    
+    前提となる会話コンテキスト:
+    【状況/問いかけ】: {$situation}
+    【ユーザーの回答】: {$userInput}
+    【AIによる添削】: {$correction}
+    
+    これまでのQ&A履歴:
+    {$history}
+    
+    ユーザーの質問:
+    {$input['text']}
+    
+    指示:
+    - 上記の「前提となる会話コンテキスト」を踏まえて、ユーザーの質問に答えてください。
+    - ユーザーは自分の回答がなぜ修正されたのか、あるいはもっと良い表現がないかなどを知りたがっています。
+    - 丁寧でわかりやすい日本語で答えてください。
+    - ユーザーが英語での回答を求めている場合、または「簡単な単語で」などの指示がある場合は、中学生レベルの簡単な英語で回答してください。
+    - 必要に応じて英語の例文を提示してください。
+    - 出力はJSON形式で、以下のキーを含めてください:
+      - 'answer': 回答内容（マークダウン形式で記述可）";
 } else {
     $history = implode("\n", array_map(function($item) {
-        return "相手: " . $item['japanese']; // Add speaker label for context
+        if (isset($item['role']) && $item['role'] === 'user') {
+            return "あなた(ユーザー): " . $item['text'];
+        } else {
+            return "相手: " . ($item['japanese'] ?? '');
+        }
     }, $context));
     
     $prompt = "以下の会話の文脈に続く、相手（AI）の自然な日本語の返答を生成してください。
@@ -58,8 +93,10 @@ if ($type === 'new') {
     {$history}
     
     役割定義:
-    - あなたは「相手」として発話します。
-    - ユーザーはそれに応答する立場です。
+    - 直前の発言は「ユーザー」によるものです。
+    - あなたは「相手」として、ユーザーの発言を受けて返答してください。
+    - ユーザーの言葉を繰り返したり、ユーザーの立場（感謝する側など）を奪ったりしないでください。
+    - 会話の流れが自然に続くようにしてください。
     
     指示:
     - 文字数は{$length}文字程度にしてください。
@@ -135,13 +172,26 @@ try {
             $json = $json[0];
         }
         
-        if (empty($json['japanese']) || empty($json['english'])) {
-            $errorMsg = 'Incomplete data from Gemini';
-            file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nData: " . print_r($json, true) . "\n", FILE_APPEND);
+        // Validation based on expected keys
+        if (isset($json['answer'])) {
+            // Q&A Response
+            if (empty($json['answer'])) {
+                 $errorMsg = 'Empty answer from Gemini';
+                 file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nData: " . print_r($json, true) . "\n", FILE_APPEND);
+                 http_response_code(500);
+                 echo json_encode(['error' => $errorMsg, 'data' => $json]);
+                 exit;
+            }
+        } else {
+            // Conversation Response
+            if (empty($json['japanese']) || empty($json['english'])) {
+                $errorMsg = 'Incomplete data from Gemini';
+                file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nData: " . print_r($json, true) . "\n", FILE_APPEND);
 
-            http_response_code(500);
-            echo json_encode(['error' => $errorMsg, 'data' => $json]);
-            exit;
+                http_response_code(500);
+                echo json_encode(['error' => $errorMsg, 'data' => $json]);
+                exit;
+            }
         }
 
         // Ensure sample_user_japanese exists

@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsPanel = document.getElementById('settings-panel');
     const settingsOverlay = document.getElementById('settings-overlay');
 
+    // Q&A Elements
+
+
     // Input Group Elements
     const inputGroup = document.getElementById('input-group');
     const hintDisplay = document.getElementById('hint-display');
@@ -24,11 +27,71 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSend = document.getElementById('btn-send');
 
     let conversationHistory = [];
+
     let currentAudio = null;
     let currentAudioBtn = null;
     let isRepeating = false;
     let currentContext = ""; // Store the last Japanese prompt
     let currentSampleAnswer = ""; // Store the current sample answer
+
+    // Event Listeners
+    btnNew.addEventListener('click', () => {
+        if (conversationHistory.length === 0 || confirm('新しい会話を始めますか？今の会話は消えます。')) {
+            container.innerHTML = '';
+            conversationHistory = [];
+            stopAudio();
+            generateText('new');
+        }
+    });
+
+    userInput.addEventListener('input', () => {
+        btnSend.disabled = userInput.value.trim() === '';
+        userInput.style.height = 'auto';
+        userInput.style.height = Math.min(userInput.scrollHeight, 100) + 'px';
+    });
+
+    btnSend.addEventListener('click', async () => {
+        const text = userInput.value.trim();
+        if (!text) return;
+
+        // Disable input
+        userInput.disabled = true;
+        btnSend.disabled = true;
+
+        // Find the feedback section of the last item
+        const groups = container.querySelectorAll('.conversation-group');
+        if (groups.length > 0) {
+            const lastGroup = groups[groups.length - 1];
+
+            // Show User Message
+            const userMsgDiv = lastGroup.querySelector('.user-message');
+            const userTextP = lastGroup.querySelector('.user-text');
+            if (userMsgDiv && userTextP) {
+                userTextP.textContent = text;
+                userMsgDiv.classList.remove('hidden');
+            }
+
+            // Add to history
+            conversationHistory.push({ role: 'user', text: text });
+
+            const feedbackSection = lastGroup.querySelector('.feedback-section');
+            await getCorrection(text, feedbackSection);
+
+            // Auto-advance conversation
+            await generateText('continue');
+        }
+
+        userInput.disabled = false;
+        userInput.focus();
+    });
+
+    btnHint.addEventListener('click', () => {
+        hintDisplay.classList.remove('hidden');
+        hintText.textContent = currentSampleAnswer;
+    });
+
+    // Initial Load
+    generateText('new');
 
     // Settings Panel Logic
     function toggleSettings(show) {
@@ -45,100 +108,93 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnSettings.addEventListener('click', () => toggleSettings(true));
     btnCloseSettings.addEventListener('click', () => toggleSettings(false));
-    settingsOverlay.addEventListener('click', () => toggleSettings(false));
+    settingsOverlay.addEventListener('click', () => {
+        toggleSettings(false);
+    });
 
-    // Settings Inputs
-    speedRange.addEventListener('input', (e) => speedVal.textContent = e.target.value);
-    lengthRange.addEventListener('input', (e) => lengthVal.textContent = e.target.value);
+    // Q&A Logic (Per Item)
+    async function setupItemQa(feedbackElement, contextData) {
+        const qaContainer = feedbackElement.querySelector('.item-qa-container');
+        const qaInput = feedbackElement.querySelector('.item-qa-input');
+        const btnQaSend = feedbackElement.querySelector('.btn-item-qa-send');
+        let itemQaHistory = [];
 
-    // Slider Progress Coloring
-    const rangeInputs = document.querySelectorAll('input[type="range"]');
+        qaInput.addEventListener('input', () => {
+            btnQaSend.disabled = qaInput.value.trim() === '';
+            qaInput.style.height = 'auto';
+            qaInput.style.height = Math.min(qaInput.scrollHeight, 100) + 'px';
+        });
 
-    function updateSlider(range) {
-        const min = parseFloat(range.min) || 0;
-        const max = parseFloat(range.max) || 100;
-        const val = parseFloat(range.value);
-        const percentage = (val - min) * 100 / (max - min);
-        range.style.setProperty('--value', percentage + '%');
+        btnQaSend.addEventListener('click', async () => {
+            const text = qaInput.value.trim();
+            if (!text) return;
+
+            // Add user message
+            appendItemQaMessage(qaContainer, text, 'user');
+
+            qaInput.value = '';
+            qaInput.style.height = 'auto';
+            btnQaSend.disabled = true;
+
+            // Add to history
+            itemQaHistory.push({ role: 'user', text: text });
+
+            // Call API
+            await sendItemQuestion(text, contextData, itemQaHistory, qaContainer);
+        });
     }
 
-    rangeInputs.forEach(range => {
-        updateSlider(range);
-        range.addEventListener('input', () => updateSlider(range));
-    });
+    async function sendItemQuestion(text, contextData, history, container) {
+        // Show loading
+        const loadingId = 'qa-loading-' + Date.now();
+        const loadingDiv = document.createElement('div');
+        loadingDiv.id = loadingId;
+        loadingDiv.className = 'qa-message ai';
+        loadingDiv.innerHTML = '<div class="loader" style="width:16px;height:16px;border-width:2px;"></div>';
+        container.appendChild(loadingDiv);
+        container.scrollTop = container.scrollHeight;
 
-    // Initial Load
-    generateText('new');
+        try {
+            const response = await fetch('api/generate_text.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'question',
+                    context: {
+                        situation: contextData.situation,
+                        user_input: contextData.user_input,
+                        correction: contextData.correction,
+                        history: history
+                    },
+                    text: text
+                })
+            });
 
-    // Button Events
-    btnNew.addEventListener('click', () => {
-        if (confirm('新しい会話を始めますか？今の会話は消えます。')) {
-            container.innerHTML = '';
-            conversationHistory = [];
-            stopAudio();
-            generateText('new');
+            if (!response.ok) throw new Error('API Error');
+            const data = await response.json();
+
+            // Remove loading
+            document.getElementById(loadingId).remove();
+
+            if (data.answer) {
+                appendItemQaMessage(container, data.answer, 'ai');
+                history.push({ role: 'ai', text: data.answer });
+            }
+
+        } catch (error) {
+            console.error(error);
+            document.getElementById(loadingId).remove();
+            appendItemQaMessage(container, 'エラーが発生しました。', 'ai');
         }
-    });
+    }
 
-    // User Input Logic
-    userInput.addEventListener('input', () => {
-        btnSend.disabled = userInput.value.trim() === '';
-        // Auto-resize textarea
-        userInput.style.height = 'auto';
-        userInput.style.height = userInput.scrollHeight + 'px';
-    });
-
-    // Hint Button Logic
-    btnHint.addEventListener('click', () => {
-        if (currentSampleAnswer) {
-            hintText.textContent = currentSampleAnswer;
-            hintDisplay.classList.toggle('hidden');
-        }
-    });
-
-    btnSend.addEventListener('click', async () => {
-        const text = userInput.value.trim();
-        if (!text) return;
-
-        // Add user message to UI
-        const lastItem = container.lastElementChild;
-        // If input group is appended, the last element might be input group.
-        // We need to find the last conversation item.
-        // Actually, we should insert the user message BEFORE the input group.
-
-        // Create User Message Bubble
-        const userMsgDiv = document.createElement('div');
-        userMsgDiv.className = 'user-message';
-        userMsgDiv.innerHTML = `<p class="user-text">${text}</p>`;
-
-        // Insert before input group
-        container.insertBefore(userMsgDiv, inputGroup);
-
-        // Scroll to show message
-        userMsgDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
-
-        userInput.value = '';
-        userInput.style.height = 'auto';
-        btnSend.disabled = true;
-        hintDisplay.classList.add('hidden'); // Hide hint after sending
-
-        // Call Correction API
-        // We need to pass the element where feedback should be appended.
-        // Let's create a feedback container and insert it after user message.
-        const feedbackDiv = document.createElement('div');
-        feedbackDiv.className = 'feedback-section hidden';
-        feedbackDiv.innerHTML = `
-            <div class="feedback-content">
-                <h3>添削</h3>
-                <p class="correction"></p>
-                <h3>提案</h3>
-                <ul class="suggestions-list"></ul>
-            </div>
-        `;
-        container.insertBefore(feedbackDiv, inputGroup);
-
-        await getCorrection(text, feedbackDiv);
-    });
+    function appendItemQaMessage(container, text, role) {
+        const div = document.createElement('div');
+        div.className = `qa-message ${role}`;
+        div.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
 
     async function getCorrection(userText, feedbackElement) {
         const correctionP = feedbackElement.querySelector('.correction');
@@ -203,6 +259,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 suggestionsList.appendChild(li);
+            });
+
+            // Initialize Q&A for this item
+            setupItemQa(feedbackElement, {
+                situation: currentContext,
+                user_input: userText,
+                correction: data.correction
             });
 
             feedbackElement.classList.remove('hidden');
@@ -290,9 +353,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function generateText(type) {
+        console.log('generateText called with type:', type);
         setLoading(true);
         try {
+            if (!lengthRange) {
+                console.error('lengthRange element not found');
+                return;
+            }
             const length = lengthRange.value;
+
+            console.log('Fetching from api/generate_text.php...');
             const response = await fetch('api/generate_text.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -304,10 +374,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
-                throw new Error('API Error: ' + response.status);
+                const errorText = await response.text();
+                throw new Error('API Error: ' + response.status + ' ' + errorText);
             }
 
             const data = await response.json();
+            console.log('API Response:', data);
 
             if (!data || typeof data !== 'object') {
                 throw new Error('Invalid data format');
@@ -322,8 +394,8 @@ document.addEventListener('DOMContentLoaded', () => {
             moveInputToBottom();
 
         } catch (error) {
-            console.error(error);
-            alert('文章の生成に失敗しました。');
+            console.error('generateText Error:', error);
+            alert('文章の生成に失敗しました: ' + error.message);
         } finally {
             setLoading(false);
         }

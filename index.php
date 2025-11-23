@@ -38,6 +38,7 @@
                 <button id="btn-settings" class="btn-icon" title="設定">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                 </button>
+
                 <button id="btn-new" class="btn btn-primary">新しい会話を生成</button>
             </div>
         </header>
@@ -73,9 +74,11 @@
             </div>
         </div>
 
+
+
         <div id="input-group" class="input-group">
             <div id="hint-display" class="hint-display hidden">
-                <p class="label">Hint (Sample Answer):</p>
+                <p class="label">例えば…</p>
                 <p class="text"></p>
             </div>
             <div class="input-row">
@@ -125,11 +128,24 @@
                     <p class="correction"></p>
                     <h3>提案</h3>
                     <ul class="suggestions-list"></ul>
+                    
+                    <div class="item-qa-section">
+                        <h3>質問</h3>
+                        <div class="item-qa-container">
+                            <!-- Q&A history for this item -->
+                        </div>
+                        <div class="item-qa-input-area">
+                            <textarea class="item-qa-input" placeholder="この添削について質問..." rows="1"></textarea>
+                            <button class="btn-icon btn-item-qa-send" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </template>
 
-    <script src="js/app.js"></script>
+    <script src="js/app.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

@@ -16,6 +16,38 @@
         "situation": "新しい趣味を始めようか迷っている"
     },
     {
+        "category": "Daily Life",
+        "situation": "美容院で髪型のオーダーをしている"
+    },
+    {
+        "category": "Daily Life",
+        "situation": "ジムでトレーニングの方法をインストラクターに聞いている"
+    },
+    {
+        "category": "Daily Life",
+        "situation": "図書館で探している本が見つからず司書に尋ねる"
+    },
+    {
+        "category": "Daily Life",
+        "situation": "近所の人とゴミ出しのルールについて確認する"
+    },
+    {
+        "category": "Daily Life",
+        "situation": "体調が悪くて病院の受付で症状を説明する"
+    },
+    {
+        "category": "Daily Life",
+        "situation": "宅配便の再配達を電話で依頼する"
+    },
+    {
+        "category": "Daily Life",
+        "situation": "友人の誕生日プレゼントを何にするか相談している"
+    },
+    {
+        "category": "Daily Life",
+        "situation": "部屋の模様替えについてルームメイトと話し合う"
+    },
+    {
         "category": "Travel",
         "situation": "空港のチェックインカウンターで荷物を預ける"
     },
@@ -26,6 +58,34 @@
     {
         "category": "Travel",
         "situation": "道に迷って通りすがりの人に道を尋ねる"
+    },
+    {
+        "category": "Travel",
+        "situation": "レストランでメニューの内容について店員に質問する"
+    },
+    {
+        "category": "Travel",
+        "situation": "観光案内所で現地ツアーの予約をする"
+    },
+    {
+        "category": "Travel",
+        "situation": "お土産屋で値切り交渉をしてみる"
+    },
+    {
+        "category": "Travel",
+        "situation": "バスの乗り方がわからず運転手に聞く"
+    },
+    {
+        "category": "Travel",
+        "situation": "ホテルの部屋のエアコンが壊れてフロントに電話する"
+    },
+    {
+        "category": "Travel",
+        "situation": "空港で乗り継ぎ便に間に合うか係員に相談する"
+    },
+    {
+        "category": "Travel",
+        "situation": "現地の友人と待ち合わせ場所について連絡を取り合う"
     },
     {
         "category": "Business",
@@ -40,6 +100,34 @@
         "situation": "クライアントとの電話でアポイントメントを取る"
     },
     {
+        "category": "Business",
+        "situation": "会議で新しいアイデアを提案する"
+    },
+    {
+        "category": "Business",
+        "situation": "取引先との会食で雑談をして場を和ませる"
+    },
+    {
+        "category": "Business",
+        "situation": "後輩のミスを注意しつつ励ます"
+    },
+    {
+        "category": "Business",
+        "situation": "電話会議の接続トラブルでITサポートに連絡する"
+    },
+    {
+        "category": "Business",
+        "situation": "昇進の面談で自分の実績をアピールする"
+    },
+    {
+        "category": "Business",
+        "situation": "他部署の同僚に協力を依頼する"
+    },
+    {
+        "category": "Business",
+        "situation": "退職する同僚に送別の言葉をかける"
+    },
+    {
         "category": "Emotions",
         "situation": "試験に合格して喜びを伝えている"
     },
@@ -50,5 +138,65 @@
     {
         "category": "Emotions",
         "situation": "サプライズパーティーを計画してワクワクしている"
+    },
+    {
+        "category": "Emotions",
+        "situation": "理不尽な扱いを受けて怒っている"
+    },
+    {
+        "category": "Emotions",
+        "situation": "将来の不安を友人に打ち明ける"
+    },
+    {
+        "category": "Emotions",
+        "situation": "久しぶりに会った友人と懐かしい話で盛り上がる"
+    },
+    {
+        "category": "Emotions",
+        "situation": "映画を見て感動し、感想を語り合う"
+    },
+    {
+        "category": "Emotions",
+        "situation": "失敗して恥ずかしい思いをしたことを笑い話にする"
+    },
+    {
+        "category": "Social",
+        "situation": "パーティーで初対面の人と自己紹介をする"
+    },
+    {
+        "category": "Social",
+        "situation": "デートの誘いを断る（または受ける）"
+    },
+    {
+        "category": "Social",
+        "situation": "友人の結婚式でのスピーチを頼まれる"
+    },
+    {
+        "category": "Social",
+        "situation": "近所の騒音トラブルについてやんわりと苦情を言う"
+    },
+    {
+        "category": "Social",
+        "situation": "SNSで知り合った人と実際に会って話す"
+    },
+    {
+        "category": "Academic",
+        "situation": "教授にレポートの課題について質問する"
+    },
+    {
+        "category": "Academic",
+        "situation": "留学生とキャンパスライフについて話す"
+    },
+    {
+        "category": "Academic",
+        "situation": "図書館の利用方法についてオリエンテーションを受ける"
+    },
+    {
+        "category": "Academic",
+        "situation": "グループワークで役割分担を決める"
+    },
+    {
+        "category": "Academic",
+        "situation": "奨学金の申請手続きについて事務室で聞く"
     }
 ]
