@@ -9,6 +9,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const lengthVal = document.getElementById('length-val');
     const tmpl = document.getElementById('tmpl-conversation');
 
+    // Slider Logic
+    function updateSliderVisuals(range, valDisplay) {
+        const val = range.value;
+        if (valDisplay) valDisplay.textContent = val;
+        const min = range.min ? parseFloat(range.min) : 0;
+        const max = range.max ? parseFloat(range.max) : 100;
+        const percentage = ((val - min) / (max - min)) * 100;
+        range.style.setProperty('--value', percentage + '%');
+    }
+
+    speedRange.addEventListener('input', () => updateSliderVisuals(speedRange, speedVal));
+    lengthRange.addEventListener('input', () => updateSliderVisuals(lengthRange, lengthVal));
+
+    // Initialize sliders
+    updateSliderVisuals(speedRange, speedVal);
+    updateSliderVisuals(lengthRange, lengthVal);
+
     // New UI Elements
     const btnSettings = document.getElementById('btn-settings');
     const btnCloseSettings = document.getElementById('btn-close-settings');
@@ -447,8 +464,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const iconPause = btnSpeak.querySelector('.icon-pause');
             const loader = btnSpeak.querySelector('.loader');
 
-            if (currentAudio && currentAudio.src.includes(audioUrl) && !currentAudio.paused && !forceRegenerate) {
-                currentAudio.pause();
+            if (audioUrl && currentAudio && currentAudio.src.includes(audioUrl) && !forceRegenerate) {
+                if (currentAudio.paused) {
+                    currentAudio.play();
+                } else {
+                    currentAudio.pause();
+                }
                 return;
             }
 
