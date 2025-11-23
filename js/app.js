@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         userInput.disabled = false;
-        userInput.focus();
+        userInput.focus({ preventScroll: true });
     });
 
     btnHint.addEventListener('click', () => {
@@ -286,7 +286,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             feedbackElement.classList.remove('hidden');
-            feedbackElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
 
         } catch (error) {
             console.error(error);
@@ -428,7 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSend.disabled = true;
 
         // Scroll to input
-        inputGroup.scrollIntoView({ behavior: 'smooth' });
+        // inputGroup.scrollIntoView({ behavior: 'smooth' });
     }
 
     function addConversationItem(data) {
