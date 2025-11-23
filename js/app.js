@@ -10,6 +10,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const tmpl = document.getElementById('tmpl-conversation');
     const tmplLoading = document.getElementById('tmpl-loading');
 
+    // Local Storage Keys
+    const STORAGE_KEYS = {
+        VOICE: 'english-training-voice',
+        SPEED: 'english-training-speed',
+        LENGTH: 'english-training-length'
+    };
+
+    // Load settings from localStorage
+    function loadSettings() {
+        const savedVoice = localStorage.getItem(STORAGE_KEYS.VOICE);
+        const savedSpeed = localStorage.getItem(STORAGE_KEYS.SPEED);
+        const savedLength = localStorage.getItem(STORAGE_KEYS.LENGTH);
+
+        if (savedVoice) {
+            voiceSelect.value = savedVoice;
+        }
+        if (savedSpeed) {
+            speedRange.value = savedSpeed;
+        }
+        if (savedLength) {
+            lengthRange.value = savedLength;
+        }
+    }
+
+    // Save settings to localStorage
+    function saveSettings() {
+        localStorage.setItem(STORAGE_KEYS.VOICE, voiceSelect.value);
+        localStorage.setItem(STORAGE_KEYS.SPEED, speedRange.value);
+        localStorage.setItem(STORAGE_KEYS.LENGTH, lengthRange.value);
+    }
+
     // Slider Logic
     function updateSliderVisuals(range, valDisplay) {
         const val = range.value;
@@ -20,8 +51,22 @@ document.addEventListener('DOMContentLoaded', () => {
         range.style.setProperty('--value', percentage + '%');
     }
 
-    speedRange.addEventListener('input', () => updateSliderVisuals(speedRange, speedVal));
-    lengthRange.addEventListener('input', () => updateSliderVisuals(lengthRange, lengthVal));
+    speedRange.addEventListener('input', () => {
+        updateSliderVisuals(speedRange, speedVal);
+        saveSettings();
+    });
+    lengthRange.addEventListener('input', () => {
+        updateSliderVisuals(lengthRange, lengthVal);
+        saveSettings();
+    });
+
+    // Save voice setting when changed
+    voiceSelect.addEventListener('change', () => {
+        saveSettings();
+    });
+
+    // Load settings first
+    loadSettings();
 
     // Initialize sliders
     updateSliderVisuals(speedRange, speedVal);
@@ -379,10 +424,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const loadingClone = tmplLoading.content.cloneNode(true);
             loadingElement = loadingClone.querySelector('.loading-group');
             container.appendChild(loadingClone);
-            // Scroll to loading
-            setTimeout(() => {
-                loadingElement?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-            }, 100);
         }
 
         try {
