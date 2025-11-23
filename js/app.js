@@ -344,8 +344,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const iconPause = btn.querySelector('.icon-pause');
         const loader = btn.querySelector('.loader');
 
-        // Toggle logic if already playing
-        if (currentAudio && currentAudioBtn === btn) {
+        const currentVoice = voiceSelect.value;
+        const currentSpeed = speedRange.value;
+
+        // Get stored audio URL and settings from button's dataset
+        let audioUrl = btn.dataset.audioUrl || null;
+        let lastVoice = btn.dataset.lastVoice || null;
+        let lastSpeed = btn.dataset.lastSpeed || null;
+
+        // Check if settings have changed
+        const settingsChanged = (lastVoice && lastSpeed) &&
+            (lastVoice !== currentVoice || lastSpeed !== currentSpeed);
+
+        // If audio exists and is the current playing audio, toggle play/pause
+        if (audioUrl && currentAudio && currentAudio.src.includes(audioUrl) && !settingsChanged) {
             if (currentAudio.paused) {
                 currentAudio.play();
             } else {
@@ -356,62 +368,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
         stopAudio(); // Stop other audio
 
-        try {
-            // Use current settings
-            const speed = speedRange.value;
-            const voice = voiceSelect.value;
-
-            // Visual feedback
+        // Regenerate audio if no audio exists, or settings have changed
+        if (!audioUrl || settingsChanged) {
+            // Generate Speech
             iconPlay.classList.add('hidden');
             loader.classList.remove('hidden');
 
-            const res = await fetch('api/generate_speech.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    text: text,
-                    voice: voice,
-                    speed: speed
-                })
-            });
+            try {
+                const res = await fetch('api/generate_speech.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: text,
+                        voice: currentVoice,
+                        speed: currentSpeed
+                    })
+                });
 
-            const resData = await res.json();
-            const audioUrl = resData.audio_url;
+                const resData = await res.json();
+                audioUrl = resData.audio_url;
 
-            const audio = new Audio(audioUrl);
-
-            // Set initial loop state based on repeat button
-            audio.loop = btnRepeat.classList.contains('active');
-
-            audio.addEventListener('ended', () => {
-                if (!audio.loop) {
-                    iconPlay.classList.remove('hidden');
-                    iconPause.classList.add('hidden');
-                }
-            });
-
-            audio.addEventListener('play', () => {
-                iconPlay.classList.add('hidden');
-                iconPause.classList.remove('hidden');
+                // Save current settings to button's dataset
+                btn.dataset.audioUrl = audioUrl;
+                btn.dataset.lastVoice = currentVoice;
+                btn.dataset.lastSpeed = currentSpeed;
+            } catch (e) {
+                console.error(e);
+                alert('音声生成に失敗しました');
+                iconPlay.classList.remove('hidden');
                 loader.classList.add('hidden');
-            });
+                return;
+            }
+        }
 
-            audio.addEventListener('pause', () => {
+        // Play
+        currentAudio = new Audio(audioUrl);
+        currentAudioBtn = btn;
+
+        // Set initial loop state based on repeat button
+        currentAudio.loop = btnRepeat.classList.contains('active');
+
+        currentAudio.addEventListener('play', () => {
+            iconPlay.classList.add('hidden');
+            iconPause.classList.remove('hidden');
+            loader.classList.add('hidden');
+        });
+
+        currentAudio.addEventListener('pause', () => {
+            iconPlay.classList.remove('hidden');
+            iconPause.classList.add('hidden');
+        });
+
+        currentAudio.addEventListener('ended', () => {
+            if (!currentAudio.loop) {
                 iconPlay.classList.remove('hidden');
                 iconPause.classList.add('hidden');
-            });
+            }
+        });
 
-            currentAudio = audio;
-            currentAudioBtn = btn;
-
-            audio.play();
-
-        } catch (e) {
-            console.error(e);
-            alert('音声再生に失敗しました');
-            iconPlay.classList.remove('hidden');
-            loader.classList.add('hidden');
-        }
+        currentAudio.play();
     }
 
     async function generateText(type) {
