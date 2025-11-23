@@ -438,7 +438,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnTranslate = clone.querySelector('.btn-translate');
         const btnSpeak = clone.querySelector('.btn-speak');
         const btnRepeat = clone.querySelector('.btn-repeat');
-        const btnRegenerate = clone.querySelector('.btn-regenerate');
 
         japanese.textContent = data.japanese;
         english.textContent = data.english;
@@ -457,13 +456,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Speech
         let audioUrl = null;
+        let lastVoice = null;
+        let lastSpeed = null;
 
-        const playAudio = async (forceRegenerate = false) => {
+        const playAudio = async () => {
             const iconPlay = btnSpeak.querySelector('.icon-play');
             const iconPause = btnSpeak.querySelector('.icon-pause');
             const loader = btnSpeak.querySelector('.loader');
 
-            if (audioUrl && currentAudio && currentAudio.src.includes(audioUrl) && !forceRegenerate) {
+            const currentVoice = voiceSelect.value;
+            const currentSpeed = speedRange.value;
+
+            // Check if settings have changed
+            const settingsChanged = (lastVoice && lastSpeed) &&
+                (lastVoice !== currentVoice || lastSpeed !== currentSpeed);
+
+            // If audio exists and is the current playing audio, toggle play/pause
+            if (audioUrl && currentAudio && currentAudio.src.includes(audioUrl) && !settingsChanged) {
                 if (currentAudio.paused) {
                     currentAudio.play();
                 } else {
@@ -474,27 +483,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
             stopAudio(); // Stop other audio
 
-            if (!audioUrl || forceRegenerate) {
+            // Regenerate audio if no audio exists, or settings have changed
+            if (!audioUrl || settingsChanged) {
                 // Generate Speech
                 iconPlay.classList.add('hidden');
                 loader.classList.remove('hidden');
 
                 try {
-                    const speed = speedRange.value;
-                    const voice = voiceSelect.value;
-
                     const res = await fetch('api/generate_speech.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             text: data.english,
-                            voice: voice,
-                            speed: speed
+                            voice: currentVoice,
+                            speed: currentSpeed
                         })
                     });
 
                     const resData = await res.json();
                     audioUrl = resData.audio_url;
+
+                    // Save current settings
+                    lastVoice = currentVoice;
+                    lastSpeed = currentSpeed;
                 } catch (e) {
                     console.error(e);
                     alert('音声生成に失敗しました');
@@ -532,13 +543,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentAudio.play();
         };
 
-        btnSpeak.addEventListener('click', () => playAudio(false));
-
-        btnRegenerate.addEventListener('click', () => {
-            if (confirm('現在の設定（声・速度）で音声を再生成しますか？')) {
-                playAudio(true);
-            }
-        });
+        btnSpeak.addEventListener('click', () => playAudio());
 
         btnRepeat.addEventListener('click', () => {
             btnRepeat.classList.toggle('active');
