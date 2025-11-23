@@ -35,6 +35,9 @@
         <header class="app-header">
             <h1>EnTra</h1>
             <div class="controls-top">
+                <button id="btn-settings" class="btn-icon" title="設定">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
                 <button id="btn-new" class="btn btn-primary">新しい会話を生成</button>
             </div>
         </header>
@@ -43,7 +46,14 @@
             <!-- Conversation items will be injected here -->
         </main>
 
-        <div class="settings-panel">
+        <div id="settings-overlay" class="settings-overlay hidden"></div>
+        <div id="settings-panel" class="settings-panel">
+            <div class="settings-header">
+                <h2>設定</h2>
+                <button id="btn-close-settings" class="btn-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
             <div class="setting-item">
                 <label for="voice-select">Voice</label>
                 <select id="voice-select">
@@ -63,32 +73,59 @@
             </div>
         </div>
 
-        <div class="controls-bottom">
-            <button id="btn-continue" class="btn btn-secondary">会話を続ける</button>
+        <div id="input-group" class="input-group">
+            <div id="hint-display" class="hint-display hidden">
+                <p class="label">Hint (Sample Answer):</p>
+                <p class="text"></p>
+            </div>
+            <div class="input-row">
+                <textarea id="user-input" placeholder="英語で返信を入力..." rows="1"></textarea>
+                <button id="btn-hint" class="btn-icon btn-hint" title="ヒントを表示">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </button>
+                <button id="btn-send" class="btn-icon btn-send" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
         </div>
     </div>
 
     <template id="tmpl-conversation">
-        <div class="conversation-item">
-            <div class="text-content">
-                <p class="japanese"></p>
-                <p class="english hidden"></p>
+        <div class="conversation-group">
+            <div class="conversation-item system-message">
+                <div class="text-content">
+                    <p class="japanese"></p>
+                    <p class="english hidden"></p>
+                </div>
+                <div class="actions">
+                    <button class="btn-translate" title="英訳を表示/非表示">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>
+                    </button>
+                    <button class="btn-speak" title="再生">
+                        <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <svg class="icon-pause hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                        <div class="loader hidden"></div>
+                    </button>
+                    <button class="btn-repeat" title="リピート再生">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                    </button>
+                    <button class="btn-regenerate" title="音声を再生成">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
+                    </button>
+                </div>
             </div>
-            <div class="actions">
-                <button class="btn-translate" title="英訳を表示/非表示">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>
-                </button>
-                <button class="btn-speak" title="再生">
-                    <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <svg class="icon-pause hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-                    <div class="loader hidden"></div>
-                </button>
-                <button class="btn-repeat" title="リピート再生">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-                </button>
-                <button class="btn-regenerate" title="音声を再生成">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
-                </button>
+            
+            <div class="user-message hidden">
+                <p class="user-text"></p>
+            </div>
+
+            <div class="feedback-section hidden">
+                <div class="feedback-content">
+                    <h3>添削</h3>
+                    <p class="correction"></p>
+                    <h3>提案</h3>
+                    <ul class="suggestions-list"></ul>
+                </div>
             </div>
         </div>
     </template>

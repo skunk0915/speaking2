@@ -128,13 +128,24 @@ body {
         font-weight: 700;
         color: $text-primary;
         text-shadow: 1px 1px 1px $shadow-light;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .controls-top {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        width: 100%;
+        justify-content: space-between;
     }
 }
 
 // Scrollable Content Area
 .conversation-container {
     flex: 1;
-    padding: calc(110px + env(safe-area-inset-top)) 20px 40px 20px; // Account for header height + safe area
+    padding: calc(110px + env(safe-area-inset-top)) 20px 40px 20px; // Reduced bottom padding
     // overflow-y: auto; // Removed scroll
     display: flex;
     flex-direction: column;
@@ -148,6 +159,13 @@ body {
     // }
 }
 
+// Conversation Group
+.conversation-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
 // Conversation Items (Cards)
 .conversation-item {
     @include neumorphism-flat;
@@ -155,6 +173,10 @@ body {
     padding: 20px;
     animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
+
+    &.system-message {
+        border-top-left-radius: 4px;
+    }
 
     .text-content {
         margin-bottom: 20px;
@@ -208,46 +230,315 @@ body {
     }
 }
 
-// Bottom Controls
-.controls-bottom {
-    // position: absolute; // Removed absolute
-    // bottom: 0;
-    // left: 0;
-    // right: 0;
-    padding: 20px 24px 40px 24px;
-    background: $bg-color;
-    display: flex;
-    justify-content: center;
-    z-index: 90;
-    // Top shadow to separate from content
-    // box-shadow: 0 -5px 10px rgba(163, 177, 198, 0.3); // Removed shadow as it's not sticky anymore
+.sample-answer {
+    @include neumorphism-flat;
+    border-radius: $border-radius-lg;
+    padding: 16px 20px;
+    margin: 0 0 8px 0;
+    border: 1px dashed $primary-color;
+    background: rgba($primary-color, 0.05);
+
+    &.hidden {
+        display: none;
+    }
+
+    .label {
+        font-size: 12px;
+        color: $primary-color;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin: 0 0 4px 0;
+    }
+
+    .text {
+        font-size: 16px;
+        color: $text-primary;
+        margin: 0;
+        font-weight: 500;
+    }
 }
 
-// Settings Panel
-.settings-panel {
-    // position: absolute; // Removed absolute
-    // bottom: 110px;
-    // left: 20px;
-    // right: 20px;
-    margin: 20px; // Add margin
+.user-message {
+    align-self: flex-end;
+    max-width: 85%;
     @include neumorphism-convex;
-    padding: 24px;
     border-radius: $border-radius-lg;
-    z-index: 80;
+    border-bottom-right-radius: 4px;
+    padding: 16px 20px;
+    color: $text-primary;
+    font-size: 16px;
+    line-height: 1.5;
+    animation: slideUpFade 0.4s ease;
+}
+
+.feedback-section {
+    @include neumorphism-flat;
+    border-radius: $border-radius-lg;
+    padding: 20px;
+    margin-top: 8px;
+    animation: slideUpFade 0.6s ease;
+
+    h3 {
+        font-size: 14px;
+        color: $text-secondary;
+        margin: 0 0 10px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .correction {
+        margin: 0 0 20px 0;
+        font-size: 16px;
+        color: $danger-color;
+        line-height: 1.5;
+    }
+
+    .suggestions-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px;
+            border-radius: $border-radius-md;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+
+            span {
+                flex: 1;
+                font-size: 15px;
+                color: $text-primary;
+            }
+
+            .btn-play-suggestion {
+                @include neumorphism-icon-btn;
+                width: 36px;
+                height: 36px;
+                flex-shrink: 0;
+
+                svg {
+                    width: 16px;
+                    height: 16px;
+                }
+            }
+        }
+    }
+}
+
+// Input Group (Dynamic)
+.input-group {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 8px;
+    animation: slideUpFade 0.4s ease;
+
+    .hint-display {
+        @include neumorphism-flat;
+        border-radius: $border-radius-lg;
+        padding: 12px 16px;
+        border: 1px dashed $primary-color;
+        background: rgba($primary-color, 0.05);
+        font-size: 14px;
+        color: $text-primary;
+
+        &.hidden {
+            display: none;
+        }
+
+        .label {
+            font-size: 11px;
+            color: $primary-color;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin: 0 0 4px 0;
+        }
+
+        .text {
+            margin: 0;
+            font-weight: 500;
+        }
+    }
+
+    .input-row {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+
+        textarea {
+            flex: 1;
+            @include neumorphism-pressed;
+            border: none;
+            border-radius: 20px;
+            padding: 12px 16px;
+            font-size: 16px;
+            line-height: 1.5;
+            color: $text-primary;
+            background: transparent;
+            resize: none;
+            min-height: 48px;
+            max-height: 120px;
+
+            &:focus {
+                outline: none;
+                box-shadow: inset 3px 3px 6px $shadow-dark, inset -3px -3px 6px $shadow-light, 0 0 0 2px rgba($primary-color, 0.1);
+            }
+
+            &::placeholder {
+                color: $text-secondary;
+                opacity: 0.7;
+            }
+        }
+
+        .btn-icon {
+            @include neumorphism-icon-btn;
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+
+            &.btn-hint {
+                color: $primary-color;
+            }
+
+            &.btn-send {
+                color: $primary-color;
+            }
+        }
+    }
+}
+
+// Input Area
+.input-area {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    background: $bg-color;
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    z-index: 90;
+    box-shadow: 0 -5px 10px rgba(163, 177, 198, 0.1);
+
+    @media (min-width: 640px) {
+        position: absolute;
+        border-radius: 0 0 32px 32px;
+    }
+
+    textarea {
+        flex: 1;
+        @include neumorphism-pressed;
+        border-radius: 20px;
+        padding: 12px 16px;
+        font-family: $font-stack;
+        font-size: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        resize: none;
+        min-height: 48px;
+        max-height: 120px;
+        line-height: 1.5;
+
+        &:focus {
+            outline: none;
+            box-shadow: inset 4px 4px 8px $shadow-dark, inset -4px -4px 8px $shadow-light, 0 0 0 2px rgba($primary-color, 0.1);
+        }
+    }
+
+    .btn-send {
+        @include neumorphism-icon-btn;
+        color: $primary-color;
+
+        &:disabled {
+            color: $text-secondary;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+    }
+}
+
+// Icon Button Class
+.btn-icon {
+    @include neumorphism-icon-btn;
+    border: none;
+    cursor: pointer;
+}
+
+// Settings Overlay
+.settings-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(2px);
+    z-index: 190;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+
+    &.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+// Settings Panel (Drawer)
+.settings-panel {
+    position: fixed;
+    top: 0;
+    left: -300px; // Hide off-screen
+    bottom: 0;
+    width: 280px;
+    background: $bg-color;
+    z-index: 200;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding-top: calc(24px + env(safe-area-inset-top));
+
+    &.active {
+        transform: translateX(300px);
+    }
+
+    .settings-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+
+        h2 {
+            margin: 0;
+            font-size: 20px;
+            color: $text-primary;
+        }
+    }
 
     .setting-item {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
+        flex-direction: column; // Stack label and input
+        gap: 10px;
         font-size: 14px;
         font-weight: 600;
         color: $text-primary;
 
         label {
-            min-width: 80px;
+            display: flex;
+            justify-content: space-between;
         }
 
         // Custom Range Slider
@@ -255,7 +546,7 @@ body {
             -webkit-appearance: none;
             width: 100%;
             background: transparent;
-            margin-left: 16px;
+            margin: 0; // Reset margin
 
             &:focus {
                 outline: none;
@@ -289,13 +580,13 @@ body {
         select {
             appearance: none;
             @include neumorphism-pressed;
-            padding: 10px 16px;
+            padding: 12px 16px;
             border-radius: 12px;
             color: $primary-color;
             font-weight: 600;
             font-size: 14px;
             cursor: pointer;
-            text-align: right;
+            width: 100%;
             border: 1px solid rgba(255, 255, 255, 0.1);
 
             &:focus {

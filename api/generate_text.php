@@ -28,23 +28,38 @@ if ($type === 'new') {
         }
     }
 
-    $prompt = "日常会話の文章を日本語で生成してください。
+    $prompt = "日常会話のロールプレイシナリオを作成してください。
     {$situationText}
+    
+    役割定義:
+    - 'japanese': 相手（AI）がユーザーに話しかける言葉です。
+    - 'sample_user_japanese': それに対するユーザー（あなた）の返答例です。
+    
+    指示:
     - 文字数は{$length}文字程度にしてください。
     - 1人の発話のみを含めてください。複数人の会話形式にはしないでください。
     - シーンの説明や話者名を含めないでください。
     - 「もちろんです」などの前置きは一切不要です。
     - 純粋な会話文のみを出力してください。
-    - 出力はJSON形式で、キーは 'japanese' と 'english' (英訳) にしてください。";
+    - 文脈から上下関係や役割が明確になるようにしてください（例：上司と部下、店員と客など）。
+    
+    出力はJSON形式で、以下のキーを含めてください:
+      - 'japanese': 生成した日本語の会話文（相手の発話）
+      - 'english': その英訳
+      - 'sample_user_japanese': この発話に対する、ユーザーが返答する際の自然な日本語の回答例（短文で。ユーザーの立場に立った返答にすること）";
 } else {
     $history = implode("\n", array_map(function($item) {
-        return $item['japanese'];
+        return "相手: " . $item['japanese']; // Add speaker label for context
     }, $context));
     
-    $prompt = "以下の会話の文脈に続く、自然な日本語の返答を生成してください。
+    $prompt = "以下の会話の文脈に続く、相手（AI）の自然な日本語の返答を生成してください。
     
     これまでの会話:
     {$history}
+    
+    役割定義:
+    - あなたは「相手」として発話します。
+    - ユーザーはそれに応答する立場です。
     
     指示:
     - 文字数は{$length}文字程度にしてください。
@@ -52,7 +67,10 @@ if ($type === 'new') {
     - シーンの説明や話者名を含めないでください。
     - 「もちろんです」などの前置きは一切不要です。
     - 純粋な会話文のみを出力してください。
-    - 出力はJSON形式で、キーは 'japanese' と 'english' (英訳) にしてください。";
+    - 出力はJSON形式で、以下のキーを含めてください:
+      - 'japanese': 生成した日本語の会話文（相手の発話）
+      - 'english': その英訳
+      - 'sample_user_japanese': この発話に対する、ユーザーが返答する際の自然な日本語の回答例（短文で。ユーザーの立場に立った返答にすること）";
 }
 
 // Call Gemini API
@@ -124,6 +142,11 @@ try {
             http_response_code(500);
             echo json_encode(['error' => $errorMsg, 'data' => $json]);
             exit;
+        }
+
+        // Ensure sample_user_japanese exists
+        if (!isset($json['sample_user_japanese'])) {
+            $json['sample_user_japanese'] = ""; // Default empty if missing
         }
 
         echo json_encode($json);
