@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const lengthRange = document.getElementById('length-range');
     const lengthVal = document.getElementById('length-val');
     const tmpl = document.getElementById('tmpl-conversation');
+    const tmplLoading = document.getElementById('tmpl-loading');
 
     // Slider Logic
     function updateSliderVisuals(range, valDisplay) {
@@ -371,6 +372,19 @@ document.addEventListener('DOMContentLoaded', () => {
     async function generateText(type) {
         console.log('generateText called with type:', type);
         setLoading(true);
+
+        // Show loading display
+        let loadingElement = null;
+        if (tmplLoading) {
+            const loadingClone = tmplLoading.content.cloneNode(true);
+            loadingElement = loadingClone.querySelector('.loading-group');
+            container.appendChild(loadingClone);
+            // Scroll to loading
+            setTimeout(() => {
+                loadingElement?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 100);
+        }
+
         try {
             if (!lengthRange) {
                 console.error('lengthRange element not found');
@@ -413,6 +427,10 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('generateText Error:', error);
             alert('文章の生成に失敗しました: ' + error.message);
         } finally {
+            // Remove loading display
+            if (loadingElement && loadingElement.parentNode) {
+                loadingElement.remove();
+            }
             setLoading(false);
         }
     }

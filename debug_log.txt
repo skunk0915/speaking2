@@ -115,3 +115,10 @@ Data: Array
   "english": "You're welcome. Take care.",
   "sample_user_japanese": "はい、ありがとうございます！"
 }
+2025-11-23 13:02:42 Raw API Response: [
+  {
+    "japanese": "結婚式のスピーチ、ぜひお願いしたいんだけど、引き受けてくれるかな？",
+    "english": "I'd really like you to give a speech at the wedding. Would you be willing to do it?",
+    "sample_user_japanese": "喜んで！お祝いさせてください。"
+  }
+]

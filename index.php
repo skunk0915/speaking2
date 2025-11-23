@@ -139,6 +139,17 @@
         </div>
     </template>
 
+    <template id="tmpl-loading">
+        <div class="conversation-group loading-group">
+            <div class="conversation-item loading-item">
+                <div class="loading-content">
+                    <div class="loader"></div>
+                    <p>会話を生成中...</p>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <script src="js/app.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
