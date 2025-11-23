@@ -745,8 +745,6 @@ body {
   letter-spacing: 0.05em;
 }
 .item-qa-section .item-qa-container {
-  max-height: 200px;
-  overflow-y: auto;
   margin-bottom: 12px;
   display: flex;
   flex-direction: column;
