@@ -289,7 +289,7 @@ body {
     .correction {
         margin: 0 0 20px 0;
         font-size: 16px;
-        color: $danger-color;
+        color: $primary-color;
         line-height: 1.5;
     }
 
@@ -301,31 +301,77 @@ body {
         flex-direction: column;
         gap: 12px;
 
-        li {
+        li.suggestion-item {
             display: flex;
-            align-items: center;
+            align-items: flex-start; // Align to top
             justify-content: space-between;
             gap: 12px;
-            padding: 12px;
+            padding: 16px; // Increased padding
             border-radius: $border-radius-md;
             background: rgba(255, 255, 255, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.2);
 
-            span {
+            .suggestion-content {
                 flex: 1;
-                font-size: 15px;
-                color: $text-primary;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+
+                p {
+                    margin: 0;
+                    line-height: 1.5;
+                }
+
+                .english {
+                    font-size: 16px;
+                    color: $text-primary;
+                    font-weight: 600;
+                }
+
+                .japanese {
+                    font-size: 13px;
+                    color: $text-secondary;
+                }
+
+                .point {
+                    font-size: 13px;
+                    color: $text-primary;
+                    background: rgba($primary-color, 0.08);
+                    padding: 8px 10px;
+                    border-radius: 8px;
+                    margin-top: 4px;
+
+                    .label {
+                        font-weight: 700;
+                        color: $primary-color;
+                        font-size: 11px;
+                        margin-right: 4px;
+                    }
+                }
             }
 
-            .btn-play-suggestion {
-                @include neumorphism-icon-btn;
-                width: 36px;
-                height: 36px;
+            .suggestion-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
                 flex-shrink: 0;
 
-                svg {
-                    width: 16px;
-                    height: 16px;
+                button {
+                    @include neumorphism-icon-btn;
+                    width: 36px;
+                    height: 36px;
+
+                    svg {
+                        width: 16px;
+                        height: 16px;
+                    }
+
+                    &.btn-repeat-suggestion {
+                        &.active {
+                            color: $primary-color;
+                            box-shadow: inset 2px 2px 4px $shadow-dark, inset -2px -2px 4px $shadow-light;
+                        }
+                    }
                 }
             }
         }

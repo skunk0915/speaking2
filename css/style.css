@@ -221,7 +221,7 @@ body {
 .feedback-section .correction {
   margin: 0 0 20px 0;
   font-size: 16px;
-  color: #FF3B30;
+  color: #007AFF;
   line-height: 1.5;
 }
 .feedback-section .suggestions-list {
@@ -232,22 +232,56 @@ body {
   flex-direction: column;
   gap: 12px;
 }
-.feedback-section .suggestions-list li {
+.feedback-section .suggestions-list li.suggestion-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px;
+  padding: 16px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
-.feedback-section .suggestions-list li span {
+.feedback-section .suggestions-list li.suggestion-item .suggestion-content {
   flex: 1;
-  font-size: 15px;
-  color: #4a4a4a;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
-.feedback-section .suggestions-list li .btn-play-suggestion {
+.feedback-section .suggestions-list li.suggestion-item .suggestion-content p {
+  margin: 0;
+  line-height: 1.5;
+}
+.feedback-section .suggestions-list li.suggestion-item .suggestion-content .english {
+  font-size: 16px;
+  color: #4a4a4a;
+  font-weight: 600;
+}
+.feedback-section .suggestions-list li.suggestion-item .suggestion-content .japanese {
+  font-size: 13px;
+  color: #8d97a5;
+}
+.feedback-section .suggestions-list li.suggestion-item .suggestion-content .point {
+  font-size: 13px;
+  color: #4a4a4a;
+  background: rgba(0, 122, 255, 0.08);
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-top: 4px;
+}
+.feedback-section .suggestions-list li.suggestion-item .suggestion-content .point .label {
+  font-weight: 700;
+  color: #007AFF;
+  font-size: 11px;
+  margin-right: 4px;
+}
+.feedback-section .suggestions-list li.suggestion-item .suggestion-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.feedback-section .suggestions-list li.suggestion-item .suggestion-actions button {
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -261,19 +295,22 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
   width: 36px;
   height: 36px;
-  flex-shrink: 0;
 }
-.feedback-section .suggestions-list li .btn-play-suggestion:active, .feedback-section .suggestions-list li .btn-play-suggestion.active {
+.feedback-section .suggestions-list li.suggestion-item .suggestion-actions button:active, .feedback-section .suggestions-list li.suggestion-item .suggestion-actions button.active {
   box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
   color: #007AFF;
 }
-.feedback-section .suggestions-list li .btn-play-suggestion:hover {
+.feedback-section .suggestions-list li.suggestion-item .suggestion-actions button:hover {
   color: #007AFF;
   transform: translateY(-1px);
 }
-.feedback-section .suggestions-list li .btn-play-suggestion svg {
+.feedback-section .suggestions-list li.suggestion-item .suggestion-actions button svg {
   width: 16px;
   height: 16px;
+}
+.feedback-section .suggestions-list li.suggestion-item .suggestion-actions button.btn-repeat-suggestion.active {
+  color: #007AFF;
+  box-shadow: inset 2px 2px 4px #a3b1c6, inset -2px -2px 4px #f5f5f5;
 }
 
 .input-group {

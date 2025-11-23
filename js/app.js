@@ -163,16 +163,44 @@ document.addEventListener('DOMContentLoaded', () => {
             suggestionsList.innerHTML = '';
             data.suggestions.forEach(suggestion => {
                 const li = document.createElement('li');
+                li.className = 'suggestion-item';
+
+                // Handle both old (string) and new (object) formats for backward compatibility
+                const engText = typeof suggestion === 'string' ? suggestion : suggestion.english;
+                const jpText = typeof suggestion === 'string' ? '' : suggestion.japanese;
+                const pointText = typeof suggestion === 'string' ? '' : suggestion.point;
+
                 li.innerHTML = `
-                    <span>${suggestion}</span>
-                    <button class="btn-play-suggestion" title="再生">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    </button>
+                    <div class="suggestion-content">
+                        <p class="english">${engText}</p>
+                        ${jpText ? `<p class="japanese">${jpText}</p>` : ''}
+                        ${pointText ? `<p class="point"><span class="label">POINT</span> ${pointText}</p>` : ''}
+                    </div>
+                    <div class="suggestion-actions">
+                        <button class="btn-play-suggestion" title="再生">
+                            <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            <svg class="icon-pause hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                            <div class="loader hidden" style="width:16px;height:16px;border-width:2px;"></div>
+                        </button>
+                        <button class="btn-repeat-suggestion" title="リピート再生">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                        </button>
+                    </div>
                 `;
 
                 // Add play event for suggestion
                 const btnPlay = li.querySelector('.btn-play-suggestion');
-                btnPlay.addEventListener('click', () => playSuggestionAudio(suggestion, btnPlay));
+                const btnRepeat = li.querySelector('.btn-repeat-suggestion');
+
+                btnPlay.addEventListener('click', () => playSuggestionAudio(engText, btnPlay, btnRepeat));
+
+                btnRepeat.addEventListener('click', () => {
+                    btnRepeat.classList.toggle('active');
+                    // If currently playing this audio, update loop status
+                    if (currentAudio && currentAudioBtn === btnPlay) {
+                        currentAudio.loop = btnRepeat.classList.contains('active');
+                    }
+                });
 
                 suggestionsList.appendChild(li);
             });
@@ -186,15 +214,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function playSuggestionAudio(text, btn) {
+    async function playSuggestionAudio(text, btn, btnRepeat) {
+        const iconPlay = btn.querySelector('.icon-play');
+        const iconPause = btn.querySelector('.icon-pause');
+        const loader = btn.querySelector('.loader');
+
+        // Toggle logic if already playing
+        if (currentAudio && currentAudioBtn === btn) {
+            if (currentAudio.paused) {
+                currentAudio.play();
+            } else {
+                currentAudio.pause();
+            }
+            return;
+        }
+
+        stopAudio(); // Stop other audio
+
         try {
             // Use current settings
             const speed = speedRange.value;
             const voice = voiceSelect.value;
 
             // Visual feedback
-            const originalIcon = btn.innerHTML;
-            btn.innerHTML = '<div class="loader" style="width:16px;height:16px;border-width:2px;"></div>';
+            iconPlay.classList.add('hidden');
+            loader.classList.remove('hidden');
 
             const res = await fetch('api/generate_speech.php', {
                 method: 'POST',
@@ -211,62 +255,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const audio = new Audio(audioUrl);
 
-            // Handle Repeat
-            // We need to check the global repeat state. 
-            // But the repeat button is per conversation item. 
-            // The requirement says "reflect controller settings (Repeat ON/OFF)".
-            // Let's assume there's a global repeat setting or we check the last active repeat button?
-            // Actually, the user said "回答例も会話英文と同様の機能（リピートON/OFF...）を備える".
-            // Since suggestions are separate, maybe we should just respect the loop if the user wants?
-            // For now, let's just play once. If we want repeat, we'd need a UI toggle for it on the suggestion or global.
-            // But wait, the previous code had `isRepeating` toggled by `btnRepeat` on the conversation item.
-            // Let's use a global `isRepeating` flag if we want, but `btnRepeat` is specific to that item.
-            // Let's just play it once for now, as adding repeat to suggestions might clutter UI unless requested.
-            // Wait, user said "リピートON/OFF...を備える". 
-            // Maybe we can check if ANY repeat button is active? Or just add a repeat toggle to suggestions?
-            // Let's keep it simple: Play once. If user wants repeat, they click again. 
-            // Or if we want to support repeat, we need to know if "Repeat Mode" is on.
-            // Let's check if the LAST conversation item's repeat button is active.
-            const lastItem = container.querySelector('.conversation-item:last-of-type');
-            if (lastItem) {
-                const btnRepeat = lastItem.querySelector('.btn-repeat');
-                if (btnRepeat && btnRepeat.classList.contains('active')) {
-                    audio.loop = true;
-                }
-            }
+            // Set initial loop state based on repeat button
+            audio.loop = btnRepeat.classList.contains('active');
 
             audio.addEventListener('ended', () => {
                 if (!audio.loop) {
-                    btn.innerHTML = originalIcon;
+                    iconPlay.classList.remove('hidden');
+                    iconPause.classList.add('hidden');
                 }
             });
 
-            // If looping, we need a way to stop. Clicking again?
-            // For now, simple play.
-
-            audio.play();
-
             audio.addEventListener('play', () => {
-                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+                iconPlay.classList.add('hidden');
+                iconPause.classList.remove('hidden');
+                loader.classList.add('hidden');
             });
 
             audio.addEventListener('pause', () => {
-                btn.innerHTML = originalIcon;
+                iconPlay.classList.remove('hidden');
+                iconPause.classList.add('hidden');
             });
 
-            // Allow stopping by clicking again?
-            // The current implementation creates a new Audio each time.
-            // To support toggle stop, we need to track current suggestion audio.
-            if (currentAudio) {
-                currentAudio.pause();
-            }
             currentAudio = audio;
             currentAudioBtn = btn;
+
+            audio.play();
 
         } catch (e) {
             console.error(e);
             alert('音声再生に失敗しました');
-            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+            iconPlay.classList.remove('hidden');
+            loader.classList.add('hidden');
         }
     }
 
