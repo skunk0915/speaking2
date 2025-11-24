@@ -185,6 +185,158 @@ body {
             }
         }
     }
+
+    .practice-section {
+        margin-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 16px;
+        width: 100%;
+        animation: slideUpFade 0.3s ease;
+
+        &.hidden {
+            display: none;
+        }
+
+        .practice-input-area {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            align-items: flex-end;
+
+            .practice-input {
+                flex: 1;
+                padding: 12px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                font-size: 16px;
+                resize: none;
+                background-color: rgba(255, 255, 255, 0.05);
+                transition: all 0.2s ease;
+                font-family: inherit;
+                color: $text-primary;
+                min-height: 48px;
+
+                &:focus {
+                    outline: none;
+                    border-color: $primary-color;
+                    background-color: rgba(255, 255, 255, 0.1);
+                    box-shadow: inset 2px 2px 4px $shadow-dark, inset -2px -2px 4px $shadow-light;
+                }
+            }
+
+            .btn-practice-send {
+                @include neumorphism-icon-btn;
+                width: 40px;
+                height: 40px;
+                color: $primary-color;
+                flex-shrink: 0;
+
+                &:disabled {
+                    color: $text-secondary;
+                    opacity: 0.5;
+                    box-shadow: none;
+                    cursor: not-allowed;
+                }
+            }
+        }
+
+        .feedback-content {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+
+            &.hidden {
+                display: none;
+            }
+
+            h3 {
+                font-size: 12px;
+                color: $text-secondary;
+                margin-bottom: 8px;
+                margin-top: 16px;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+
+                &:first-child {
+                    margin-top: 0;
+                }
+            }
+
+            .correction {
+                font-size: 16px;
+                line-height: 1.6;
+                color: $text-primary;
+                margin-bottom: 16px;
+            }
+
+            .suggestions-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+
+                .suggestion-item {
+                    background-color: rgba(255, 255, 255, 0.05);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 8px;
+                    padding: 12px;
+
+                    .suggestion-content {
+                        margin-bottom: 8px;
+
+                        .english {
+                            font-weight: 500;
+                            color: $text-primary;
+                            margin-bottom: 4px;
+                            font-size: 15px;
+                        }
+
+                        .japanese {
+                            font-size: 13px;
+                            color: $text-secondary;
+                            margin-bottom: 4px;
+                        }
+
+                        .point {
+                            font-size: 12px;
+                            color: $primary-color;
+                            background-color: rgba($primary-color, 0.1);
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                            display: inline-block;
+                            margin-top: 4px;
+
+                            .label {
+                                font-weight: 700;
+                                margin-right: 4px;
+                            }
+                        }
+                    }
+
+                    .suggestion-actions {
+                        display: flex;
+                        justify-content: flex-end;
+                        gap: 8px;
+
+                        button {
+                            @include neumorphism-icon-btn;
+                            width: 32px;
+                            height: 32px;
+
+                            svg {
+                                width: 14px;
+                                height: 14px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 .sample-answer {

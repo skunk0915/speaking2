@@ -542,6 +542,72 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // Practice Mode
+        const btnPractice = clone.querySelector('.btn-practice');
+        const practiceSection = clone.querySelector('.practice-section');
+        const practiceInput = clone.querySelector('.practice-input');
+        const btnPracticeSend = clone.querySelector('.btn-practice-send');
+        const practiceFeedback = clone.querySelector('.feedback-content');
+
+        if (btnPractice) {
+            btnPractice.addEventListener('click', () => {
+                practiceSection.classList.toggle('hidden');
+                if (!practiceSection.classList.contains('hidden')) {
+                    practiceInput.focus();
+                }
+            });
+
+            practiceInput.addEventListener('input', () => {
+                btnPracticeSend.disabled = practiceInput.value.trim() === '';
+                practiceInput.style.height = 'auto';
+                practiceInput.style.height = Math.min(practiceInput.scrollHeight, 100) + 'px';
+            });
+
+            btnPracticeSend.addEventListener('click', async () => {
+                const text = practiceInput.value.trim();
+                if (!text) return;
+
+                // Disable input
+                practiceInput.disabled = true;
+                btnPracticeSend.disabled = true;
+
+                // Call API
+                try {
+                    const response = await fetch('api/correct_text.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user_input: text,
+                            context: data.japanese // Use the system message Japanese as context
+                        })
+                    });
+
+                    if (!response.ok) throw new Error('API Error');
+                    const resData = await response.json();
+
+                    // Render Feedback
+                    const correctionP = practiceFeedback.querySelector('.correction');
+                    const suggestionsList = practiceFeedback.querySelector('.suggestions-list');
+
+                    correctionP.textContent = resData.correction;
+                    suggestionsList.innerHTML = '';
+                    resData.suggestions.forEach(suggestion => {
+                        const li = createSuggestionElement(suggestion, suggestionsList);
+                        suggestionsList.appendChild(li);
+                    });
+
+                    practiceFeedback.classList.remove('hidden');
+
+                } catch (error) {
+                    console.error(error);
+                    alert('添削の取得に失敗しました。');
+                } finally {
+                    practiceInput.disabled = false;
+                    btnPracticeSend.disabled = false;
+                }
+            });
+        }
+
         // Speech
         let audioUrl = null;
         let lastVoice = null;

@@ -120,6 +120,172 @@ body {
   box-shadow: none;
   cursor: not-allowed;
 }
+.conversation-item .practice-section {
+  margin-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 16px;
+  width: 100%;
+  animation: slideUpFade 0.3s ease;
+}
+.conversation-item .practice-section.hidden {
+  display: none;
+}
+.conversation-item .practice-section .practice-input-area {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: flex-end;
+}
+.conversation-item .practice-section .practice-input-area .practice-input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  font-size: 16px;
+  resize: none;
+  background-color: rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+  font-family: inherit;
+  color: #4a4a4a;
+  min-height: 48px;
+}
+.conversation-item .practice-section .practice-input-area .practice-input:focus {
+  outline: none;
+  border-color: #007AFF;
+  background-color: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 2px 2px 4px #a3b1c6, inset -2px -2px 4px #f5f5f5;
+}
+.conversation-item .practice-section .practice-input-area .btn-practice-send {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e0e5ec;
+  box-shadow: 7px 7px 14px #a3b1c6, -7px -7px 14px #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4a4a4a;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 40px;
+  height: 40px;
+  color: #007AFF;
+  flex-shrink: 0;
+}
+.conversation-item .practice-section .practice-input-area .btn-practice-send:active, .conversation-item .practice-section .practice-input-area .btn-practice-send.active {
+  box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
+  color: #007AFF;
+}
+.conversation-item .practice-section .practice-input-area .btn-practice-send:hover {
+  color: #007AFF;
+  transform: translateY(-1px);
+}
+.conversation-item .practice-section .practice-input-area .btn-practice-send:disabled {
+  color: #8d97a5;
+  opacity: 0.5;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.conversation-item .practice-section .feedback-content {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.conversation-item .practice-section .feedback-content.hidden {
+  display: none;
+}
+.conversation-item .practice-section .feedback-content h3 {
+  font-size: 12px;
+  color: #8d97a5;
+  margin-bottom: 8px;
+  margin-top: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.conversation-item .practice-section .feedback-content h3:first-child {
+  margin-top: 0;
+}
+.conversation-item .practice-section .feedback-content .correction {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #4a4a4a;
+  margin-bottom: 16px;
+}
+.conversation-item .practice-section .feedback-content .suggestions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+}
+.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content {
+  margin-bottom: 8px;
+}
+.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .english {
+  font-weight: 500;
+  color: #4a4a4a;
+  margin-bottom: 4px;
+  font-size: 15px;
+}
+.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .japanese {
+  font-size: 13px;
+  color: #8d97a5;
+  margin-bottom: 4px;
+}
+.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point {
+  font-size: 12px;
+  color: #007AFF;
+  background-color: rgba(0, 122, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 4px;
+}
+.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point .label {
+  font-weight: 700;
+  margin-right: 4px;
+}
+.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-actions button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e0e5ec;
+  box-shadow: 7px 7px 14px #a3b1c6, -7px -7px 14px #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4a4a4a;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 32px;
+  height: 32px;
+}
+.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-actions button:active, .conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-actions button.active {
+  box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
+  color: #007AFF;
+}
+.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-actions button:hover {
+  color: #007AFF;
+  transform: translateY(-1px);
+}
+.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-actions button svg {
+  width: 14px;
+  height: 14px;
+}
 
 .sample-answer {
   background: #e0e5ec;
