@@ -750,7 +750,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Map API response to suggestion format
             const suggestionData = {
                 english: data.english,
-                japanese: data.japanese
+                japanese: data.japanese,
+                point: data.point
             };
 
             const newLi = createSuggestionElement(suggestionData, originalItemElement.parentNode);

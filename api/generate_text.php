@@ -107,7 +107,8 @@ if ($type === 'new') {
     - 出力はJSON形式で、以下のキーを含めてください:
       - 'japanese': 生成した日本語の会話文（相手の発話）
       - 'english': その英訳
-      - 'sample_user_japanese': この発話に対する、ユーザーが返答する際の自然な日本語の回答例（短文で。ユーザーの立場に立った返答にすること）";
+      - 'sample_user_japanese': この発話に対する、ユーザーが返答する際の自然な日本語の回答例（短文で。ユーザーの立場に立った返答にすること）
+      - 'point': このバリエーションのポイントや特徴の簡潔な解説（例：「より丁寧な表現にしました」「〇〇というイディオムを使いました」など）";
 } elseif ($type === 'simple') {
     $originalJapanese = $input['context']['japanese'] ?? '';
     $originalEnglish = $input['context']['english'] ?? '';
@@ -124,7 +125,8 @@ if ($type === 'new') {
     - 出力はJSON形式で、以下のキーを含めてください:
       - 'japanese': 生成した日本語の会話文（元の意味に近い、自然な日本語）
       - 'english': その簡単な英訳
-      - 'sample_user_japanese': この発話に対する、ユーザーが返答する際の自然な日本語の回答例（短文で）";
+      - 'sample_user_japanese': この発話に対する、ユーザーが返答する際の自然な日本語の回答例（短文で）
+      - 'point': どのように簡単にしたかの解説（例：「難しい単語〇〇を簡単な〇〇に言い換えました」など）";
 } elseif ($type === 'formal') {
     $originalJapanese = $input['context']['japanese'] ?? '';
     $originalEnglish = $input['context']['english'] ?? '';
@@ -140,7 +142,8 @@ if ($type === 'new') {
     - 出力はJSON形式で、以下のキーを含めてください:
       - 'japanese': 生成した日本語の会話文
       - 'english': その英訳
-      - 'sample_user_japanese': この発話に対する、ユーザーが返答する際の自然な日本語の回答例";
+      - 'sample_user_japanese': この発話に対する、ユーザーが返答する際の自然な日本語の回答例
+      - 'point': どの部分がフォーマルなのかの解説（例：「〇〇という丁寧な表現を使いました」など）";
 } elseif ($type === 'casual') {
     $originalJapanese = $input['context']['japanese'] ?? '';
     $originalEnglish = $input['context']['english'] ?? '';
@@ -156,7 +159,8 @@ if ($type === 'new') {
     - 出力はJSON形式で、以下のキーを含めてください:
       - 'japanese': 生成した日本語の会話文
       - 'english': その英訳
-      - 'sample_user_japanese': この発話に対する、ユーザーが返答する際の自然な日本語の回答例";
+      - 'sample_user_japanese': この発話に対する、ユーザーが返答する際の自然な日本語の回答例
+      - 'point': どの部分がカジュアルなのかの解説（例：「スラングの〇〇を使いました」「短縮形を使いました」など）";
 } else {
     $history = implode("\n", array_map(function($item) {
         if (isset($item['role']) && $item['role'] === 'user') {
