@@ -337,10 +337,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 btnRepeat.addEventListener('click', () => {
                     btnRepeat.classList.toggle('active');
-                    // If currently playing this audio, update loop status
-                    if (currentAudio && currentAudioBtn === btnPlay) {
-                        currentAudio.loop = btnRepeat.classList.contains('active');
-                    }
                 });
 
                 suggestionsList.appendChild(li);
@@ -428,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentAudioBtn = btn;
 
         // Set initial loop state based on repeat button
-        currentAudio.loop = btnRepeat.classList.contains('active');
+        // currentAudio.loop = btnRepeat.classList.contains('active'); // Removed for manual delay
 
         currentAudio.addEventListener('play', () => {
             iconPlay.classList.add('hidden');
@@ -441,8 +437,16 @@ document.addEventListener('DOMContentLoaded', () => {
             iconPause.classList.add('hidden');
         });
 
+        const audioInstance = currentAudio;
         currentAudio.addEventListener('ended', () => {
-            if (!currentAudio.loop) {
+            if (btnRepeat.classList.contains('active')) {
+                setTimeout(() => {
+                    if (currentAudio === audioInstance) {
+                        audioInstance.currentTime = 0;
+                        audioInstance.play();
+                    }
+                }, 500);
+            } else {
                 iconPlay.classList.remove('hidden');
                 iconPause.classList.add('hidden');
             }
@@ -644,10 +648,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 iconPause.classList.add('hidden');
             });
 
+            const audioInstance = currentAudio;
             currentAudio.addEventListener('ended', () => {
                 if (isRepeating && btnRepeat.classList.contains('active')) {
-                    currentAudio.currentTime = 0;
-                    currentAudio.play();
+                    setTimeout(() => {
+                        if (currentAudio === audioInstance) {
+                            audioInstance.currentTime = 0;
+                            audioInstance.play();
+                        }
+                    }, 500);
                 } else {
                     iconPlay.classList.remove('hidden');
                     iconPause.classList.add('hidden');
