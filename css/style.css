@@ -606,7 +606,44 @@ body {
   color: #4a4a4a;
   border-bottom-left-radius: 4px;
 }
-.qa-panel .qa-input-area {
+
+.variation-menu {
+  position: absolute;
+  z-index: 100;
+  background: #e0e5ec;
+  box-shadow: 9px 9px 16px #a3b1c6, -9px -9px 16px #f5f5f5;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 180px;
+  animation: slideUpFade 0.2s ease;
+}
+.variation-menu button {
+  background: transparent;
+  border: none;
+  padding: 10px 16px;
+  text-align: left;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  color: #4a4a4a;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+.variation-menu button:hover {
+  color: #007AFF;
+  background: rgba(0, 122, 255, 0.05);
+  box-shadow: inset 2px 2px 4px #a3b1c6, inset -2px -2px 4px #f5f5f5;
+}
+.variation-menu button:active {
+  transform: scale(0.98);
+}
+
+.qa-input-area {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -619,7 +656,7 @@ body {
   align-items: flex-end;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
-.qa-panel .qa-input-area textarea {
+.qa-input-area textarea {
   flex: 1;
   background: #e0e5ec;
   box-shadow: inset 6px 6px 10px #a3b1c6, inset -6px -6px 10px #f5f5f5;
@@ -635,11 +672,11 @@ body {
   min-height: 44px;
   max-height: 100px;
 }
-.qa-panel .qa-input-area textarea:focus {
+.qa-input-area textarea:focus {
   outline: none;
   box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #f5f5f5, 0 0 0 2px rgba(0, 122, 255, 0.1);
 }
-.qa-panel .qa-input-area .btn-send {
+.qa-input-area .btn-send {
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -656,15 +693,15 @@ body {
   flex-shrink: 0;
   color: #007AFF;
 }
-.qa-panel .qa-input-area .btn-send:active, .qa-panel .qa-input-area .btn-send.active {
+.qa-input-area .btn-send:active, .qa-input-area .btn-send.active {
   box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
   color: #007AFF;
 }
-.qa-panel .qa-input-area .btn-send:hover {
+.qa-input-area .btn-send:hover {
   color: #007AFF;
   transform: translateY(-1px);
 }
-.qa-panel .qa-input-area .btn-send:disabled {
+.qa-input-area .btn-send:disabled {
   color: #8d97a5;
   box-shadow: none;
   cursor: not-allowed;

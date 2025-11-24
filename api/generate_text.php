@@ -108,6 +108,55 @@ if ($type === 'new') {
       - 'japanese': 生成した日本語の会話文（相手の発話）
       - 'english': その英訳
       - 'sample_user_japanese': この発話に対する、ユーザーが返答する際の自然な日本語の回答例（短文で。ユーザーの立場に立った返答にすること）";
+} elseif ($type === 'simple') {
+    $originalJapanese = $input['context']['japanese'] ?? '';
+    $originalEnglish = $input['context']['english'] ?? '';
+
+    $prompt = "以下の会話フレーズを「簡単な英語（中学生レベル）」に書き換えてください。
+    
+    元のフレーズ:
+    日本語: {$originalJapanese}
+    英語: {$originalEnglish}
+    
+    指示:
+    - 元のフレーズと同じ意味・意図を保ちつつ、中学生で習うような基本的な単語や文法を使って表現してください。
+    - 難しいイディオムや構文は避けてください。
+    - 出力はJSON形式で、以下のキーを含めてください:
+      - 'japanese': 生成した日本語の会話文（元の意味に近い、自然な日本語）
+      - 'english': その簡単な英訳
+      - 'sample_user_japanese': この発話に対する、ユーザーが返答する際の自然な日本語の回答例（短文で）";
+} elseif ($type === 'formal') {
+    $originalJapanese = $input['context']['japanese'] ?? '';
+    $originalEnglish = $input['context']['english'] ?? '';
+
+    $prompt = "以下の会話フレーズを「フォーマル・丁寧な表現」に書き換えてください。
+    
+    元のフレーズ:
+    日本語: {$originalJapanese}
+    英語: {$originalEnglish}
+    
+    指示:
+    - ビジネスシーンや目上の人に対して使えるような、丁寧で礼儀正しい表現にしてください。
+    - 出力はJSON形式で、以下のキーを含めてください:
+      - 'japanese': 生成した日本語の会話文
+      - 'english': その英訳
+      - 'sample_user_japanese': この発話に対する、ユーザーが返答する際の自然な日本語の回答例";
+} elseif ($type === 'casual') {
+    $originalJapanese = $input['context']['japanese'] ?? '';
+    $originalEnglish = $input['context']['english'] ?? '';
+
+    $prompt = "以下の会話フレーズを「カジュアル・親しい間柄の表現」に書き換えてください。
+    
+    元のフレーズ:
+    日本語: {$originalJapanese}
+    英語: {$originalEnglish}
+    
+    指示:
+    - 友人や家族など、親しい間柄で使うような砕けた表現やスラングを含めた表現にしてください。
+    - 出力はJSON形式で、以下のキーを含めてください:
+      - 'japanese': 生成した日本語の会話文
+      - 'english': その英訳
+      - 'sample_user_japanese': この発話に対する、ユーザーが返答する際の自然な日本語の回答例";
 } else {
     $history = implode("\n", array_map(function($item) {
         if (isset($item['role']) && $item['role'] === 'user') {

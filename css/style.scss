@@ -641,52 +641,90 @@ body {
             }
         }
     }
+}
 
-    .qa-input-area {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        padding: 16px;
-        padding-bottom: calc(16px + env(safe-area-inset-bottom));
-        background: $bg-color;
-        display: flex;
-        gap: 10px;
-        align-items: flex-end;
-        border-top: 1px solid rgba(0, 0, 0, 0.05);
+// Variation Menu
+.variation-menu {
+    position: absolute;
+    z-index: 100;
+    @include neumorphism-flat;
+    border-radius: $border-radius-md;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 180px;
+    animation: slideUpFade 0.2s ease;
 
-        textarea {
-            flex: 1;
-            @include neumorphism-pressed;
-            border: none;
-            border-radius: 20px;
-            padding: 10px 14px;
-            font-size: 15px;
-            line-height: 1.4;
-            color: $text-primary;
-            background: transparent;
-            resize: none;
-            min-height: 44px;
-            max-height: 100px;
+    button {
+        background: transparent;
+        border: none;
+        padding: 10px 16px;
+        text-align: left;
+        font-family: $font-stack;
+        font-size: 14px;
+        color: $text-primary;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: 500;
 
-            &:focus {
-                outline: none;
-                box-shadow: inset 3px 3px 6px $shadow-dark, inset -3px -3px 6px $shadow-light, 0 0 0 2px rgba($primary-color, 0.1);
-            }
+        &:hover {
+            color: $primary-color;
+            background: rgba($primary-color, 0.05);
+            box-shadow: inset 2px 2px 4px $shadow-dark, inset -2px -2px 4px $shadow-light;
         }
 
-        .btn-send {
-            @include neumorphism-icon-btn;
-            width: 44px;
-            height: 44px;
-            flex-shrink: 0;
-            color: $primary-color;
+        &:active {
+            transform: scale(0.98);
+        }
+    }
+}
 
-            &:disabled {
-                color: $text-secondary;
-                box-shadow: none;
-                cursor: not-allowed;
-            }
+.qa-input-area {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    background: $bg-color;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+
+    textarea {
+        flex: 1;
+        @include neumorphism-pressed;
+        border: none;
+        border-radius: 20px;
+        padding: 10px 14px;
+        font-size: 15px;
+        line-height: 1.4;
+        color: $text-primary;
+        background: transparent;
+        resize: none;
+        min-height: 44px;
+        max-height: 100px;
+
+        &:focus {
+            outline: none;
+            box-shadow: inset 3px 3px 6px $shadow-dark, inset -3px -3px 6px $shadow-light, 0 0 0 2px rgba($primary-color, 0.1);
+        }
+    }
+
+    .btn-send {
+        @include neumorphism-icon-btn;
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        color: $primary-color;
+
+        &:disabled {
+            color: $text-secondary;
+            box-shadow: none;
+            cursor: not-allowed;
         }
     }
 }

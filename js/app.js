@@ -78,6 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsPanel = document.getElementById('settings-panel');
     const settingsOverlay = document.getElementById('settings-overlay');
 
+    // Variation Menu Elements
+    const variationMenu = document.getElementById('variation-menu');
+    let activeVariationData = null;
+    let activeVariationItem = null;
+
     // Q&A Elements
 
 
@@ -173,6 +178,23 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCloseSettings.addEventListener('click', () => toggleSettings(false));
     settingsOverlay.addEventListener('click', () => {
         toggleSettings(false);
+    });
+
+    // Variation Menu Logic
+    document.addEventListener('click', (e) => {
+        if (!variationMenu.contains(e.target) && !e.target.closest('.btn-variation-menu')) {
+            variationMenu.classList.add('hidden');
+        }
+    });
+
+    variationMenu.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const type = btn.dataset.type;
+            if (activeVariationData && activeVariationItem) {
+                generateVariation(activeVariationData, activeVariationItem, type);
+            }
+            variationMenu.classList.add('hidden');
+        });
     });
 
     // Q&A Logic (Per Item)
@@ -512,14 +534,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnTranslate = clone.querySelector('.btn-translate');
         const btnSpeak = clone.querySelector('.btn-speak');
         const btnRepeat = clone.querySelector('.btn-repeat');
-        const btnVariation = clone.querySelector('.btn-variation');
+        const btnVariationMenu = clone.querySelector('.btn-variation-menu');
 
         japanese.textContent = data.japanese;
         english.textContent = data.english;
 
-        // Variation Generation
-        btnVariation.addEventListener('click', () => {
-            generateVariation(data, item);
+        // Variation Menu Trigger
+        btnVariationMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+            activeVariationData = data;
+            activeVariationItem = item;
+
+            // Position menu
+            const rect = btnVariationMenu.getBoundingClientRect();
+            const menuWidth = 180; // Approximate width or measure it
+
+            // Position below the button, right-aligned
+            variationMenu.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+            variationMenu.style.left = (rect.right + window.scrollX - menuWidth) + 'px';
+
+            variationMenu.classList.remove('hidden');
         });
 
         // Translation Toggle
@@ -655,8 +689,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function generateVariation(originalData, originalItemElement) {
-        if (!confirm('このフレーズの別バリエーションを生成しますか？')) return;
+    async function generateVariation(originalData, originalItemElement, type = 'variation') {
+        let confirmMsg = 'このフレーズの別バリエーションを生成しますか？';
+        if (type === 'simple') confirmMsg = '簡単な英語に変換しますか？';
+        if (type === 'formal') confirmMsg = 'フォーマルな表現に変換しますか？';
+        if (type === 'casual') confirmMsg = 'カジュアルな表現に変換しますか？';
+
+        if (!confirm(confirmMsg)) return;
 
         // Show loading below the original item
         let loadingElement = null;
@@ -675,7 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    type: 'variation',
+                    type: type,
                     context: {
                         japanese: originalData.japanese,
                         english: originalData.english
