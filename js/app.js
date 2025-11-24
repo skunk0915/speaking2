@@ -504,7 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // inputGroup.scrollIntoView({ behavior: 'smooth' });
     }
 
-    function addConversationItem(data) {
+    function addConversationItem(data, insertAfterGroup = null) {
         const clone = tmpl.content.cloneNode(true);
         const item = clone.querySelector('.conversation-item');
         const japanese = clone.querySelector('.japanese');
@@ -512,9 +512,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnTranslate = clone.querySelector('.btn-translate');
         const btnSpeak = clone.querySelector('.btn-speak');
         const btnRepeat = clone.querySelector('.btn-repeat');
+        const btnVariation = clone.querySelector('.btn-variation');
 
         japanese.textContent = data.japanese;
         english.textContent = data.english;
+
+        // Variation Generation
+        btnVariation.addEventListener('click', () => {
+            generateVariation(data, item);
+        });
 
         // Translation Toggle
         let translateTimeout;
@@ -624,7 +630,11 @@ document.addEventListener('DOMContentLoaded', () => {
             isRepeating = btnRepeat.classList.contains('active');
         });
 
-        container.appendChild(clone); // Append the whole fragment (group)
+        if (insertAfterGroup) {
+            insertAfterGroup.parentNode.insertBefore(clone, insertAfterGroup.nextSibling);
+        } else {
+            container.appendChild(clone);
+        }
 
         // Note: We don't scroll here because moveInputToBottom will handle scrolling
     }
@@ -642,6 +652,56 @@ document.addEventListener('DOMContentLoaded', () => {
                 iconPause.classList.add('hidden');
             }
             currentAudioBtn = null;
+        }
+    }
+
+    async function generateVariation(originalData, originalItemElement) {
+        if (!confirm('このフレーズの別バリエーションを生成しますか？')) return;
+
+        // Show loading below the original item
+        let loadingElement = null;
+        if (tmplLoading) {
+            const loadingClone = tmplLoading.content.cloneNode(true);
+            // Get the element from the clone BEFORE insertion
+            const loadingGroup = loadingClone.querySelector('.conversation-group');
+            loadingElement = loadingGroup.querySelector('.conversation-item');
+
+            const currentGroup = originalItemElement.closest('.conversation-group');
+            currentGroup.parentNode.insertBefore(loadingClone, currentGroup.nextSibling);
+        }
+
+        try {
+            const response = await fetch('api/generate_text.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'variation',
+                    context: {
+                        japanese: originalData.japanese,
+                        english: originalData.english
+                    }
+                })
+            });
+
+            if (!response.ok) throw new Error('API Error');
+            const data = await response.json();
+
+            // Remove loading
+            if (loadingElement) {
+                const loadingGroup = loadingElement.closest('.conversation-group');
+                loadingGroup.remove();
+            }
+
+            // Add new item
+            addConversationItem(data, originalItemElement.closest('.conversation-group'));
+
+        } catch (error) {
+            console.error(error);
+            alert('バリエーション生成に失敗しました。');
+            if (loadingElement) {
+                const loadingGroup = loadingElement.closest('.conversation-group');
+                loadingGroup.remove();
+            }
         }
     }
 

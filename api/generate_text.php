@@ -78,6 +78,36 @@ if ($type === 'new') {
     - 必要に応じて英語の例文を提示してください。
     - 出力はJSON形式で、以下のキーを含めてください:
       - 'answer': 回答内容（マークダウン形式で記述可）";
+} elseif ($type === 'variation') {
+    $originalJapanese = $input['context']['japanese'] ?? '';
+    $originalEnglish = $input['context']['english'] ?? '';
+
+    // Randomize the direction of variation to prevent same results
+    $styles = [
+        "よりカジュアルな表現にしてください。",
+        "より丁寧・フォーマルな表現にしてください。",
+        "全く別の単語やイディオムを使って表現してください。",
+        "少しニュアンスを変えて、より感情を込めた表現にしてください。",
+        "簡潔で短い表現にしてください。",
+        "ネイティブスピーカーがよく使う、こなれた表現にしてください。"
+    ];
+    $randomStyle = $styles[array_rand($styles)];
+
+    $prompt = "以下の会話フレーズの「別バリエーション」を生成してください。
+    
+    元のフレーズ:
+    日本語: {$originalJapanese}
+    英語: {$originalEnglish}
+    
+    指示:
+    - 元のフレーズと同じ意味・意図を持ちつつ、異なる言い回しや表現を考えてください。
+    - **{$randomStyle}**
+    - 元のフレーズが既に自然な場合でも、別の自然な言い方を提示してください。
+    - 文字数は元のフレーズと同程度にしてください。
+    - 出力はJSON形式で、以下のキーを含めてください:
+      - 'japanese': 生成した日本語の会話文（相手の発話）
+      - 'english': その英訳
+      - 'sample_user_japanese': この発話に対する、ユーザーが返答する際の自然な日本語の回答例（短文で。ユーザーの立場に立った返答にすること）";
 } else {
     $history = implode("\n", array_map(function($item) {
         if (isset($item['role']) && $item['role'] === 'user') {
