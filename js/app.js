@@ -690,13 +690,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function generateVariation(originalData, originalItemElement, type = 'variation') {
-        let confirmMsg = 'このフレーズの別バリエーションを生成しますか？';
-        if (type === 'simple') confirmMsg = '簡単な英語に変換しますか？';
-        if (type === 'formal') confirmMsg = 'フォーマルな表現に変換しますか？';
-        if (type === 'casual') confirmMsg = 'カジュアルな表現に変換しますか？';
-
-        if (!confirm(confirmMsg)) return;
-
         // Show loading below the original item
         let loadingElement = null;
         if (tmplLoading) {
