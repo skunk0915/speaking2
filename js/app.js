@@ -180,6 +180,21 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleSettings(false);
     });
 
+    // Free Text Player Logic
+    const settingsFreeText = document.getElementById('settings-free-text');
+    const btnSettingsPlay = document.getElementById('btn-settings-play');
+    const btnSettingsRepeat = document.getElementById('btn-settings-repeat');
+
+    btnSettingsRepeat.addEventListener('click', () => {
+        btnSettingsRepeat.classList.toggle('active');
+    });
+
+    btnSettingsPlay.addEventListener('click', () => {
+        const text = settingsFreeText.value.trim();
+        if (!text) return;
+        playSuggestionAudio(text, btnSettingsPlay, btnSettingsRepeat);
+    });
+
     // Variation Menu Logic
     document.addEventListener('click', (e) => {
         if (!variationMenu.contains(e.target) && !e.target.closest('.btn-variation-menu')) {
@@ -295,7 +310,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     user_input: userText,
-                    context: currentContext
+                    context: currentContext,
+                    mode: 'conversation'
                 })
             });
 
@@ -578,7 +594,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             user_input: text,
-                            context: data.japanese // Use the system message Japanese as context
+                            context: data.japanese, // Use the system message Japanese as context
+                            mode: 'translation'
                         })
                     });
 
@@ -693,7 +710,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const audioInstance = currentAudio;
             currentAudio.addEventListener('ended', () => {
-                if (isRepeating && btnRepeat.classList.contains('active')) {
+                if (btnRepeat.classList.contains('active')) {
                     setTimeout(() => {
                         if (currentAudio === audioInstance) {
                             audioInstance.currentTime = 0;
