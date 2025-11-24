@@ -598,6 +598,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     practiceFeedback.classList.remove('hidden');
 
+                    // Initialize Q&A for this practice item
+                    setupItemQa(practiceFeedback, {
+                        situation: data.japanese, // Context is the system message
+                        user_input: text,
+                        correction: resData.correction
+                    });
+
                 } catch (error) {
                     console.error(error);
                     alert('添削の取得に失敗しました。');
