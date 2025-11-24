@@ -191,7 +191,11 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => {
             const type = btn.dataset.type;
             if (activeVariationData && activeVariationItem) {
-                generateVariation(activeVariationData, activeVariationItem, type);
+                if (activeVariationItem.classList.contains('suggestion-item')) {
+                    generateSuggestionVariation(activeVariationData, activeVariationItem, type);
+                } else {
+                    generateVariation(activeVariationData, activeVariationItem, type);
+                }
             }
             variationMenu.classList.add('hidden');
         });
@@ -302,43 +306,9 @@ document.addEventListener('DOMContentLoaded', () => {
             correctionP.textContent = data.correction;
 
             suggestionsList.innerHTML = '';
+            suggestionsList.innerHTML = '';
             data.suggestions.forEach(suggestion => {
-                const li = document.createElement('li');
-                li.className = 'suggestion-item';
-
-                // Handle both old (string) and new (object) formats for backward compatibility
-                const engText = typeof suggestion === 'string' ? suggestion : suggestion.english;
-                const jpText = typeof suggestion === 'string' ? '' : suggestion.japanese;
-                const pointText = typeof suggestion === 'string' ? '' : suggestion.point;
-
-                li.innerHTML = `
-                    <div class="suggestion-content">
-                        <p class="english">${engText}</p>
-                        ${jpText ? `<p class="japanese">${jpText}</p>` : ''}
-                        ${pointText ? `<p class="point"><span class="label">POINT</span> ${pointText}</p>` : ''}
-                    </div>
-                    <div class="suggestion-actions">
-                        <button class="btn-play-suggestion" title="再生">
-                            <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                            <svg class="icon-pause hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-                            <div class="loader hidden" style="width:16px;height:16px;border-width:2px;"></div>
-                        </button>
-                        <button class="btn-repeat-suggestion" title="リピート再生">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-                        </button>
-                    </div>
-                `;
-
-                // Add play event for suggestion
-                const btnPlay = li.querySelector('.btn-play-suggestion');
-                const btnRepeat = li.querySelector('.btn-repeat-suggestion');
-
-                btnPlay.addEventListener('click', () => playSuggestionAudio(engText, btnPlay, btnRepeat));
-
-                btnRepeat.addEventListener('click', () => {
-                    btnRepeat.classList.toggle('active');
-                });
-
+                const li = createSuggestionElement(suggestion, suggestionsList);
                 suggestionsList.appendChild(li);
             });
 
@@ -744,6 +714,116 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadingGroup.remove();
             }
         }
+    }
+
+    async function generateSuggestionVariation(originalData, originalItemElement, type) {
+        // Show loading below the original item
+        const loadingLi = document.createElement('li');
+        loadingLi.className = 'suggestion-item loading-item';
+        loadingLi.innerHTML = `
+            <div class="suggestion-content" style="display:flex;justify-content:center;align-items:center;padding:20px;">
+                <div class="loader"></div>
+            </div>
+        `;
+        originalItemElement.parentNode.insertBefore(loadingLi, originalItemElement.nextSibling);
+
+        try {
+            const response = await fetch('api/generate_text.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: type,
+                    context: {
+                        japanese: originalData.japanese,
+                        english: originalData.english
+                    }
+                })
+            });
+
+            if (!response.ok) throw new Error('API Error');
+            const data = await response.json();
+
+            // Remove loading
+            loadingLi.remove();
+
+            // Create new suggestion item
+            // Map API response to suggestion format
+            const suggestionData = {
+                english: data.english,
+                japanese: data.japanese
+            };
+
+            const newLi = createSuggestionElement(suggestionData, originalItemElement.parentNode);
+            originalItemElement.parentNode.insertBefore(newLi, originalItemElement.nextSibling);
+
+        } catch (error) {
+            console.error(error);
+            alert('バリエーション生成に失敗しました。');
+            loadingLi.remove();
+        }
+    }
+
+    function createSuggestionElement(suggestion, containerList) {
+        const li = document.createElement('li');
+        li.className = 'suggestion-item';
+
+        // Handle both old (string) and new (object) formats for backward compatibility
+        const engText = typeof suggestion === 'string' ? suggestion : suggestion.english;
+        const jpText = typeof suggestion === 'string' ? '' : suggestion.japanese;
+        const pointText = typeof suggestion === 'string' ? '' : suggestion.point;
+
+        li.innerHTML = `
+            <div class="suggestion-content">
+                <p class="english">${engText}</p>
+                ${jpText ? `<p class="japanese">${jpText}</p>` : ''}
+                ${pointText ? `<p class="point"><span class="label">POINT</span> ${pointText}</p>` : ''}
+            </div>
+            <div class="suggestion-actions">
+                <button class="btn-play-suggestion" title="再生">
+                    <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    <svg class="icon-pause hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                    <div class="loader hidden" style="width:16px;height:16px;border-width:2px;"></div>
+                </button>
+                <button class="btn-repeat-suggestion" title="リピート再生">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                </button>
+                <button class="btn-variation-menu" title="バリエーション生成">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+                </button>
+            </div>
+        `;
+
+        // Add play event for suggestion
+        const btnPlay = li.querySelector('.btn-play-suggestion');
+        const btnRepeat = li.querySelector('.btn-repeat-suggestion');
+        const btnVariation = li.querySelector('.btn-variation-menu');
+
+        btnPlay.addEventListener('click', () => playSuggestionAudio(engText, btnPlay, btnRepeat));
+
+        btnRepeat.addEventListener('click', () => {
+            btnRepeat.classList.toggle('active');
+        });
+
+        btnVariation.addEventListener('click', (e) => {
+            e.stopPropagation();
+            activeVariationData = {
+                japanese: jpText,
+                english: engText
+            };
+            activeVariationItem = li;
+
+            // Position menu
+            const rect = btnVariation.getBoundingClientRect();
+            const menuWidth = 180;
+
+            // Position below the button, right-aligned
+            variationMenu.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+            variationMenu.style.left = (rect.right + window.scrollX - menuWidth) + 'px';
+
+            variationMenu.classList.remove('hidden');
+        });
+
+        return li;
     }
 
     function setLoading(isLoading) {
