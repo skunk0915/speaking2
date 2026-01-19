@@ -429,7 +429,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     if (currentAudio === audioInstance) {
                         audioInstance.currentTime = 0;
-                        audioInstance.play();
+                        const playPromise = audioInstance.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(error => {
+                                console.log('Playback interrupted or prevented:', error);
+                            });
+                        }
                     }
                 }, 500);
             } else {
@@ -438,7 +443,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        currentAudio.play();
+        const playPromise = currentAudio.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.log('Playback interrupted or prevented:', error);
+            });
+        }
     }
 
     async function generateText(type) {
@@ -723,7 +733,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            currentAudio.play();
+            const playPromise = currentAudio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log('Playback interrupted or prevented:', error);
+                });
+            }
         };
 
         btnSpeak.addEventListener('click', () => playAudio());
