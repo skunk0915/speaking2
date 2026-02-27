@@ -48,7 +48,7 @@ if ($type === 'new') {
       - 'english': その英訳
       - 'sample_user_japanese': この発話に対する、ユーザーが返答する際の自然な日本語の回答例（短文で。ユーザーの立場に立った返答にすること）";
 } elseif ($type === 'question') {
-    $history = implode("\n", array_map(function($item) {
+    $history = implode("\n", array_map(function ($item) {
         $role = $item['role'] === 'user' ? 'ユーザー' : 'AI';
         return "{$role}: " . $item['text'];
     }, $input['context']['history'] ?? []));
@@ -162,23 +162,23 @@ if ($type === 'new') {
       - 'sample_user_japanese': この発話に対する、ユーザーが返答する際の自然な日本語の回答例
       - 'point': どの部分がカジュアルなのかの解説（例：「スラングの〇〇を使いました」「短縮形を使いました」など）";
 } else {
-    $history = implode("\n", array_map(function($item) {
+    $history = implode("\n", array_map(function ($item) {
         if (isset($item['role']) && $item['role'] === 'user') {
             return "あなた(ユーザー): " . $item['text'];
         } else {
             return "相手: " . ($item['japanese'] ?? '');
         }
     }, $context));
-    
+
     // Extract recent conversation texts to prevent repetition
-    $recentTexts = array_slice(array_map(function($item) {
+    $recentTexts = array_slice(array_map(function ($item) {
         return $item['japanese'] ?? '';
-    }, array_filter($context, function($item) {
+    }, array_filter($context, function ($item) {
         return !isset($item['role']) || $item['role'] !== 'user';
     })), -3);
-    
+
     $recentTextsStr = implode("\n", array_filter($recentTexts));
-    
+
     $prompt = "以下の会話の文脈に続く、相手(AI)の自然な日本語の返答を生成してください。
     
     これまでの会話:
@@ -208,7 +208,7 @@ if ($type === 'new') {
 }
 
 // Call Gemini API
-$url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" . GEMINI_API_KEY;
+$url = "https://generativelanguage.googleapis.com/v1beta/models/" . GEMINI_MODEL . ":generateContent?key=" . GEMINI_API_KEY;
 
 $data = [
     'contents' => [
@@ -246,38 +246,38 @@ try {
     $result = json_decode($response, true);
     if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
         $text = $result['candidates'][0]['content']['parts'][0]['text'];
-        
+
         // Log raw response for debugging
         file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Raw API Response: " . $text . "\n", FILE_APPEND);
 
         // Strip markdown code blocks if present
         $text = preg_replace('/^```json\s*|\s*```$/', '', $text);
-        
+
         // Validate JSON content
         $json = json_decode($text, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
             $errorMsg = 'Invalid JSON from Gemini: ' . json_last_error_msg();
             file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nRaw: " . $text . "\n", FILE_APPEND);
-            
+
             http_response_code(500);
             echo json_encode(['error' => $errorMsg, 'raw' => $text]);
             exit;
         }
-        
+
         // Handle case where Gemini returns an array of objects
         if (isset($json[0]) && is_array($json[0])) {
             $json = $json[0];
         }
-        
+
         // Validation based on expected keys
         if (isset($json['answer'])) {
             // Q&A Response
             if (empty($json['answer'])) {
-                 $errorMsg = 'Empty answer from Gemini';
-                 file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nData: " . print_r($json, true) . "\n", FILE_APPEND);
-                 http_response_code(500);
-                 echo json_encode(['error' => $errorMsg, 'data' => $json]);
-                 exit;
+                $errorMsg = 'Empty answer from Gemini';
+                file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nData: " . print_r($json, true) . "\n", FILE_APPEND);
+                http_response_code(500);
+                echo json_encode(['error' => $errorMsg, 'data' => $json]);
+                exit;
             }
         } else {
             // Conversation Response
