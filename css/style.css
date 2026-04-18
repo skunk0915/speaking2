@@ -471,7 +471,7 @@ body {
   box-shadow: 9px 9px 16px #a3b1c6, -9px -9px 16px #f5f5f5;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 20px;
-  padding: 12px 16px;
+  padding: 16px;
   border: 1px dashed #007AFF;
   background: rgba(0, 122, 255, 0.05);
   font-size: 14px;
@@ -485,11 +485,48 @@ body {
   color: #007AFF;
   font-weight: 700;
   text-transform: uppercase;
-  margin: 0 0 4px 0;
+  margin: 0 0 10px 0;
 }
-.input-group .hint-display .text {
+.input-group .hint-display .hint-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.input-group .hint-display .hint-item {
   margin: 0;
   font-weight: 500;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.input-group .hint-display .hint-item .ja-hint {
+  margin: 0;
+  font-size: 14px;
+  color: #4a4a4a;
+  font-weight: 600;
+}
+.input-group .hint-display .hint-item .en-hint {
+  margin: 0;
+  font-size: 13px;
+  color: #007AFF;
+  font-weight: 400;
+}
+.input-group .hint-display .hint-item:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(-1px);
+  box-shadow: 2px 2px 5px rgba(163, 177, 198, 0.3);
+}
+.input-group .hint-display .hint-item:active {
+  transform: translateY(0);
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: inset 2px 2px 4px rgba(163, 177, 198, 0.5);
 }
 .input-group .input-row {
   display: flex;

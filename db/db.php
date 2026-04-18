@@ -10,6 +10,6 @@ try {
     ];
     $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
 } catch (\PDOException $e) {
-    // In production, log this error instead of showing it
-    die("Database connection failed: " . $e->getMessage());
+    // Re-throw exception so calling scripts can handle it (e.g., return JSON error)
+    throw new Exception("Database connection failed: " . $e->getMessage());
 }

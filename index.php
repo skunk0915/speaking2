@@ -67,7 +67,7 @@
             </div>
             <div class="setting-item">
                 <label for="length-range">Length: <span id="length-val">100</span> chars</label>
-                <input type="range" id="length-range" min="50" max="500" step="10" value="100">
+                <input type="range" id="length-range" min="10" max="500" step="10" value="100">
             </div>
             <div class="setting-item free-text-player">
                 <label for="settings-free-text">Free Text Playback</label>
@@ -90,7 +90,7 @@
         <div id="input-group" class="input-group">
             <div id="hint-display" class="hint-display hidden">
                 <p class="label">例えば…</p>
-                <p class="text"></p>
+                <div class="hint-list"></div>
             </div>
             <div class="input-row">
                 <textarea id="user-input" placeholder="英語で返信を入力..." rows="1"></textarea>

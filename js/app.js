@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Input Group Elements
     const inputGroup = document.getElementById('input-group');
     const hintDisplay = document.getElementById('hint-display');
-    const hintText = hintDisplay.querySelector('.text');
+    const hintList = hintDisplay.querySelector('.hint-list');
     const userInput = document.getElementById('user-input');
     const btnHint = document.getElementById('btn-hint');
     const btnSend = document.getElementById('btn-send');
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentAudioBtn = null;
     let isRepeating = false;
     let currentContext = ""; // Store the last Japanese prompt
-    let currentSampleAnswer = ""; // Store the current sample answer
+    let currentSampleAnswers = []; // Store current sample answers
 
     // Event Listeners
     btnNew.addEventListener('click', () => {
@@ -155,7 +155,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnHint.addEventListener('click', () => {
         hintDisplay.classList.remove('hidden');
-        hintText.textContent = currentSampleAnswer;
+        hintList.innerHTML = '';
+        currentSampleAnswers.forEach(ans => {
+            const div = document.createElement('div');
+            div.className = 'hint-item';
+            
+            const jaText = typeof ans === 'object' ? ans.ja : ans;
+            const enText = typeof ans === 'object' ? ans.en : '';
+
+            div.innerHTML = `
+                <p class="ja-hint">${jaText}</p>
+                ${enText ? `<p class="en-hint hidden">${enText}</p>` : ''}
+            `;
+            
+            div.addEventListener('click', (e) => {
+                const enHint = div.querySelector('.en-hint');
+                if (enHint && enHint.classList.contains('hidden')) {
+                    // First click: Reveal English
+                    enHint.classList.remove('hidden');
+                } else {
+                    // Second click (or click on revealed text): Insert English
+                    userInput.value = enText || jaText;
+                    userInput.dispatchEvent(new Event('input'));
+                    hintDisplay.classList.add('hidden');
+                    userInput.focus();
+                }
+            });
+            hintList.appendChild(div);
+        });
     });
 
     // Initial Load
@@ -486,7 +513,7 @@ document.addEventListener('DOMContentLoaded', () => {
             addConversationItem(data);
             conversationHistory.push(data);
             currentContext = data.japanese; // Update context
-            currentSampleAnswer = data.sample_user_japanese || ""; // Update sample answer
+            currentSampleAnswers = data.sample_user_answers || (data.sample_user_japanese ? [data.sample_user_japanese] : []); // Update sample answers
 
             // Move input to bottom
             moveInputToBottom();
@@ -507,7 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
         container.appendChild(inputGroup);
         // Reset hint display
         hintDisplay.classList.add('hidden');
-        hintText.textContent = '';
+        hintList.innerHTML = '';
         userInput.value = '';
         userInput.style.height = 'auto';
         btnSend.disabled = true;
@@ -678,15 +705,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         })
                     });
 
+                    if (!res.ok) {
+                        const errorText = await res.text();
+                        console.error('Speech API Error Details:', errorText);
+                        throw new Error(`Server returned ${res.status}: ${errorText}`);
+                    }
+
                     const resData = await res.json();
+                    if (!resData.audio_url) {
+                        throw new Error('No audio URL returned');
+                    }
                     audioUrl = resData.audio_url;
 
                     // Save current settings
                     lastVoice = currentVoice;
                     lastSpeed = currentSpeed;
                 } catch (e) {
-                    console.error(e);
-                    alert('音声生成に失敗しました');
+                    console.error('Speech generation failed:', e);
+                    alert('音声生成に失敗しました: ' + e.message);
                     iconPlay.classList.remove('hidden');
                     loader.classList.add('hidden');
                     return;
