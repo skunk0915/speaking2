@@ -123,7 +123,7 @@ if ($mode === 'translation') {
 }
 
 // Call Gemini API
-$url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" . GEMINI_API_KEY;
+$url = "https://generativelanguage.googleapis.com/v1beta/models/" . GEMINI_MODEL . ":generateContent?key=" . GEMINI_API_KEY;
 
 $data = [
     'contents' => [
@@ -160,14 +160,14 @@ try {
     $result = json_decode($response, true);
     if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
         $text = $result['candidates'][0]['content']['parts'][0]['text'];
-        
+
         // Strip markdown code blocks if present
         $text = preg_replace('/^```json\s*|\s*```$/', '', $text);
-        
+
         $json = json_decode($text, true);
-        
+
         if (json_last_error() !== JSON_ERROR_NONE) {
-             // Fallback if JSON parsing fails
+            // Fallback if JSON parsing fails
             throw new Exception('Invalid JSON from Gemini: ' . json_last_error_msg());
         }
 

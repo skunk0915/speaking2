@@ -170,15 +170,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             div.addEventListener('click', (e) => {
                 const enHint = div.querySelector('.en-hint');
-                if (enHint && enHint.classList.contains('hidden')) {
-                    // First click: Reveal English
-                    enHint.classList.remove('hidden');
-                } else {
-                    // Second click (or click on revealed text): Insert English
-                    userInput.value = enText || jaText;
-                    userInput.dispatchEvent(new Event('input'));
-                    hintDisplay.classList.add('hidden');
-                    userInput.focus();
+                if (enHint) {
+                    // Toggle visibility of English translation
+                    enHint.classList.toggle('hidden');
                 }
             });
             hintList.appendChild(div);
@@ -456,7 +450,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     if (currentAudio === audioInstance) {
                         audioInstance.currentTime = 0;
-                        audioInstance.play();
+                        const playPromise = audioInstance.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(error => {
+                                console.log('Playback interrupted or prevented:', error);
+                            });
+                        }
                     }
                 }, 500);
             } else {
@@ -465,7 +464,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        currentAudio.play();
+        const playPromise = currentAudio.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.log('Playback interrupted or prevented:', error);
+            });
+        }
     }
 
     async function generateText(type) {
@@ -759,7 +763,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            currentAudio.play();
+            const playPromise = currentAudio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log('Playback interrupted or prevented:', error);
+                });
+            }
         };
 
         btnSpeak.addEventListener('click', () => playAudio());
