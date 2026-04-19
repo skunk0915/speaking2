@@ -189,6 +189,29 @@
                             <line x1="4" y1="4" x2="9" y2="9"></line>
                         </svg>
                     </button>
+                    <button class="btn-qa" title="質問">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="item-qa-section main-qa hidden">
+                    <h3>この英文への質問</h3>
+                    <div class="item-qa-container">
+                        <!-- Q&A history for this item -->
+                    </div>
+                    <div class="item-qa-input-area">
+                        <textarea class="item-qa-input" placeholder="この英文について質問..." rows="1"></textarea>
+                        <button class="btn-icon btn-item-qa-send" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="practice-section hidden">

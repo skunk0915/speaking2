@@ -53,13 +53,15 @@ if ($type === 'new') {
         return "{$role}: " . $item['text'];
     }, $input['context']['history'] ?? []));
 
-    $situation = $input['context']['situation'] ?? '';
-    $userInput = $input['context']['user_input'] ?? '';
-    $correction = $input['context']['correction'] ?? '';
+    $situation = $input['context']['situation'] ?: 'なし';
+    $userInput = $input['context']['user_input'] ?: 'なし';
+    $correction = $input['context']['correction'] ?: 'なし';
+    $englishText = $input['context']['english'] ?: '';
 
     $prompt = "あなたは英語学習のアシスタントAIです。ユーザーからの質問に答えてください。
     
     前提となる会話コンテキスト:
+    【対象の英文】: {$englishText}
     【状況/問いかけ】: {$situation}
     【ユーザーの回答】: {$userInput}
     【AIによる添削】: {$correction}
@@ -71,9 +73,10 @@ if ($type === 'new') {
     {$input['text']}
     
     指示:
-    - 上記の「前提となる会話コンテキスト」を踏まえて、ユーザーの質問に答えてください。
-    - ユーザーは自分の回答がなぜ修正されたのか、あるいはもっと良い表現がないかなどを知りたがっています。
-    - 丁寧でわかりやすい日本語で答えてください。
+    - 上記の「前提となる会話コンテキスト」を踏まえて、ユーザーの質問に答えててください。
+    - 質問が「対象の英文」に関するものであれば、文法、語彙、ニュアンス、使い方などについて分かりやすく解説してください。
+    - 質問が「AIによる添削」に関するものであれば、なぜそのように修正されたのかを解説してください。
+    - 丁寧で分かりやすい日本語で答えてください。
     - ユーザーが英語での回答を求めている場合、または「簡単な単語で」などの指示がある場合は、中学生レベルの簡単な英語で回答してください。
     - 必要に応じて英語の例文を提示してください。
     - 出力はJSON形式で、以下のキーを含めてください:

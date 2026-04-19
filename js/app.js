@@ -289,6 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         situation: contextData.situation,
                         user_input: contextData.user_input,
                         correction: contextData.correction,
+                        english: contextData.english,
                         history: history
                     },
                     text: text
@@ -584,6 +585,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
             variationMenu.classList.remove('hidden');
         });
+
+        // Q&A Toggle for System Message
+        const btnQa = clone.querySelector('.btn-qa');
+        const mainQa = clone.querySelector('.main-qa');
+        if (btnQa && mainQa) {
+            btnQa.addEventListener('click', () => {
+                const isHidden = mainQa.classList.contains('hidden');
+                mainQa.classList.toggle('hidden');
+                if (isHidden) {
+                    mainQa.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    mainQa.querySelector('.item-qa-input').focus();
+                }
+            });
+
+            setupItemQa(mainQa, {
+                english: data.english,
+                situation: currentContext
+            });
+        }
 
         // Translation Toggle
         let translateTimeout;
