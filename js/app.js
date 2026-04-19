@@ -324,6 +324,13 @@ document.addEventListener('DOMContentLoaded', () => {
     async function getCorrection(userText, feedbackElement) {
         const correctionP = feedbackElement.querySelector('.correction');
         const suggestionsList = feedbackElement.querySelector('.suggestions-list');
+        const qaSection = feedbackElement.querySelector('.item-qa-section');
+
+        // Show loading state
+        feedbackElement.classList.remove('hidden');
+        correctionP.innerHTML = '<div class="loader" style="display:inline-block; vertical-align:middle; margin-right:8px; width:16px; height:16px; border-width:2px;"></div><span>添削中...</span>';
+        suggestionsList.innerHTML = '';
+        if (qaSection) qaSection.classList.add('hidden');
 
         try {
             const response = await fetch('api/correct_text.php', {
@@ -356,6 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 correction: data.correction
             });
 
+            if (qaSection) qaSection.classList.remove('hidden');
             feedbackElement.classList.remove('hidden');
 
         } catch (error) {
@@ -618,6 +626,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 practiceInput.disabled = true;
                 btnPracticeSend.disabled = true;
 
+                // Show loading
+                const correctionP = practiceFeedback.querySelector('.correction');
+                const suggestionsList = practiceFeedback.querySelector('.suggestions-list');
+                const qaSection = practiceFeedback.querySelector('.item-qa-section');
+                
+                practiceFeedback.classList.remove('hidden');
+                correctionP.innerHTML = '<div class="loader" style="display:inline-block; vertical-align:middle; margin-right:8px; width:16px; height:16px; border-width:2px;"></div><span>添削中...</span>';
+                suggestionsList.innerHTML = '';
+                if (qaSection) qaSection.classList.add('hidden');
+
                 // Call API
                 try {
                     const response = await fetch('api/correct_text.php', {
@@ -652,6 +670,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         user_input: text,
                         correction: resData.correction
                     });
+
+                    if (qaSection) qaSection.classList.remove('hidden');
+                    practiceFeedback.classList.remove('hidden');
 
                 } catch (error) {
                     console.error(error);
