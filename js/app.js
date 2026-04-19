@@ -297,7 +297,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function appendItemQaMessage(container, text, role) {
         const div = document.createElement('div');
         div.className = `qa-message ${role}`;
-        div.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+        
+        if (role === 'ai') {
+            // Use marked for AI messages
+            div.innerHTML = marked.parse(text);
+        } else {
+            // Use textContent or simple escape for user messages to avoid XSS
+            div.textContent = text;
+        }
+
         container.appendChild(div);
         container.scrollTop = container.scrollHeight;
     }
@@ -328,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             // Render Feedback
-            correctionP.textContent = data.correction;
+            correctionP.innerHTML = marked.parse(data.correction);
 
             suggestionsList.innerHTML = '';
             suggestionsList.innerHTML = '';
@@ -688,7 +696,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const correctionP = practiceFeedback.querySelector('.correction');
                     const suggestionsList = practiceFeedback.querySelector('.suggestions-list');
 
-                    correctionP.textContent = resData.correction;
+                    correctionP.innerHTML = marked.parse(resData.correction);
                     suggestionsList.innerHTML = '';
                     resData.suggestions.forEach(suggestion => {
                         const li = createSuggestionElement(suggestion, suggestionsList);
@@ -1014,7 +1022,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="suggestion-content">
                 <p class="english">${engText}</p>
                 ${jpText ? `<p class="japanese">${jpText}</p>` : ''}
-                ${pointText ? `<p class="point"><span class="label">POINT</span> ${pointText}</p>` : ''}
+                ${pointText ? `<p class="point"><span class="label">POINT</span> ${marked.parse(pointText).replace(/^<p>|<\/p>$/g, '')}</p>` : ''}
             </div>
             <div class="suggestion-actions">
                 <button class="btn-play-suggestion" title="再生">
