@@ -43,11 +43,7 @@
             <!-- Conversation items will be injected here -->
         </main>
 
-        <div id="variation-menu" class="variation-menu hidden">
-            <button data-type="formal">フォーマル</button>
-            <button data-type="casual">カジュアル</button>
-            <button data-type="simple">簡単</button>
-        </div>
+
 
         <div id="settings-overlay" class="settings-overlay hidden"></div>
         <div id="settings-panel" class="settings-panel">
@@ -196,6 +192,18 @@
                             <line x1="12" y1="17" x2="12.01" y2="17"></line>
                         </svg>
                     </button>
+                </div>
+
+                <div class="variation-section hidden">
+                    <h3>バリエーション</h3>
+                    <div class="variation-options">
+                        <button data-type="formal">フォーマル</button>
+                        <button data-type="casual">カジュアル</button>
+                        <button data-type="simple">簡単</button>
+                    </div>
+                    <div class="variation-result-container hidden">
+                        <!-- Generated variations go here -->
+                    </div>
                 </div>
 
                 <div class="item-qa-section main-qa hidden">

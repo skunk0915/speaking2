@@ -96,16 +96,20 @@ if ($type === 'new') {
     ];
     $randomStyle = $styles[array_rand($styles)];
 
+    $excludeList = $input['context']['exclude'] ?? [];
+    $excludeInstruction = !empty($excludeList) ? "\n以下の表現は既に提示済みのため、これらとは**異なる**別の自然な言い回しを考えてください:\n- " . implode("\n- ", $excludeList) : "";
+
     $prompt = "以下の会話フレーズの「別バリエーション」を生成してください。
     
     元のフレーズ:
     日本語: {$originalJapanese}
     英語: {$originalEnglish}
+    {$excludeInstruction}
     
     指示:
     - 元のフレーズと同じ意味・意図を持ちつつ、異なる言い回しや表現を考えてください。
     - **{$randomStyle}**
-    - 元のフレーズが既に自然な場合でも、別の自然な言い方を提示してください。
+    - 元のフレーズや既に出された上記のリストが既に自然な場合でも、必ず別の自然な言い方を提示してください。
     - 文字数は元のフレーズと同程度にしてください。
     - 出力はJSON形式で、以下のキーを含めてください:
       - 'japanese': 生成した日本語の会話文（相手の発話）
@@ -116,14 +120,19 @@ if ($type === 'new') {
     $originalJapanese = $input['context']['japanese'] ?? '';
     $originalEnglish = $input['context']['english'] ?? '';
 
+    $excludeList = $input['context']['exclude'] ?? [];
+    $excludeInstruction = !empty($excludeList) ? "\n以下の表現は既に提示済みのため、これらとは**異なる**簡単な表現を使用してください:\n- " . implode("\n- ", $excludeList) : "";
+
     $prompt = "以下の会話フレーズを「簡単な英語（中学生レベル）」に書き換えてください。
     
     元のフレーズ:
     日本語: {$originalJapanese}
     英語: {$originalEnglish}
+    {$excludeInstruction}
     
     指示:
     - 元のフレーズと同じ意味・意図を保ちつつ、中学生で習うような基本的な単語や文法を使って表現してください。
+    - 既に提示された上記のリストとは異なる言い回しを積極的に探してください。
     - 難しいイディオムや構文は避けてください。
     - 出力はJSON形式で、以下のキーを含めてください:
       - 'japanese': 生成した日本語の会話文（元の意味に近い、自然な日本語）
@@ -134,14 +143,19 @@ if ($type === 'new') {
     $originalJapanese = $input['context']['japanese'] ?? '';
     $originalEnglish = $input['context']['english'] ?? '';
 
+    $excludeList = $input['context']['exclude'] ?? [];
+    $excludeInstruction = !empty($excludeList) ? "\n以下の表現は既に提示済みのため、これらとは**異なる**自然で丁寧な表現を使用してください:\n- " . implode("\n- ", $excludeList) : "";
+
     $prompt = "以下の会話フレーズを「フォーマル・丁寧な表現」に書き換えてください。
     
     元のフレーズ:
     日本語: {$originalJapanese}
     英語: {$originalEnglish}
+    {$excludeInstruction}
     
     指示:
     - ビジネスシーンや目上の人に対して使えるような、丁寧で礼儀正しい表現にしてください。
+    - 既に提示された上記のリストとは異なる、別の語彙や構成を検討してください。
     - 出力はJSON形式で、以下のキーを含めてください:
       - 'japanese': 生成した日本語の会話文
       - 'english': その英訳
@@ -151,14 +165,19 @@ if ($type === 'new') {
     $originalJapanese = $input['context']['japanese'] ?? '';
     $originalEnglish = $input['context']['english'] ?? '';
 
+    $excludeList = $input['context']['exclude'] ?? [];
+    $excludeInstruction = !empty($excludeList) ? "\n以下の表現は既に提示済みのため、これらとは**異なる**カジュアルな表現を使用してください:\n- " . implode("\n- ", $excludeList) : "";
+
     $prompt = "以下の会話フレーズを「カジュアル・親しい間柄の表現」に書き換えてください。
     
     元のフレーズ:
     日本語: {$originalJapanese}
     英語: {$originalEnglish}
+    {$excludeInstruction}
     
     指示:
-    - 友人や家族など、親しい間柄で使うような砕けた表現やスラングを含めた表現にしてください。
+    - 友人や家族など、親しい間柄で使うような砕けた表現やスラングを含めた自然な表現にしてください。
+    - 既に提示された上記のリストとは異なる、別のスラングや短縮形、口語表現を検討してください。
     - 出力はJSON形式で、以下のキーを含めてください:
       - 'japanese': 生成した日本語の会話文
       - 'english': その英訳

@@ -79,9 +79,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsOverlay = document.getElementById('settings-overlay');
 
     // Variation Menu Elements
-    const variationMenu = document.getElementById('variation-menu');
-    let activeVariationData = null;
-    let activeVariationItem = null;
+
+
 
     // Q&A Elements
 
@@ -216,26 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
         playSuggestionAudio(text, btnSettingsPlay, btnSettingsRepeat);
     });
 
-    // Variation Menu Logic
-    document.addEventListener('click', (e) => {
-        if (!variationMenu.contains(e.target) && !e.target.closest('.btn-variation-menu')) {
-            variationMenu.classList.add('hidden');
-        }
-    });
 
-    variationMenu.querySelectorAll('button').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const type = btn.dataset.type;
-            if (activeVariationData && activeVariationItem) {
-                if (activeVariationItem.classList.contains('suggestion-item')) {
-                    generateSuggestionVariation(activeVariationData, activeVariationItem, type);
-                } else {
-                    generateVariation(activeVariationData, activeVariationItem, type);
-                }
-            }
-            variationMenu.classList.add('hidden');
-        });
-    });
 
     // Q&A Logic (Per Item)
     async function setupItemQa(feedbackElement, contextData) {
@@ -565,39 +545,85 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnSpeak = clone.querySelector('.btn-speak');
         const btnRepeat = clone.querySelector('.btn-repeat');
         const btnVariationMenu = clone.querySelector('.btn-variation-menu');
+        const btnPractice = clone.querySelector('.btn-practice');
+        const btnQa = clone.querySelector('.btn-qa');
+        
+        const practiceSection = clone.querySelector('.practice-section');
+        const variationSection = clone.querySelector('.variation-section');
+        const mainQa = clone.querySelector('.main-qa');
+        
+        const practiceInput = clone.querySelector('.practice-input');
+        const btnPracticeSend = clone.querySelector('.btn-practice-send');
+        const practiceFeedback = clone.querySelector('.feedback-content');
 
         japanese.textContent = data.japanese;
         english.textContent = data.english;
 
-        // Variation Menu Trigger
-        btnVariationMenu.addEventListener('click', (e) => {
-            e.stopPropagation();
-            activeVariationData = data;
-            activeVariationItem = item;
+        // Interaction Toggles (Practice, Variation, QA)
+        const toggleSection = (btn, section, inputToFocus = null) => {
+            if (!section) return;
+            const isOpening = section.classList.contains('hidden');
+            
+            // Close others in the same item
+            const others = [
+                { b: btnPractice, s: practiceSection },
+                { b: btnVariationMenu, s: variationSection },
+                { b: btnQa, s: mainQa }
+            ];
 
-            // Position menu
-            const rect = btnVariationMenu.getBoundingClientRect();
-            const menuWidth = 180; // Approximate width or measure it
-
-            // Position below the button, right-aligned
-            variationMenu.style.top = (rect.bottom + window.scrollY + 8) + 'px';
-            variationMenu.style.left = (rect.right + window.scrollX - menuWidth) + 'px';
-
-            variationMenu.classList.remove('hidden');
-        });
-
-        // Q&A Toggle for System Message
-        const btnQa = clone.querySelector('.btn-qa');
-        const mainQa = clone.querySelector('.main-qa');
-        if (btnQa && mainQa) {
-            btnQa.addEventListener('click', () => {
-                const isHidden = mainQa.classList.contains('hidden');
-                mainQa.classList.toggle('hidden');
-                if (isHidden) {
-                    mainQa.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    mainQa.querySelector('.item-qa-input').focus();
+            others.forEach(pair => {
+                if (pair.s && pair.s !== section && !pair.s.classList.contains('hidden')) {
+                    pair.b.classList.remove('active');
+                    pair.s.classList.add('hiding');
+                    setTimeout(() => {
+                        pair.s.classList.add('hidden');
+                        pair.s.classList.remove('hiding');
+                    }, 300);
                 }
             });
+
+            if (isOpening) {
+                section.classList.remove('hiding');
+                section.classList.remove('hidden');
+                btn.classList.add('active');
+                if (inputToFocus) {
+                    setTimeout(() => {
+                        section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        inputToFocus.focus();
+                    }, 50);
+                } else {
+                    setTimeout(() => {
+                        section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 50);
+                }
+            } else {
+                btn.classList.remove('active');
+                section.classList.add('hiding');
+                setTimeout(() => {
+                    section.classList.add('hidden');
+                    section.classList.remove('hiding');
+                }, 300);
+            }
+        };
+
+        if (btnPractice) {
+            btnPractice.addEventListener('click', () => toggleSection(btnPractice, practiceSection, practiceInput));
+        }
+
+        if (btnVariationMenu) {
+            btnVariationMenu.addEventListener('click', () => toggleSection(btnVariationMenu, variationSection));
+            
+            variationSection.querySelectorAll('button').forEach(vBtn => {
+                vBtn.addEventListener('click', () => {
+                    const type = vBtn.dataset.type;
+                    generateVariation(data, item, type);
+                    // Section remains open as per user request
+                });
+            });
+        }
+
+        if (btnQa && mainQa) {
+            btnQa.addEventListener('click', () => toggleSection(btnQa, mainQa, mainQa.querySelector('.item-qa-input')));
 
             setupItemQa(mainQa, {
                 english: data.english,
@@ -618,20 +644,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Practice Mode
-        const btnPractice = clone.querySelector('.btn-practice');
-        const practiceSection = clone.querySelector('.practice-section');
-        const practiceInput = clone.querySelector('.practice-input');
-        const btnPracticeSend = clone.querySelector('.btn-practice-send');
-        const practiceFeedback = clone.querySelector('.feedback-content');
-
         if (btnPractice) {
-            btnPractice.addEventListener('click', () => {
-                practiceSection.classList.toggle('hidden');
-                if (!practiceSection.classList.contains('hidden')) {
-                    practiceInput.focus();
-                }
-            });
-
             practiceInput.addEventListener('input', () => {
                 btnPracticeSend.disabled = practiceInput.value.trim() === '';
                 practiceInput.style.height = 'auto';
@@ -844,18 +857,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function generateVariation(originalData, originalItemElement, type = 'variation') {
-        // Show loading below the original item
-        let loadingElement = null;
-        if (tmplLoading) {
-            const loadingClone = tmplLoading.content.cloneNode(true);
-            // Get the element from the clone BEFORE insertion
-            const loadingGroup = loadingClone.querySelector('.conversation-group');
-            loadingElement = loadingGroup.querySelector('.conversation-item');
+    async function generateVariation(originalData, originalItemElement, type) {
+        const resultContainer = originalItemElement.querySelector('.variation-result-container');
+        if (!resultContainer) return;
 
-            const currentGroup = originalItemElement.closest('.conversation-group');
-            currentGroup.parentNode.insertBefore(loadingClone, currentGroup.nextSibling);
-        }
+        // Show result container
+        resultContainer.classList.remove('hidden');
+
+        // Add loading item
+        const loadingItem = document.createElement('div');
+        loadingItem.className = 'variation-result-item loading';
+        loadingItem.innerHTML = `<div class="loader" style="margin: 0 auto; width: 20px; height: 20px; border-width: 2px;"></div>`;
+        resultContainer.appendChild(loadingItem);
+        loadingItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        const existingVariations = Array.from(resultContainer.querySelectorAll('.variation-result-eng')).map(el => el.textContent);
 
         try {
             const response = await fetch('api/generate_text.php', {
@@ -865,7 +881,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     type: type,
                     context: {
                         japanese: originalData.japanese,
-                        english: originalData.english
+                        english: originalData.english,
+                        exclude: existingVariations
                     }
                 })
             });
@@ -873,35 +890,58 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('API Error');
             const data = await response.json();
 
-            // Remove loading
-            if (loadingElement) {
-                const loadingGroup = loadingElement.closest('.conversation-group');
-                loadingGroup.remove();
-            }
+            loadingItem.remove();
 
-            // Add new item
-            addConversationItem(data, originalItemElement.closest('.conversation-group'));
+            // Render Variation Item
+            const variationItem = document.createElement('div');
+            variationItem.className = 'variation-result-item';
+            
+            let label = 'Variation';
+            if (type === 'formal') label = 'Formal';
+            if (type === 'casual') label = 'Casual';
+            if (type === 'simple') label = 'Simple';
+
+            variationItem.innerHTML = `
+                <div class="variation-result-header">
+                    <span class="variation-result-type">${label}</span>
+                    <button class="btn-variation-play" title="再生">
+                        <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <svg class="icon-pause hidden" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                        <div class="loader hidden" style="width:12px; height:12px; border-width: 2px;"></div>
+                    </button>
+                </div>
+                <div class="variation-result-text">
+                    <p class="variation-result-eng">${data.english}</p>
+                    <p class="variation-result-jp">${data.japanese}</p>
+                </div>
+            `;
+
+            const btnPlay = variationItem.querySelector('.btn-variation-play');
+            btnPlay.addEventListener('click', () => {
+                playSuggestionAudio(data.english, btnPlay); // Reusing suggestion audio logic (simple play)
+            });
+
+            resultContainer.appendChild(variationItem);
+            variationItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
         } catch (error) {
             console.error(error);
-            alert('バリエーション生成に失敗しました。');
-            if (loadingElement) {
-                const loadingGroup = loadingElement.closest('.conversation-group');
-                loadingGroup.remove();
-            }
+            loadingItem.innerHTML = '<p style="font-size:12px; color:red; text-align:center;">Failed to generate.</p>';
+            setTimeout(() => loadingItem.remove(), 2000);
         }
     }
 
     async function generateSuggestionVariation(originalData, originalItemElement, type) {
-        // Show loading below the original item
-        const loadingLi = document.createElement('li');
-        loadingLi.className = 'suggestion-item loading-item';
-        loadingLi.innerHTML = `
-            <div class="suggestion-content" style="display:flex;justify-content:center;align-items:center;padding:20px;">
-                <div class="loader"></div>
-            </div>
-        `;
-        originalItemElement.parentNode.insertBefore(loadingLi, originalItemElement.nextSibling);
+        const resultContainer = originalItemElement.querySelector('.variation-result-container');
+        if (!resultContainer) return;
+
+        resultContainer.classList.remove('hidden');
+        const loadingItem = document.createElement('div');
+        loadingItem.className = 'variation-result-item';
+        loadingItem.innerHTML = `<div class="loader" style="margin: 0 auto; width: 16px; height: 16px; border-width: 2px;"></div>`;
+        resultContainer.appendChild(loadingItem);
+
+        const existingVariations = Array.from(resultContainer.querySelectorAll('.variation-result-eng')).map(el => el.textContent);
 
         try {
             const response = await fetch('api/generate_text.php', {
@@ -911,7 +951,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     type: type,
                     context: {
                         japanese: originalData.japanese,
-                        english: originalData.english
+                        english: originalData.english,
+                        exclude: existingVariations
                     }
                 })
             });
@@ -919,24 +960,44 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('API Error');
             const data = await response.json();
 
-            // Remove loading
-            loadingLi.remove();
+            loadingItem.remove();
 
-            // Create new suggestion item
-            // Map API response to suggestion format
-            const suggestionData = {
-                english: data.english,
-                japanese: data.japanese,
-                point: data.point
-            };
+            const variationItem = document.createElement('div');
+            variationItem.className = 'variation-result-item';
+            variationItem.style.padding = '8px';
+            variationItem.style.marginTop = '8px';
 
-            const newLi = createSuggestionElement(suggestionData, originalItemElement.parentNode);
-            originalItemElement.parentNode.insertBefore(newLi, originalItemElement.nextSibling);
+            let label = 'Variation';
+            if (type === 'formal') label = 'Formal';
+            if (type === 'casual') label = 'Casual';
+            if (type === 'simple') label = 'Simple';
+
+            variationItem.innerHTML = `
+                <div class="variation-result-header">
+                    <span class="variation-result-type" style="font-size:9px;">${label}</span>
+                    <button class="btn-variation-play" style="width:24px; height:24px;" title="再生">
+                        <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <svg class="icon-pause hidden" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                        <div class="loader hidden" style="width:10px; height:10px; border-width: 2px;"></div>
+                    </button>
+                </div>
+                <div class="variation-result-text">
+                    <p class="variation-result-eng" style="font-size:13px;">${data.english}</p>
+                    <p class="variation-result-jp" style="font-size:11px;">${data.japanese}</p>
+                </div>
+            `;
+
+            const btnPlay = variationItem.querySelector('.btn-variation-play');
+            btnPlay.addEventListener('click', () => {
+                playSuggestionAudio(data.english, btnPlay);
+            });
+
+            resultContainer.appendChild(variationItem);
 
         } catch (error) {
             console.error(error);
-            alert('バリエーション生成に失敗しました。');
-            loadingLi.remove();
+            loadingItem.innerHTML = '<p style="font-size:10px; color:red;">Error</p>';
+            setTimeout(() => loadingItem.remove(), 2000);
         }
     }
 
@@ -968,6 +1029,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
                 </button>
             </div>
+            <div class="variation-section hidden" style="width:100%; margin-top:12px; border-top:1px solid rgba(255,255,255,0.1); padding-top:12px;">
+                <h3 style="font-size:12px; margin-bottom:8px;">バリエーション</h3>
+                <div class="variation-options">
+                    <button data-type="formal">フォーマル</button>
+                    <button data-type="casual">カジュアル</button>
+                    <button data-type="simple">簡単</button>
+                </div>
+                <div class="variation-result-container hidden" style="margin-top:12px;"></div>
+            </div>
         `;
 
         // Add play event for suggestion
@@ -981,23 +1051,36 @@ document.addEventListener('DOMContentLoaded', () => {
             btnRepeat.classList.toggle('active');
         });
 
+        const variationSection = li.querySelector('.variation-section');
+
         btnVariation.addEventListener('click', (e) => {
             e.stopPropagation();
-            activeVariationData = {
-                japanese: jpText,
-                english: engText
-            };
-            activeVariationItem = li;
+            const isOpening = variationSection.classList.contains('hidden');
+            
+            if (isOpening) {
+                variationSection.classList.remove('hiding');
+                variationSection.classList.remove('hidden');
+                btnVariation.classList.add('active');
+            } else {
+                btnVariation.classList.remove('active');
+                variationSection.classList.add('hiding');
+                setTimeout(() => {
+                    variationSection.classList.add('hidden');
+                    variationSection.classList.remove('hiding');
+                }, 300);
+            }
+        });
 
-            // Position menu
-            const rect = btnVariation.getBoundingClientRect();
-            const menuWidth = 180;
-
-            // Position below the button, right-aligned
-            variationMenu.style.top = (rect.bottom + window.scrollY + 8) + 'px';
-            variationMenu.style.left = (rect.right + window.scrollX - menuWidth) + 'px';
-
-            variationMenu.classList.remove('hidden');
+        variationSection.querySelectorAll('button').forEach(vBtn => {
+            vBtn.addEventListener('click', () => {
+                const type = vBtn.dataset.type;
+                generateSuggestionVariation({
+                    japanese: jpText,
+                    english: engText
+                }, li, type);
+                
+                // Section remains open as per user request
+            });
         });
 
         return li;
