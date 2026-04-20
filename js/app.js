@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const speedVal = document.getElementById('speed-val');
     const lengthRange = document.getElementById('length-range');
     const lengthVal = document.getElementById('length-val');
+    const aiStyleSelect = document.getElementById('ai-style-select');
+    const englishLevelSelect = document.getElementById('english-level-select');
     const tmpl = document.getElementById('tmpl-conversation');
     const tmplLoading = document.getElementById('tmpl-loading');
 
@@ -14,7 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const STORAGE_KEYS = {
         VOICE: 'english-training-voice',
         SPEED: 'english-training-speed',
-        LENGTH: 'english-training-length'
+        LENGTH: 'english-training-length',
+        AI_STYLE: 'english-training-ai-style',
+        ENGLISH_LEVEL: 'english-training-english-level'
     };
 
     // Load settings from localStorage
@@ -22,6 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedVoice = localStorage.getItem(STORAGE_KEYS.VOICE);
         const savedSpeed = localStorage.getItem(STORAGE_KEYS.SPEED);
         const savedLength = localStorage.getItem(STORAGE_KEYS.LENGTH);
+        const savedAiStyle = localStorage.getItem(STORAGE_KEYS.AI_STYLE);
+        const savedEnglishLevel = localStorage.getItem(STORAGE_KEYS.ENGLISH_LEVEL);
 
         if (savedVoice) {
             voiceSelect.value = savedVoice;
@@ -32,6 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedLength) {
             lengthRange.value = savedLength;
         }
+        if (savedAiStyle && aiStyleSelect) {
+            aiStyleSelect.value = savedAiStyle;
+        }
+        if (savedEnglishLevel && englishLevelSelect) {
+            englishLevelSelect.value = savedEnglishLevel;
+        }
     }
 
     // Save settings to localStorage
@@ -39,6 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(STORAGE_KEYS.VOICE, voiceSelect.value);
         localStorage.setItem(STORAGE_KEYS.SPEED, speedRange.value);
         localStorage.setItem(STORAGE_KEYS.LENGTH, lengthRange.value);
+        if (aiStyleSelect) localStorage.setItem(STORAGE_KEYS.AI_STYLE, aiStyleSelect.value);
+        if (englishLevelSelect) localStorage.setItem(STORAGE_KEYS.ENGLISH_LEVEL, englishLevelSelect.value);
     }
 
     // Slider Logic
@@ -64,6 +78,18 @@ document.addEventListener('DOMContentLoaded', () => {
     voiceSelect.addEventListener('change', () => {
         saveSettings();
     });
+
+    if (aiStyleSelect) {
+        aiStyleSelect.addEventListener('change', () => {
+            saveSettings();
+        });
+    }
+
+    if (englishLevelSelect) {
+        englishLevelSelect.addEventListener('change', () => {
+            saveSettings();
+        });
+    }
 
     // Load settings first
     loadSettings();
@@ -272,7 +298,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         english: contextData.english,
                         history: history
                     },
-                    text: text
+                    text: text,
+                    ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite'
                 })
             });
 
@@ -328,7 +355,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({
                     user_input: userText,
                     context: currentContext,
-                    mode: 'conversation'
+                    mode: 'conversation',
+                    ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite'
                 })
             });
 
@@ -495,7 +523,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({
                     type: type,
                     context: conversationHistory,
-                    length: length
+                    length: length,
+                    english_level: englishLevelSelect ? englishLevelSelect.value : 'native',
+                    ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite'
                 })
             });
 
@@ -685,7 +715,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: JSON.stringify({
                             user_input: text,
                             context: data.japanese, // Use the system message Japanese as context
-                            mode: 'translation'
+                            mode: 'translation',
+                            ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite'
                         })
                     });
 
@@ -891,7 +922,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         japanese: originalData.japanese,
                         english: originalData.english,
                         exclude: existingVariations
-                    }
+                    },
+                    ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite'
                 })
             });
 
@@ -961,7 +993,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         japanese: originalData.japanese,
                         english: originalData.english,
                         exclude: existingVariations
-                    }
+                    },
+                    ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite'
                 })
             });
 

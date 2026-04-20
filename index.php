@@ -71,6 +71,23 @@
                 <input type="range" id="speed-range" min="0.5" max="2.0" step="0.1" value="1.0">
             </div>
             <div class="setting-item">
+                <label for="ai-style-select">AIの話し方</label>
+                <select id="ai-style-select">
+                    <option value="polite">ですます調</option>
+                    <option value="friendly">友達のようなフレンドリーな感じ</option>
+                    <option value="jk">女子高生スタイル</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <label for="english-level-select">英文レベル</label>
+                <select id="english-level-select">
+                    <option value="native">ネイティブ</option>
+                    <option value="formal">フォーマル</option>
+                    <option value="casual">カジュアル</option>
+                    <option value="simple">簡単</option>
+                </select>
+            </div>
+            <div class="setting-item">
                 <label for="length-range">Length: <span id="length-val">100</span> chars</label>
                 <input type="range" id="length-range" min="10" max="500" step="10" value="100">
             </div>

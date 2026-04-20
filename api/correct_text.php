@@ -12,6 +12,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $input = json_decode(file_get_contents('php://input'), true);
 $user_input = $input['user_input'] ?? '';
 $context = $input['context'] ?? ''; // The Japanese prompt or previous conversation context
+$aiStyle = $input['ai_style'] ?? 'polite';
+
+$styleInstructions = [
+    'polite' => "丁寧な「ですます調」で回答・解説してください。",
+    'friendly' => "親しみ友達のような、タメ口でフレンドリーな口調で回答・解説してください。",
+    'jk' => "女子高生のような口調（例：「〜だね！」「〜じゃん？」「マジで」「うける」など）で、明るくフレンドリーに回答・解説してください。"
+];
+
+$currentStyleInst = $styleInstructions[$aiStyle] ?? $styleInstructions['polite'];
 
 if (empty($user_input)) {
     http_response_code(400);
@@ -35,7 +44,8 @@ if ($mode === 'translation') {
     - ただし、文法ミスや、ネイティブが聞いて違和感を感じる不自然な表現、または意味が誤解される表現については指摘してください。
 
     指示:
-    - 添削コメントは日本語で記述してください。
+    - 添削コメントや各提案の解説（point）は、以下のスタイルを守って日本語で記述してください:
+      **{$currentStyleInst}**
     - 「素晴らしいです」などの無駄な褒め言葉は一切不要です。
     - 間違いがある場合は、どこがどう間違っているのか、なぜその表現が不自然なのかを具体的に解説してください。
     - ユーザーの英語が完璧な場合は、「自然で正しい英語です」とのみ伝えてください。
@@ -85,7 +95,8 @@ if ($mode === 'translation') {
     - ただし、文法ミスや、ネイティブが聞いて違和感を感じる不自然な表現、または意味が誤解される表現については指摘してください。
 
     指示:
-    - 添削コメントは日本語で記述してください。
+    - 添削コメントや各提案の解説（point）は、以下のスタイルを守って日本語で記述してください:
+      **{$currentStyleInst}**
     - 「素晴らしいです」などの無駄な褒め言葉は一切不要です。
     - 間違いがある場合は、どこがどう間違っているのか、なぜその表現が不自然なのかを具体的に解説してください。
     - ユーザーの英語が完璧な場合は、「自然で正しい英語です」とのみ伝えてください。
