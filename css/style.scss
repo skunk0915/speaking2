@@ -209,7 +209,13 @@ body {
     position: relative;
 
     &.system-message {
+
         // border-top-left-radius: 4px;
+        &:has(.btn-practice.active) {
+            .text-content .english {
+                display: none !important;
+            }
+        }
     }
 
     .text-content {

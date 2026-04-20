@@ -60,6 +60,9 @@ body {
   animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
+.conversation-item.system-message:has(.btn-practice.active) .text-content .english {
+  display: none !important;
+}
 .conversation-item .text-content {
   margin-bottom: 20px;
 }
