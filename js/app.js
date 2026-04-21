@@ -672,7 +672,27 @@ document.addEventListener('DOMContentLoaded', () => {
         // Translation Toggle
         let translateTimeout;
         btnTranslate.addEventListener('click', () => {
-            english.classList.toggle('hidden');
+            // Close active sections if any
+            const activeBtn = [btnPractice, btnVariationMenu, btnQa].find(b => b && b.classList.contains('active'));
+            if (activeBtn) {
+                const section = activeBtn === btnPractice ? practiceSection :
+                                activeBtn === btnVariationMenu ? variationSection :
+                                mainQa;
+                const input = activeBtn === btnPractice ? practiceInput : 
+                              (activeBtn === btnQa ? mainQa.querySelector('.item-qa-input') : null);
+                toggleSection(activeBtn, section, input);
+                
+                // If practice was active, always show english (remove .hidden)
+                if (activeBtn === btnPractice) {
+                    english.classList.remove('hidden');
+                } else {
+                    english.classList.toggle('hidden');
+                }
+            } else {
+                // Normal toggle
+                english.classList.toggle('hidden');
+            }
+
             if (!english.classList.contains('hidden')) {
                 clearTimeout(translateTimeout);
                 translateTimeout = setTimeout(() => {
