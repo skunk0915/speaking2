@@ -443,6 +443,143 @@ body {
   color: #007AFF;
   box-shadow: inset 2px 2px 4px #a3b1c6, inset -2px -2px 4px #f5f5f5;
 }
+.conversation-item .variation-section {
+  margin-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 16px;
+  width: 100%;
+  animation: slideUpFade 0.3s ease;
+}
+.conversation-item .variation-section.hidden {
+  display: none;
+}
+.conversation-item .variation-section h3 {
+  font-size: 13px;
+  color: #8d97a5;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+.conversation-item .variation-section .variation-options {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.conversation-item .variation-section .variation-options button {
+  background: #e0e5ec;
+  box-shadow: 9px 9px 16px #a3b1c6, -9px -9px 16px #f5f5f5;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: none;
+  padding: 10px 16px;
+  border-radius: 14px;
+  font-size: 14px;
+  color: #4a4a4a;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+.conversation-item .variation-section .variation-options button svg {
+  width: 16px;
+  height: 16px;
+  color: #007AFF;
+}
+.conversation-item .variation-section .variation-options button:hover {
+  transform: translateY(-2px);
+  color: rgb(25.5, 135.3, 255);
+}
+.conversation-item .variation-section .variation-options button:active {
+  background: #e0e5ec;
+  box-shadow: inset 6px 6px 10px #a3b1c6, inset -6px -6px 10px #f5f5f5;
+  border: none;
+  transform: translateY(0);
+}
+.conversation-item .variation-section .variation-result-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: slideUpFade 0.3s ease;
+}
+.conversation-item .variation-section .variation-result-container.hidden {
+  display: none;
+}
+.conversation-item .variation-section .variation-result-container .variation-result-item {
+  background: #e0e5ec;
+  box-shadow: 9px 9px 16px #a3b1c6, -9px -9px 16px #f5f5f5;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.conversation-item .variation-section .variation-result-container .variation-result-item.loading {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+.conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-header .variation-result-type {
+  font-size: 11px;
+  font-weight: 800;
+  color: #007AFF;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(0, 122, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-header .btn-variation-play {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e0e5ec;
+  box-shadow: 7px 7px 14px #a3b1c6, -7px -7px 14px #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4a4a4a;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-header .btn-variation-play:active, .conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-header .btn-variation-play.active {
+  box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
+  color: #007AFF;
+}
+.conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-header .btn-variation-play:hover {
+  color: #007AFF;
+  transform: translateY(-1px);
+}
+.conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-header .btn-variation-play {
+  width: 32px;
+  height: 32px;
+  border: none;
+}
+.conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-header .btn-variation-play svg {
+  width: 14px;
+  height: 14px;
+}
+.conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-text .variation-result-eng {
+  font-size: 16px;
+  color: #4a4a4a;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  line-height: 1.4;
+}
+.conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-text .variation-result-jp {
+  font-size: 13px;
+  color: #8d97a5;
+  margin: 0;
+  line-height: 1.4;
+}
 
 .sample-answer {
   background: #e0e5ec;

@@ -444,6 +444,137 @@ body {
             }
         }
     }
+
+    .variation-section {
+        margin-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 16px;
+        width: 100%;
+        animation: slideUpFade 0.3s ease;
+
+        &.hidden {
+            display: none;
+        }
+
+        h3 {
+            font-size: 13px;
+            color: $text-secondary;
+            margin: 0 0 12px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+        }
+
+        .variation-options {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+
+            button {
+                @include neumorphism-flat;
+                border: none;
+                padding: 10px 16px;
+                border-radius: $border-radius-md;
+                font-size: 14px;
+                color: $text-primary;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: all 0.2s ease;
+                font-weight: 600;
+
+                svg {
+                    width: 16px;
+                    height: 16px;
+                    color: $primary-color;
+                }
+
+                &:hover {
+                    transform: translateY(-2px);
+                    color: lighten($primary-color, 5%);
+                }
+
+                &:active {
+                    @include neumorphism-pressed;
+                    transform: translateY(0);
+                }
+            }
+        }
+
+        .variation-result-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            animation: slideUpFade 0.3s ease;
+
+            &.hidden {
+                display: none;
+            }
+
+            .variation-result-item {
+                @include neumorphism-flat;
+                border-radius: $border-radius-md;
+                padding: 16px;
+                background: rgba(255, 255, 255, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+
+                &.loading {
+                    display: flex;
+                    justify-content: center;
+                    padding: 20px;
+                }
+
+                .variation-result-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 8px;
+
+                    .variation-result-type {
+                        font-size: 11px;
+                        font-weight: 800;
+                        color: $primary-color;
+                        text-transform: uppercase;
+                        letter-spacing: 0.05em;
+                        background: rgba($primary-color, 0.1);
+                        padding: 2px 8px;
+                        border-radius: 4px;
+                    }
+
+                    .btn-variation-play {
+                        @include neumorphism-icon-btn;
+                        width: 32px;
+                        height: 32px;
+                        border: none;
+
+                        svg {
+                            width: 14px;
+                            height: 14px;
+                        }
+                    }
+                }
+
+                .variation-result-text {
+                    .variation-result-eng {
+                        font-size: 16px;
+                        color: $text-primary;
+                        font-weight: 600;
+                        margin: 0 0 4px 0;
+                        line-height: 1.4;
+                    }
+
+                    .variation-result-jp {
+                        font-size: 13px;
+                        color: $text-secondary;
+                        margin: 0;
+                        line-height: 1.4;
+                    }
+                }
+            }
+        }
+    }
 }
 
 .sample-answer {
