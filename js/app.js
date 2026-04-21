@@ -371,7 +371,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     context: currentContext,
                     mode: 'conversation',
                     ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite',
-                    retry_history: history
+                    retry_history: history,
+                    suggested_sentences: getSuggestedSentences(feedbackElement.closest('.conversation-group'))
                 })
             });
 
@@ -557,10 +558,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('Invalid data format');
             }
 
-            addConversationItem(data);
+            const itemElement = addConversationItem(data);
             conversationHistory.push(data);
             currentContext = data.japanese; // Update context
-            currentSampleAnswers = data.sample_user_answers || (data.sample_user_japanese ? [data.sample_user_japanese] : []); // Update sample answers
+            
+            const sampleAnswers = data.sample_user_answers || (data.sample_user_japanese ? [data.sample_user_japanese] : []);
+            currentSampleAnswers = sampleAnswers; // For hint button
+            itemElement.dataset.sampleAnswers = JSON.stringify(sampleAnswers);
 
             // Move input to bottom
             moveInputToBottom();
@@ -592,6 +596,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function addConversationItem(data, insertAfterGroup = null) {
         const clone = tmpl.content.cloneNode(true);
+        const group = clone.querySelector('.conversation-group');
         const item = clone.querySelector('.conversation-item');
         const japanese = clone.querySelector('.japanese');
         const english = clone.querySelector('.english');
@@ -757,7 +762,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             context: data.japanese, // Use the system message Japanese as context
                             mode: 'translation',
                             ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite',
-                            retry_history: practiceRetryHistory
+                            retry_history: practiceRetryHistory,
+                            suggested_sentences: getSuggestedSentences(item)
                         })
                     });
 
@@ -949,6 +955,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Note: We don't scroll here because moveInputToBottom will handle scrolling
+        return group;
     }
 
     function stopAudio() {
@@ -1210,5 +1217,42 @@ document.addEventListener('DOMContentLoaded', () => {
     function setLoading(isLoading) {
         btnNew.disabled = isLoading;
         // btnContinue.disabled = isLoading; // Removed
+    }
+
+    function getSuggestedSentences(groupElement) {
+        if (!groupElement) return [];
+        const sentences = new Set();
+        
+        // 1. Sample Answers from dataset
+        if (groupElement.dataset.sampleAnswers) {
+            try {
+                const answers = JSON.parse(groupElement.dataset.sampleAnswers);
+                answers.forEach(ans => {
+                    if (typeof ans === 'object' && ans.en) {
+                        sentences.add(ans.en);
+                    }
+                });
+            } catch (e) {
+                console.error('Error parsing sample answers:', e);
+            }
+        }
+
+        // 2. The main English sentence of the group
+        const mainEng = groupElement.querySelector('.english');
+        if (mainEng && mainEng.textContent) {
+            sentences.add(mainEng.textContent);
+        }
+
+        // 3. Any English in suggestions
+        groupElement.querySelectorAll('.suggestions-list .english').forEach(el => {
+            if (el.textContent) sentences.add(el.textContent);
+        });
+
+        // 4. Any English in variations
+        groupElement.querySelectorAll('.variation-result-eng').forEach(el => {
+            if (el.textContent) sentences.add(el.textContent);
+        });
+
+        return Array.from(sentences).filter(s => s.trim() !== '');
     }
 });
