@@ -12,8 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $input = json_decode(file_get_contents('php://input'), true);
 $type = $input['type'] ?? 'new'; // 'new' or 'continue'
 $context = $input['context'] ?? []; // Array of previous messages
-$length = $input['length'] ?? 100; // Target length
-$englishLevel = $input['english_level'] ?? 'native';
+$length = $input['length'] ?? 20; // Target length
+$englishLevel = $input['english_level'] ?? 'simple';
 $aiStyle = $input['ai_style'] ?? 'polite';
 
 $styleInstructions = [
@@ -66,7 +66,7 @@ if ($type === 'new') {
     出力はJSON形式で、以下のキーを含めてください:
       - 'japanese': 生成した日本語の会話文（相手の発話）
       - 'english': その英訳
-      - 'sample_user_answers': ユーザーの回答例のリスト（3〜5個）。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにし、バリエーション豊かに提示してください。";
+      - 'sample_user_answers': ユーザーの返答例のリスト（1〜5個程度）。提案数は固定せず、文脈に応じてできるだけ多くのバリエーションを提示してください。ただし、似たような表現ばかりを並べるのは避け、ポジティブ・ネガティブ・質問など様々な視点で提示してください。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。;";
 } elseif ($type === 'question') {
     $history = implode("\n", array_map(function ($item) {
         $role = $item['role'] === 'user' ? 'ユーザー' : 'AI';
@@ -137,7 +137,7 @@ if ($type === 'new') {
     - 出力はJSON形式で、以下のキーを含めてください:
       - 'japanese': 生成した日本語の会話文（相手の発話）
       - 'english': その英訳
-      - 'sample_user_answers': ユーザーの回答例のリスト（3〜5個）。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。
+      - 'sample_user_answers': ユーザーの返答例のリスト（1〜5個程度）。提案数は固定せず、文脈に応じてできるだけ多くのバリエーションを提示してください。ただし、似たような表現ばかりを並べるのは避け、明確に異なる表現を提示してください。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。
       - 'point': このバリエーションのポイントや特徴の簡潔な解説（例：「より丁寧な表現にしました」「〇〇というイディオムを使いました」など）";
 } elseif ($type === 'simple') {
     $originalJapanese = $input['context']['japanese'] ?? '';
@@ -162,7 +162,7 @@ if ($type === 'new') {
     - 出力はJSON形式で、以下のキーを含めてください:
       - 'japanese': 生成した日本語の会話文（元の意味に近い、自然な日本語）
       - 'english': その簡単な英訳
-      - 'sample_user_answers': ユーザーの回答例のリスト（3〜5個）。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。
+      - 'sample_user_answers': ユーザーの回答例のリスト（1〜5個程度）。提案数は固定せず、文脈に応じてできるだけ多くのバリエーションを提示してください。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。
       - 'point': どのように簡単にしたかの解説（例：「難しい単語〇〇を簡単な〇〇に言い換えました」など）";
 } elseif ($type === 'formal') {
     $originalJapanese = $input['context']['japanese'] ?? '';
@@ -186,7 +186,7 @@ if ($type === 'new') {
     - 出力はJSON形式で、以下のキーを含めてください:
       - 'japanese': 生成した日本語の会話文
       - 'english': その英訳
-      - 'sample_user_answers': ユーザーの回答例のリスト（3〜5個）。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。
+      - 'sample_user_answers': ユーザーの回答例のリスト（1〜5個程度）。提案数は固定せず、文脈に応じてできるだけ多くのバリエーションを提示してください。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。
       - 'point': どの部分がフォーマルなのかの解説（例：「〇〇という丁寧な表現を使いました」など）";
 } elseif ($type === 'casual') {
     $originalJapanese = $input['context']['japanese'] ?? '';
@@ -210,7 +210,7 @@ if ($type === 'new') {
     - 出力はJSON形式で、以下のキーを含めてください:
       - 'japanese': 生成した日本語の会話文
       - 'english': その英訳
-      - 'sample_user_answers': ユーザーの回答例のリスト（3〜5個）。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。
+      - 'sample_user_answers': ユーザーの回答例のリスト（1〜5個程度）。提案数は固定せず、文脈に応じてできるだけ多くのバリエーションを提示してください。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。
       - 'point': どの部分がカジュアルなのかの解説（例：「スラングの〇〇を使いました」「短縮形を使いました」など）";
 } else {
     $history = implode("\n", array_map(function ($item) {
@@ -257,7 +257,7 @@ if ($type === 'new') {
     - 出力はJSON形式で、以下のキーを含めてください:
       - 'japanese': 生成した日本語の会話文(相手の発話)
       - 'english': その英訳
-      - 'sample_user_answers': ユーザーの回答例のリスト（3〜5個）。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。ポジティブ・ネガティブ・質問など様々な視点で提示すること。";
+      - 'sample_user_answers': ユーザーの回答例のリスト（1〜5個程度）。提案数は固定せず、文脈に応じてできるだけ多くのバリエーションを提示してください。ただし、似たような表現ばかりを並べるのは避け、ポジティブ・ネガティブ・質問など様々な視点で提示してください。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。";
 }
 
 // Call Gemini API

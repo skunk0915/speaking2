@@ -67,8 +67,8 @@
                 </select>
             </div>
             <div class="setting-item">
-                <label for="speed-range">Speed: <span id="speed-val">1.0</span>x</label>
-                <input type="range" id="speed-range" min="0.5" max="2.0" step="0.1" value="1.0">
+                <label for="speed-range">Speed: <span id="speed-val">0.8</span>x</label>
+                <input type="range" id="speed-range" min="0.5" max="2.0" step="0.1" value="0.8">
             </div>
             <div class="setting-item">
                 <label for="ai-style-select">AIの話し方</label>
@@ -84,12 +84,12 @@
                     <option value="native">ネイティブ</option>
                     <option value="formal">フォーマル</option>
                     <option value="casual">カジュアル</option>
-                    <option value="simple">簡単</option>
+                    <option value="simple" selected>簡単</option>
                 </select>
             </div>
             <div class="setting-item">
-                <label for="length-range">Length: <span id="length-val">100</span> chars</label>
-                <input type="range" id="length-range" min="10" max="500" step="10" value="100">
+                <label for="length-range">Length: <span id="length-val">20</span> chars</label>
+                <input type="range" id="length-range" min="10" max="500" step="10" value="20">
             </div>
             <div class="setting-item free-text-player">
                 <label for="settings-free-text">Free Text Playback</label>
