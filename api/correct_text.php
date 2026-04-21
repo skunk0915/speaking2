@@ -13,6 +13,7 @@ $input = json_decode(file_get_contents('php://input'), true);
 $user_input = $input['user_input'] ?? '';
 $context = $input['context'] ?? ''; // The Japanese prompt or previous conversation context
 $aiStyle = $input['ai_style'] ?? 'polite';
+$retry_history = $input['retry_history'] ?? [];
 
 $styleInstructions = [
     'polite' => "丁寧な「ですます調」で回答・解説してください。",
@@ -26,6 +27,19 @@ if (empty($user_input)) {
     http_response_code(400);
     echo json_encode(['error' => 'User input is required']);
     exit;
+}
+
+// Format retry history for the prompt
+$historyText = "";
+if (!empty($retry_history)) {
+    $historyText = "\n### これまでの試行履歴:\n";
+    foreach ($retry_history as $index => $item) {
+        $num = $index + 1;
+        $historyText .= "--- 試行 {$num} ---\n";
+        $historyText .= "回答: " . ($item['user_input'] ?? '') . "\n";
+        $historyText .= "添削: " . ($item['correction'] ?? '') . "\n";
+    }
+    $historyText .= "\n今回の回答は、上記の履歴（特に前回の添削内容）を踏まえて、ユーザーが改善できているか、または同じ間違いを繰り返していないかを含めて添削してください。\n";
 }
 
 // Construct the prompt for Gemini
@@ -42,6 +56,7 @@ if ($mode === 'translation') {
     - ユーザーの英語が文法的に正しく、意味が通じる場合は、内容に対する指摘はしないでください。
     - 「もっと具体的に言ったほうが親切です」といったアドバイスは不要です。あくまで「英語として正しいか」「自然な響きか」に焦点を当ててください。
     - ただし、文法ミスや、ネイティブが聞いて違和感を感じる不自然な表現、または意味が誤解される表現については指摘してください。
+    - 履歴がある場合は、その内容を踏まえて、ユーザーの進歩や改善点を評価・指摘してください。
 
     指示:
     - 添削コメントや各提案の解説（point）は、以下のスタイルを守って日本語で記述してください:
@@ -55,13 +70,13 @@ if ($mode === 'translation') {
 
     日本語の原文:
     {$context}
-
-    ユーザーの英語:
+    {$historyText}
+    ユーザーの今回の英語:
     {$user_input}
 
     出力形式（JSONのみ）:
     {
-        \"correction\": \"添削コメント（日本語）。無駄な褒め言葉は省略し、解説を重視すること。\",
+        \"correction\": \"添削コメント（日本語）。履歴がある場合はそれらを踏まえた内容にすること。無駄な褒め言葉は省略し、解説を重視すること。\",
         \"suggestions\": [
             {
                 \"english\": \"自然な表現1 (英語)\",
@@ -85,6 +100,7 @@ if ($mode === 'translation') {
     - ユーザーの英語が文法的に正しく、意味が通じる場合は、内容（親切さや具体性など）に対する指摘は絶対にしないでください。
     - 「もっと具体的に言ったほうが親切です」といったアドバイスは不要です。あくまで「英語として正しいか」「自然な響きか」に焦点を当ててください。
     - ただし、文法ミスや、ネイティブが聞いて違和感を感じる不自然な表現、または意味が誤解される表現については指摘してください。
+    - 履歴がある場合は、その内容を踏まえて、ユーザーの進歩や改善点を評価・指摘してください。
 
     指示:
     - 添削コメントや各提案の解説（point）は、以下のスタイルを守って日本語で記述してください:
@@ -98,13 +114,13 @@ if ($mode === 'translation') {
 
     状況/問いかけ（相手の発話）:
     {$context}
-
-    ユーザーの回答:
+    {$historyText}
+    ユーザーの今回の回答:
     {$user_input}
 
     出力形式（JSONのみ）:
     {
-        \"correction\": \"添削コメント（日本語）。無駄な褒め言葉は省略し、解説を重視すること。文脈に合わない場合はその旨を指摘。\",
+        \"correction\": \"添削コメント（日本語）。履歴がある場合はそれらを踏まえた内容にすること。無駄な褒め言葉は省略し、解説を重視すること。文脈に合わない場合はその旨を指摘。\",
         \"suggestions\": [
             {
                 \"english\": \"自然な表現1 (英語)\",

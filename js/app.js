@@ -168,7 +168,19 @@ document.addEventListener('DOMContentLoaded', () => {
             conversationHistory.push({ role: 'user', text: text });
 
             const feedbackSection = lastGroup.querySelector('.feedback-section');
-            await getCorrection(text, feedbackSection);
+            
+            // Initialize or get retry history for this specific message
+            if (!lastGroup.dataset.retryHistory) {
+                lastGroup.dataset.retryHistory = JSON.stringify([]);
+            }
+            const retryHistory = JSON.parse(lastGroup.dataset.retryHistory);
+
+            await getCorrection(text, feedbackSection, retryHistory);
+
+            // Update retry history with the latest result
+            const correctionText = feedbackSection.querySelector('.correction').textContent;
+            retryHistory.push({ user_input: text, correction: correctionText });
+            lastGroup.dataset.retryHistory = JSON.stringify(retryHistory);
 
             // Auto-advance conversation
             await generateText('continue');
@@ -337,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
         container.scrollTop = container.scrollHeight;
     }
 
-    async function getCorrection(userText, feedbackElement) {
+    async function getCorrection(userText, feedbackElement, history = []) {
         const correctionP = feedbackElement.querySelector('.correction');
         const suggestionsList = feedbackElement.querySelector('.suggestions-list');
         const qaSection = feedbackElement.querySelector('.item-qa-section');
@@ -347,6 +359,8 @@ document.addEventListener('DOMContentLoaded', () => {
         correctionP.innerHTML = '<div class="loader" style="display:inline-block; vertical-align:middle; margin-right:8px; width:16px; height:16px; border-width:2px;"></div><span>添削中...</span>';
         suggestionsList.innerHTML = '';
         if (qaSection) qaSection.classList.add('hidden');
+        const retrySection = feedbackElement.querySelector('.retry-section');
+        if (retrySection) retrySection.classList.add('hidden');
 
         try {
             const response = await fetch('api/correct_text.php', {
@@ -356,7 +370,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     user_input: userText,
                     context: currentContext,
                     mode: 'conversation',
-                    ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite'
+                    ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite',
+                    retry_history: history
                 })
             });
 
@@ -381,6 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (qaSection) qaSection.classList.remove('hidden');
+            if (retrySection) retrySection.classList.remove('hidden');
             feedbackElement.classList.remove('hidden');
 
         } catch (error) {
@@ -703,6 +719,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Practice Mode
         if (btnPractice) {
+            let practiceRetryHistory = [];
+
             practiceInput.addEventListener('input', () => {
                 btnPracticeSend.disabled = practiceInput.value.trim() === '';
                 practiceInput.style.height = 'auto';
@@ -726,6 +744,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 correctionP.innerHTML = '<div class="loader" style="display:inline-block; vertical-align:middle; margin-right:8px; width:16px; height:16px; border-width:2px;"></div><span>添削中...</span>';
                 suggestionsList.innerHTML = '';
                 if (qaSection) qaSection.classList.add('hidden');
+                const retrySection = practiceFeedback.querySelector('.retry-section');
+                if (retrySection) retrySection.classList.add('hidden');
 
                 // Call API
                 try {
@@ -736,7 +756,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             user_input: text,
                             context: data.japanese, // Use the system message Japanese as context
                             mode: 'translation',
-                            ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite'
+                            ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite',
+                            retry_history: practiceRetryHistory
                         })
                     });
 
@@ -744,14 +765,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     const resData = await response.json();
 
                     // Render Feedback
-                    const correctionP = practiceFeedback.querySelector('.correction');
-                    const suggestionsList = practiceFeedback.querySelector('.suggestions-list');
-
                     correctionP.innerHTML = marked.parse(resData.correction);
                     suggestionsList.innerHTML = '';
                     resData.suggestions.forEach(suggestion => {
                         const li = createSuggestionElement(suggestion, suggestionsList);
                         suggestionsList.appendChild(li);
+                    });
+
+                    // Add to history
+                    practiceRetryHistory.push({
+                        user_input: text,
+                        correction: resData.correction
                     });
 
                     practiceFeedback.classList.remove('hidden');
@@ -764,6 +788,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
 
                     if (qaSection) qaSection.classList.remove('hidden');
+                    if (retrySection) retrySection.classList.remove('hidden');
                     practiceFeedback.classList.remove('hidden');
 
                 } catch (error) {
@@ -773,6 +798,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     practiceInput.disabled = false;
                     btnPracticeSend.disabled = false;
                 }
+            });
+
+            // Retry Button Logic
+            const btnRetryList = item.querySelectorAll('.btn-retry');
+            btnRetryList.forEach(btnRetry => {
+                btnRetry.addEventListener('click', () => {
+                    const feedback = btnRetry.closest('.feedback-content') || btnRetry.closest('.feedback-section');
+                    const isPractice = feedback.classList.contains('feedback-content') && practiceSection.contains(feedback);
+                    
+                    if (isPractice) {
+                        practiceInput.value = '';
+                        practiceInput.disabled = false;
+                        practiceInput.style.height = 'auto';
+                        btnPracticeSend.disabled = true;
+                        feedback.classList.add('hidden');
+                        practiceInput.focus();
+                    } else {
+                        // Main conversation retry
+                        userInput.value = '';
+                        userInput.disabled = false;
+                        userInput.style.height = 'auto';
+                        btnSend.disabled = true;
+                        feedback.classList.add('hidden');
+                        userInput.focus();
+                    }
+                });
             });
         }
 
