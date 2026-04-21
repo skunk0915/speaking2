@@ -365,6 +365,7 @@ body {
 
                 .suggestion-item {
                     display: flex;
+                    flex-wrap: wrap;
                     align-items: flex-start; // Align to top
                     justify-content: space-between;
                     gap: 12px;
@@ -438,6 +439,34 @@ body {
                                     box-shadow: inset 2px 2px 4px $shadow-dark, inset -2px -2px 4px $shadow-light;
                                 }
                             }
+                        }
+                    }
+
+                    .variation-section {
+                        width: 100%;
+                        margin-top: 12px;
+                        border-top: 1px solid rgba(255, 255, 255, 0.1);
+                        padding-top: 12px;
+                        animation: slideUpFade 0.3s ease;
+
+                        &.hidden {
+                            display: none;
+                        }
+
+                        h3 {
+                            font-size: 12px;
+                            margin-bottom: 8px;
+                            color: $text-secondary;
+                            font-weight: 700;
+                            text-transform: uppercase;
+                        }
+
+                        .variation-options {
+                            margin-bottom: 12px;
+                        }
+
+                        .variation-result-container {
+                            margin-top: 12px;
                         }
                     }
                 }
@@ -651,6 +680,7 @@ body {
 
         li.suggestion-item {
             display: flex;
+            flex-wrap: wrap;
             align-items: flex-start; // Align to top
             justify-content: space-between;
             gap: 12px;
@@ -720,6 +750,34 @@ body {
                             box-shadow: inset 2px 2px 4px $shadow-dark, inset -2px -2px 4px $shadow-light;
                         }
                     }
+                }
+            }
+
+            .variation-section {
+                width: 100%;
+                margin-top: 12px;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                padding-top: 12px;
+                animation: slideUpFade 0.3s ease;
+
+                &.hidden {
+                    display: none;
+                }
+
+                h3 {
+                    font-size: 12px;
+                    margin-bottom: 8px;
+                    color: $text-secondary;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                }
+
+                .variation-options {
+                    margin-bottom: 12px;
+                }
+
+                .variation-result-container {
+                    margin-top: 12px;
                 }
             }
         }
