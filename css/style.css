@@ -101,7 +101,7 @@ body {
   justify-content: center;
   color: #4a4a4a;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ddd;
 }
 .conversation-item .actions button:active, .conversation-item .actions button.active {
   box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
@@ -146,8 +146,10 @@ body {
   padding: 12px;
   border: none;
   border-radius: 12px;
+  border: 1px solid #ddd;
   font-size: 16px;
   resize: none;
+  overflow: hidden;
   background-color: rgba(255, 255, 255, 0.2);
   transition: all 0.2s ease;
   font-family: inherit;
@@ -171,7 +173,7 @@ body {
   justify-content: center;
   color: #4a4a4a;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ddd;
 }
 .conversation-item .practice-section .practice-input-area .btn-practice-send:active, .conversation-item .practice-section .practice-input-area .btn-practice-send.active {
   box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
@@ -198,7 +200,7 @@ body {
   border-radius: 12px;
   padding: 16px;
   margin-top: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ddd;
 }
 .conversation-item .practice-section .feedback-content.hidden {
   display: none;
@@ -215,10 +217,14 @@ body {
   margin-top: 0;
 }
 .conversation-item .practice-section .feedback-content .correction {
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.6;
   color: #4a4a4a;
-  margin-bottom: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  border-bottom-left-radius: 4px;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 .conversation-item .practice-section .feedback-content .correction p {
   margin: 0 0 12px 0;
@@ -284,6 +290,9 @@ body {
   border: none;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   margin: 16px 0;
+}
+.conversation-item .practice-section .feedback-content .correction {
+  margin-bottom: 16px;
 }
 .conversation-item .practice-section .feedback-content .suggestions-list {
   list-style: none;
@@ -422,7 +431,7 @@ body {
   justify-content: center;
   color: #4a4a4a;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ddd;
 }
 .conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-actions button:active, .conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-actions button.active {
   box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
@@ -572,7 +581,7 @@ body {
   justify-content: center;
   color: #4a4a4a;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ddd;
 }
 .conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-header .btn-variation-play:active, .conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-header .btn-variation-play.active {
   box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
@@ -663,10 +672,14 @@ body {
   letter-spacing: 0.05em;
 }
 .feedback-section .correction {
-  margin: 0 0 20px 0;
-  font-size: 16px;
-  color: #007AFF;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #4a4a4a;
+  padding: 16px;
+  border-radius: 16px;
+  border-bottom-left-radius: 4px;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 .feedback-section .correction p {
   margin: 0 0 12px 0;
@@ -732,6 +745,9 @@ body {
   border: none;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   margin: 16px 0;
+}
+.feedback-section .correction {
+  margin: 0 0 20px 0;
 }
 .feedback-section .suggestions-list {
   list-style: none;
@@ -802,7 +818,7 @@ body {
   justify-content: center;
   color: #4a4a4a;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ddd;
 }
 .feedback-section .suggestions-list li.suggestion-item .suggestion-actions button:active, .feedback-section .suggestions-list li.suggestion-item .suggestion-actions button.active {
   box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
@@ -937,6 +953,7 @@ body {
   color: #4a4a4a;
   background: transparent;
   resize: none;
+  overflow: hidden;
   min-height: 48px;
   max-height: 120px;
   outline: none;
@@ -957,7 +974,7 @@ body {
   justify-content: center;
   color: #4a4a4a;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ddd;
 }
 .input-group .input-row .btn-icon:active, .input-group .input-row .btn-icon.active {
   box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
@@ -1008,7 +1025,7 @@ body {
   padding: 12px 16px;
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ddd;
   resize: none;
   min-height: 48px;
   max-height: 120px;
@@ -1029,7 +1046,7 @@ body {
   justify-content: center;
   color: #4a4a4a;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ddd;
 }
 .input-area .btn-send:active, .input-area .btn-send.active {
   box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
@@ -1059,7 +1076,7 @@ body {
   justify-content: center;
   color: #4a4a4a;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ddd;
 }
 .btn-icon:active, .btn-icon.active {
   box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
@@ -1160,7 +1177,7 @@ body {
   -webkit-appearance: none;
   margin-top: -8px;
   box-shadow: 3px 3px 6px #a3b1c6, -3px -3px 6px #f5f5f5;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ddd;
 }
 .settings-panel .setting-item select {
   appearance: none;
@@ -1174,7 +1191,7 @@ body {
   font-size: 14px;
   cursor: pointer;
   width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ddd;
 }
 .settings-panel .setting-item select:focus {
   outline: none;
@@ -1193,7 +1210,7 @@ body {
   width: 100%;
   outline: none;
   box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #f5f5f5;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ddd;
 }
 .settings-panel .setting-item.free-text-player textarea:focus {
   box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #f5f5f5, 0 0 0 2px rgba(0, 122, 255, 0.1);
@@ -1215,7 +1232,7 @@ body {
   justify-content: center;
   color: #4a4a4a;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ddd;
 }
 .settings-panel .setting-item.free-text-player .audio-controls button:active, .settings-panel .setting-item.free-text-player .audio-controls button.active {
   box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
@@ -1355,7 +1372,7 @@ body {
   justify-content: center;
   color: #4a4a4a;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ddd;
 }
 .qa-input-area .btn-send:active, .qa-input-area .btn-send.active {
   box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
@@ -1473,7 +1490,7 @@ body {
 }
 .item-qa-section .item-qa-container .qa-message.ai {
   align-self: flex-start;
-  background: #e0e5ec;
+  background: rgba(255, 255, 255, 0.3);
   color: #4a4a4a;
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-bottom-left-radius: 4px;
@@ -1561,6 +1578,7 @@ body {
   color: #4a4a4a;
   background: transparent;
   resize: none;
+  overflow: hidden;
   min-height: 40px;
   max-height: 80px;
   outline: none;
@@ -1577,7 +1595,7 @@ body {
   justify-content: center;
   color: #4a4a4a;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ddd;
 }
 .item-qa-section .item-qa-input-area .btn-item-qa-send:active, .item-qa-section .item-qa-input-area .btn-item-qa-send.active {
   box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
@@ -1613,7 +1631,7 @@ body {
   justify-content: center;
   color: #4a4a4a;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #ddd;
 }
 .floating-settings:active, .floating-settings.active {
   box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
@@ -1710,4 +1728,145 @@ body {
 .btn-retry:active {
   transform: translateY(0);
   box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
+}
+
+.retry-results {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin: 24px 0;
+}
+.retry-results .retry-result-item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: slideUpFade 0.4s ease;
+}
+.retry-results .retry-result-item .retry-user-text-wrapper {
+  align-self: flex-end;
+  max-width: 85%;
+  background: #007AFF;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 16px;
+  border-bottom-right-radius: 4px;
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
+}
+.retry-results .retry-result-item .retry-user-text-wrapper .label {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  display: block;
+}
+.retry-results .retry-result-item .retry-user-text-wrapper .retry-user-text {
+  font-size: 15px;
+  font-weight: 500;
+}
+.retry-results .retry-result-item .retry-correction {
+  align-self: flex-start;
+  max-width: 85%;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  padding: 16px;
+  border-radius: 16px;
+  border-bottom-left-radius: 4px;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.05);
+  font-size: 15px;
+  line-height: 1.6;
+  color: #4a4a4a;
+}
+.retry-results .retry-result-item .retry-correction p {
+  margin: 0 0 12px 0;
+}
+.retry-results .retry-result-item .retry-correction p:last-child {
+  margin-bottom: 0;
+}
+.retry-results .retry-result-item .retry-correction ul,
+.retry-results .retry-result-item .retry-correction ol {
+  margin: 0 0 12px 20px;
+  padding: 0;
+}
+.retry-results .retry-result-item .retry-correction ul li,
+.retry-results .retry-result-item .retry-correction ol li {
+  margin-bottom: 6px;
+}
+.retry-results .retry-result-item .retry-correction ul li::marker,
+.retry-results .retry-result-item .retry-correction ol li::marker {
+  color: #007AFF;
+  font-weight: 700;
+}
+.retry-results .retry-result-item .retry-correction strong {
+  color: rgb(0, 97.6, 204);
+  font-weight: 700;
+  background: rgba(0, 122, 255, 0.05);
+  padding: 0 2px;
+  border-radius: 2px;
+}
+.retry-results .retry-result-item .retry-correction em {
+  font-style: italic;
+  color: #8d97a5;
+}
+.retry-results .retry-result-item .retry-correction code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: rgb(252, 13.3913043478, 0);
+}
+.retry-results .retry-result-item .retry-correction pre {
+  background: #2d2d2d;
+  color: #f8f8f2;
+  padding: 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+.retry-results .retry-result-item .retry-correction pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: 14px;
+}
+.retry-results .retry-result-item .retry-correction blockquote {
+  margin: 12px 0;
+  padding-left: 12px;
+  border-left: 4px solid #a3b1c6;
+  color: #8d97a5;
+  font-style: italic;
+}
+.retry-results .retry-result-item .retry-correction hr {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  margin: 16px 0;
+}
+
+.user-input-display {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.user-input-display.hidden {
+  display: none;
+}
+.user-input-display .label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #8d97a5;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.user-input-display .text {
+  background: #007AFF;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 16px;
+  border-bottom-right-radius: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 85%;
 }/*# sourceMappingURL=style.css.map */

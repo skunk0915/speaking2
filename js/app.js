@@ -155,35 +155,58 @@ document.addEventListener('DOMContentLoaded', () => {
         const groups = container.querySelectorAll('.conversation-group');
         if (groups.length > 0) {
             const lastGroup = groups[groups.length - 1];
+            const isRetry = lastGroup.dataset.isRetrying === 'true';
 
-            // Show User Message
-            const userMsgDiv = lastGroup.querySelector('.user-message');
-            const userTextP = lastGroup.querySelector('.user-text');
-            if (userMsgDiv && userTextP) {
-                userTextP.textContent = text;
-                userMsgDiv.classList.remove('hidden');
+            if (isRetry) {
+                // Remove retry flag
+                delete lastGroup.dataset.isRetrying;
+                
+                const feedbackSection = lastGroup.querySelector('.feedback-section');
+                if (!lastGroup.dataset.retryHistory) {
+                    lastGroup.dataset.retryHistory = JSON.stringify([]);
+                }
+                const retryHistory = JSON.parse(lastGroup.dataset.retryHistory);
+
+                const data = await getCorrection(text, feedbackSection, retryHistory, true);
+
+                // Update retry history with the latest result
+                if (data && data.correction) {
+                    retryHistory.push({ user_input: text, correction: data.correction });
+                    lastGroup.dataset.retryHistory = JSON.stringify(retryHistory);
+                }
+
+                // For retry, we don't auto-advance conversation
+            } else {
+                // Show User Message
+                const userMsgDiv = lastGroup.querySelector('.user-message');
+                const userTextP = lastGroup.querySelector('.user-text');
+                if (userMsgDiv && userTextP) {
+                    userTextP.textContent = text;
+                    userMsgDiv.classList.remove('hidden');
+                }
+
+                // Add to history
+                conversationHistory.push({ role: 'user', text: text });
+
+                const feedbackSection = lastGroup.querySelector('.feedback-section');
+                
+                // Initialize or get retry history for this specific message
+                if (!lastGroup.dataset.retryHistory) {
+                    lastGroup.dataset.retryHistory = JSON.stringify([]);
+                }
+                const retryHistory = JSON.parse(lastGroup.dataset.retryHistory);
+
+                const data = await getCorrection(text, feedbackSection, retryHistory, false);
+
+                // Update retry history with the latest result
+                if (data && data.correction) {
+                    retryHistory.push({ user_input: text, correction: data.correction });
+                    lastGroup.dataset.retryHistory = JSON.stringify(retryHistory);
+                }
+
+                // Auto-advance conversation
+                await generateText('continue');
             }
-
-            // Add to history
-            conversationHistory.push({ role: 'user', text: text });
-
-            const feedbackSection = lastGroup.querySelector('.feedback-section');
-            
-            // Initialize or get retry history for this specific message
-            if (!lastGroup.dataset.retryHistory) {
-                lastGroup.dataset.retryHistory = JSON.stringify([]);
-            }
-            const retryHistory = JSON.parse(lastGroup.dataset.retryHistory);
-
-            await getCorrection(text, feedbackSection, retryHistory);
-
-            // Update retry history with the latest result
-            const correctionText = feedbackSection.querySelector('.correction').textContent;
-            retryHistory.push({ user_input: text, correction: correctionText });
-            lastGroup.dataset.retryHistory = JSON.stringify(retryHistory);
-
-            // Auto-advance conversation
-            await generateText('continue');
         }
 
         userInput.disabled = false;
@@ -349,60 +372,132 @@ document.addEventListener('DOMContentLoaded', () => {
         container.scrollTop = container.scrollHeight;
     }
 
-    async function getCorrection(userText, feedbackElement, history = []) {
+    async function getCorrection(userText, feedbackElement, history = [], isRetry = false) {
         const correctionP = feedbackElement.querySelector('.correction');
         const suggestionsList = feedbackElement.querySelector('.suggestions-list');
         const qaSection = feedbackElement.querySelector('.item-qa-section');
-
-        // Show loading state
-        feedbackElement.classList.remove('hidden');
-        correctionP.innerHTML = '<div class="loader" style="display:inline-block; vertical-align:middle; margin-right:8px; width:16px; height:16px; border-width:2px;"></div><span>添削中...</span>';
-        suggestionsList.innerHTML = '';
-        if (qaSection) qaSection.classList.add('hidden');
+        const retryResults = feedbackElement.querySelector('.retry-results');
         const retrySection = feedbackElement.querySelector('.retry-section');
-        if (retrySection) retrySection.classList.add('hidden');
+        const userInputDisplay = feedbackElement.querySelector('.user-input-display');
+        const suggestionsHeader = feedbackElement.querySelector('h3:nth-of-type(2)'); // "提案" header
 
-        try {
-            const response = await fetch('api/correct_text.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_input: userText,
-                    context: currentContext,
-                    mode: 'conversation',
-                    ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite',
-                    retry_history: history,
-                    suggested_sentences: getSuggestedSentences(feedbackElement.closest('.conversation-group'))
-                })
-            });
-
-            if (!response.ok) throw new Error('API Error');
-            const data = await response.json();
-
-            // Render Feedback
-            correctionP.innerHTML = marked.parse(data.correction);
-
-            suggestionsList.innerHTML = '';
-            suggestionsList.innerHTML = '';
-            data.suggestions.forEach(suggestion => {
-                const li = createSuggestionElement(suggestion, suggestionsList);
-                suggestionsList.appendChild(li);
-            });
-
-            // Initialize Q&A for this item
-            setupItemQa(feedbackElement, {
-                situation: currentContext,
-                user_input: userText,
-                correction: data.correction
-            });
-
-            if (qaSection) qaSection.classList.remove('hidden');
-            if (retrySection) retrySection.classList.remove('hidden');
+        if (isRetry) {
+            // In retry mode, show the feedback section (which was hidden)
             feedbackElement.classList.remove('hidden');
+            
+            // Add a temporary loading item to retryResults
+            const loadingItem = document.createElement('div');
+            loadingItem.className = 'retry-result-item loading';
+            loadingItem.innerHTML = `
+                <div class="retry-user-text-wrapper">
+                    <span class="label">再挑戦:</span>
+                    <span class="retry-user-text">${userText}</span>
+                </div>
+                <div class="loader" style="display:inline-block; margin-top:8px; width:16px; height:16px; border-width:2px;"></div>
+            `;
+            retryResults.appendChild(loadingItem);
+            loadingItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-        } catch (error) {
-            console.error(error);
-            alert('添削の取得に失敗しました。');
+            try {
+                const response = await fetch('api/correct_text.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_input: userText,
+                        context: feedbackElement.closest('.practice-section') ? feedbackElement.closest('.conversation-item').querySelector('.japanese').textContent : currentContext,
+                        mode: feedbackElement.closest('.practice-section') ? 'translation' : 'conversation',
+                        ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite',
+                        retry_history: history,
+                        suggested_sentences: getSuggestedSentences(feedbackElement.closest('.conversation-group')),
+                        is_retry: true
+                    })
+                });
+
+                if (!response.ok) throw new Error('API Error');
+                const data = await response.json();
+
+                // Replace loading with actual result
+                loadingItem.classList.remove('loading');
+                loadingItem.innerHTML = `
+                    <div class="retry-user-text-wrapper">
+                        <span class="label">再挑戦:</span>
+                        <span class="retry-user-text">${userText}</span>
+                    </div>
+                    <div class="retry-correction">${marked.parse(data.correction)}</div>
+                `;
+                loadingItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                return data;
+
+            } catch (error) {
+                console.error(error);
+                loadingItem.innerHTML = '<p style="color:red;">添削の取得に失敗しました。</p>';
+                return null;
+            }
+        } else {
+            // Initial correction
+            feedbackElement.classList.remove('hidden');
+            correctionP.innerHTML = '<div class="loader" style="display:inline-block; vertical-align:middle; margin-right:8px; width:16px; height:16px; border-width:2px;"></div><span>添削中...</span>';
+            suggestionsList.innerHTML = '';
+            if (retryResults) retryResults.innerHTML = '';
+            if (qaSection) qaSection.classList.add('hidden');
+            if (retrySection) retrySection.classList.add('hidden');
+
+            if (userInputDisplay) {
+                userInputDisplay.innerHTML = `<div class="text">${userText}</div>`;
+                userInputDisplay.classList.remove('hidden');
+            }
+
+            try {
+                const response = await fetch('api/correct_text.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_input: userText,
+                        context: feedbackElement.closest('.practice-section') ? feedbackElement.closest('.conversation-item').querySelector('.japanese').textContent : currentContext,
+                        mode: feedbackElement.closest('.practice-section') ? 'translation' : 'conversation',
+                        ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite',
+                        retry_history: history,
+                        suggested_sentences: getSuggestedSentences(feedbackElement.closest('.conversation-group')),
+                        is_retry: false
+                    })
+                });
+
+                if (!response.ok) throw new Error('API Error');
+                const data = await response.json();
+
+                // Render Feedback
+                correctionP.innerHTML = marked.parse(data.correction);
+
+                suggestionsList.innerHTML = '';
+                if (data.suggestions && data.suggestions.length > 0) {
+                    if (suggestionsHeader) suggestionsHeader.classList.remove('hidden');
+                    data.suggestions.forEach(suggestion => {
+                        const li = createSuggestionElement(suggestion, suggestionsList);
+                        suggestionsList.appendChild(li);
+                    });
+                } else {
+                    if (suggestionsHeader) suggestionsHeader.classList.add('hidden');
+                }
+
+                // Initialize Q&A for this item
+                setupItemQa(feedbackElement, {
+                    situation: feedbackElement.closest('.practice-section') ? feedbackElement.closest('.conversation-item').querySelector('.japanese').textContent : currentContext,
+                    user_input: userText,
+                    correction: data.correction
+                });
+
+                if (qaSection) qaSection.classList.remove('hidden');
+                if (retrySection) retrySection.classList.remove('hidden');
+                feedbackElement.classList.remove('hidden');
+
+                return data;
+
+            } catch (error) {
+                console.error(error);
+                alert('添削の取得に失敗しました。');
+                return null;
+            }
         }
     }
 
@@ -740,70 +835,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 practiceInput.disabled = true;
                 btnPracticeSend.disabled = true;
 
-                // Show loading
-                const correctionP = practiceFeedback.querySelector('.correction');
-                const suggestionsList = practiceFeedback.querySelector('.suggestions-list');
-                const qaSection = practiceFeedback.querySelector('.item-qa-section');
+                const isRetry = item.dataset.isPracticeRetrying === 'true';
                 
-                practiceFeedback.classList.remove('hidden');
-                correctionP.innerHTML = '<div class="loader" style="display:inline-block; vertical-align:middle; margin-right:8px; width:16px; height:16px; border-width:2px;"></div><span>添削中...</span>';
-                suggestionsList.innerHTML = '';
-                if (qaSection) qaSection.classList.add('hidden');
-                const retrySection = practiceFeedback.querySelector('.retry-section');
-                if (retrySection) retrySection.classList.add('hidden');
+                if (isRetry) {
+                    delete item.dataset.isPracticeRetrying;
+                    const data = await getCorrection(text, practiceFeedback, practiceRetryHistory, true);
 
-                // Call API
-                try {
-                    const response = await fetch('api/correct_text.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
+                    if (data && data.correction) {
+                        practiceRetryHistory.push({
                             user_input: text,
-                            context: data.japanese, // Use the system message Japanese as context
-                            mode: 'translation',
-                            ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite',
-                            retry_history: practiceRetryHistory,
-                            suggested_sentences: getSuggestedSentences(item)
-                        })
-                    });
-
-                    if (!response.ok) throw new Error('API Error');
-                    const resData = await response.json();
-
-                    // Render Feedback
-                    correctionP.innerHTML = marked.parse(resData.correction);
-                    suggestionsList.innerHTML = '';
-                    resData.suggestions.forEach(suggestion => {
-                        const li = createSuggestionElement(suggestion, suggestionsList);
-                        suggestionsList.appendChild(li);
-                    });
+                            correction: data.correction
+                        });
+                    }
+                    
+                    practiceInput.value = '';
+                } else {
+                    // Initial correction
+                    const data = await getCorrection(text, practiceFeedback, practiceRetryHistory, false);
 
                     // Add to history
-                    practiceRetryHistory.push({
-                        user_input: text,
-                        correction: resData.correction
-                    });
-
-                    practiceFeedback.classList.remove('hidden');
-
-                    // Initialize Q&A for this practice item
-                    setupItemQa(practiceFeedback, {
-                        situation: data.japanese, // Context is the system message
-                        user_input: text,
-                        correction: resData.correction
-                    });
-
-                    if (qaSection) qaSection.classList.remove('hidden');
-                    if (retrySection) retrySection.classList.remove('hidden');
-                    practiceFeedback.classList.remove('hidden');
-
-                } catch (error) {
-                    console.error(error);
-                    alert('添削の取得に失敗しました。');
-                } finally {
-                    practiceInput.disabled = false;
-                    btnPracticeSend.disabled = false;
+                    if (data && data.correction) {
+                        practiceRetryHistory.push({
+                            user_input: text,
+                            correction: data.correction
+                        });
+                    }
+                    
+                    practiceInput.value = '';
                 }
+
+                practiceInput.disabled = false;
+                btnPracticeSend.disabled = false;
             });
 
             // Retry Button Logic
@@ -814,6 +876,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const isPractice = feedback.classList.contains('feedback-content') && practiceSection.contains(feedback);
                     
                     if (isPractice) {
+                        item.dataset.isPracticeRetrying = 'true';
                         practiceInput.value = '';
                         practiceInput.disabled = false;
                         practiceInput.style.height = 'auto';
@@ -823,28 +886,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         // Main conversation retry
                         const group = btnRetry.closest('.conversation-group');
-                        const groups = Array.from(container.querySelectorAll('.conversation-group'));
-                        const groupIndex = groups.indexOf(group);
-                        
-                        // Remove subsequent groups from DOM
-                        for (let i = groupIndex + 1; i < groups.length; i++) {
-                            groups[i].remove();
-                        }
-                        
-                        // Remove subsequent entries from history
-                        // history: [S0, U0, S1, U1, ..., Sn, Un]
-                        // groups:  [G0, G1, ..., Gn]
-                        // Gn corresponds to Sn and Un
-                        conversationHistory.splice(groupIndex * 2 + 1);
-                        
+                        group.dataset.isRetrying = 'true';
+
                         const userTextP = group.querySelector('.user-text');
                         userInput.value = userTextP ? userTextP.textContent : '';
                         userInput.disabled = false;
                         userInput.style.height = 'auto';
                         btnSend.disabled = userInput.value.trim() === '';
                         
-                        const userMsgDiv = group.querySelector('.user-message');
-                        if (userMsgDiv) userMsgDiv.classList.add('hidden');
                         feedback.classList.add('hidden');
                         
                         // Move input back to bottom
