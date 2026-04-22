@@ -822,12 +822,36 @@ document.addEventListener('DOMContentLoaded', () => {
                         practiceInput.focus();
                     } else {
                         // Main conversation retry
-                        userInput.value = '';
+                        const group = btnRetry.closest('.conversation-group');
+                        const groups = Array.from(container.querySelectorAll('.conversation-group'));
+                        const groupIndex = groups.indexOf(group);
+                        
+                        // Remove subsequent groups from DOM
+                        for (let i = groupIndex + 1; i < groups.length; i++) {
+                            groups[i].remove();
+                        }
+                        
+                        // Remove subsequent entries from history
+                        // history: [S0, U0, S1, U1, ..., Sn, Un]
+                        // groups:  [G0, G1, ..., Gn]
+                        // Gn corresponds to Sn and Un
+                        conversationHistory.splice(groupIndex * 2 + 1);
+                        
+                        const userTextP = group.querySelector('.user-text');
+                        userInput.value = userTextP ? userTextP.textContent : '';
                         userInput.disabled = false;
                         userInput.style.height = 'auto';
-                        btnSend.disabled = true;
+                        btnSend.disabled = userInput.value.trim() === '';
+                        
+                        const userMsgDiv = group.querySelector('.user-message');
+                        if (userMsgDiv) userMsgDiv.classList.add('hidden');
                         feedback.classList.add('hidden');
+                        
+                        // Move input back to bottom
+                        moveInputToBottom();
+                        
                         userInput.focus();
+                        userInput.setSelectionRange(userInput.value.length, userInput.value.length);
                     }
                 });
             });
