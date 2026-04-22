@@ -91,6 +91,16 @@
                 <label for="length-range">Length: <span id="length-val">20</span> chars</label>
                 <input type="range" id="length-range" min="10" max="500" step="10" value="20">
             </div>
+            <div class="setting-item">
+                <label>シチュエーション</label>
+                <div class="situation-controls">
+                    <button id="btn-situation-all" class="btn-text">全選択</button>
+                    <button id="btn-situation-none" class="btn-text">全解除</button>
+                </div>
+                <div id="situation-tags" class="situation-tags">
+                    <!-- Situation category tags will be injected here -->
+                </div>
+            </div>
             <div class="setting-item free-text-player">
                 <label for="settings-free-text">Free Text Playback</label>
                 <textarea id="settings-free-text" placeholder="Enter English text..." rows="3"></textarea>

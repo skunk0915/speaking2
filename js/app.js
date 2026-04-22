@@ -18,7 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
         SPEED: 'english-training-speed',
         LENGTH: 'english-training-length',
         AI_STYLE: 'english-training-ai-style',
-        ENGLISH_LEVEL: 'english-training-english-level'
+        ENGLISH_LEVEL: 'english-training-english-level',
+        SITUATIONS: 'english-training-situations'
     };
 
     // Load settings from localStorage
@@ -44,6 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedEnglishLevel && englishLevelSelect) {
             englishLevelSelect.value = savedEnglishLevel;
         }
+        
+        // Situations are handled in initSituations
     }
 
     // Save settings to localStorage
@@ -53,6 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(STORAGE_KEYS.LENGTH, lengthRange.value);
         if (aiStyleSelect) localStorage.setItem(STORAGE_KEYS.AI_STYLE, aiStyleSelect.value);
         if (englishLevelSelect) localStorage.setItem(STORAGE_KEYS.ENGLISH_LEVEL, englishLevelSelect.value);
+        
+        const activeSituations = Array.from(document.querySelectorAll('.situation-tag.active')).map(t => t.dataset.category);
+        localStorage.setItem(STORAGE_KEYS.SITUATIONS, JSON.stringify(activeSituations));
     }
 
     // Slider Logic
@@ -97,6 +103,64 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize sliders
     updateSliderVisuals(speedRange, speedVal);
     updateSliderVisuals(lengthRange, lengthVal);
+
+    async function initSituations() {
+        const situationTags = document.getElementById('situation-tags');
+        const btnAll = document.getElementById('btn-situation-all');
+        const btnNone = document.getElementById('btn-situation-none');
+
+        const CATEGORY_MAP = {
+            'Daily Life': '日常生活',
+            'Travel': '旅行・観光',
+            'Business': 'ビジネス',
+            'Emotions': '感情・表現',
+            'Social': '社交・交流',
+            'Academic': 'アカデミック'
+        };
+        
+        try {
+            const response = await fetch('data/situations.json');
+            const situations = await response.json();
+            
+            // Extract unique categories
+            const categories = [...new Set(situations.map(s => s.category))].sort();
+            
+            // Get saved situations
+            const savedStr = localStorage.getItem(STORAGE_KEYS.SITUATIONS);
+            const saved = savedStr ? JSON.parse(savedStr) : categories; // Default to all selected
+            
+            situationTags.innerHTML = '';
+            categories.forEach(cat => {
+                const label = CATEGORY_MAP[cat] || cat;
+                const tag = document.createElement('div');
+                tag.className = 'situation-tag' + (saved.includes(cat) ? ' active' : '');
+                tag.innerHTML = `<span class="tag-label">${label}</span>`;
+                tag.dataset.category = cat;
+                
+                tag.addEventListener('click', () => {
+                    tag.classList.toggle('active');
+                    saveSettings();
+                });
+                
+                situationTags.appendChild(tag);
+            });
+            
+            btnAll.addEventListener('click', () => {
+                document.querySelectorAll('.situation-tag').forEach(t => t.classList.add('active'));
+                saveSettings();
+            });
+            
+            btnNone.addEventListener('click', () => {
+                document.querySelectorAll('.situation-tag').forEach(t => t.classList.remove('active'));
+                saveSettings();
+            });
+            
+        } catch (e) {
+            console.error('Failed to load situations:', e);
+        }
+    }
+    
+    initSituations();
 
     // New UI Elements
     const btnSettings = document.getElementById('btn-settings');
@@ -637,7 +701,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     context: conversationHistory,
                     length: length,
                     english_level: englishLevelSelect ? englishLevelSelect.value : 'native',
-                    ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite'
+                    ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite',
+                    situations: Array.from(document.querySelectorAll('.situation-tag.active')).map(t => t.dataset.category)
                 })
             });
 

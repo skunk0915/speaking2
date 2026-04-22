@@ -39,14 +39,29 @@ if ($type === 'new') {
     $situationsFile = __DIR__ . '/../data/situations.json';
     $situationText = "";
     if (file_exists($situationsFile)) {
-        $situations = json_decode(file_get_contents($situationsFile), true);
-        if ($situations && is_array($situations)) {
-            $randomSituation = $situations[array_rand($situations)];
+        $allSituations = json_decode(file_get_contents($situationsFile), true);
+        if ($allSituations && is_array($allSituations)) {
+            $selectedCategories = $input['situations'] ?? [];
+            
+            $filteredSituations = $allSituations;
+            if (!empty($selectedCategories)) {
+                $filteredSituations = array_filter($allSituations, function($s) use ($selectedCategories) {
+                    return in_array($s['category'], $selectedCategories);
+                });
+                // Fallback to all if filtering results in empty (though UI shouldn't allow this easily)
+                if (empty($filteredSituations)) {
+                    $filteredSituations = $allSituations;
+                }
+            }
+            
+            $randomSituation = $filteredSituations[array_rand($filteredSituations)];
             $situationText = "シチュエーション: " . $randomSituation['situation'] . " (" . $randomSituation['category'] . ")";
         }
     }
 
     $prompt = "日常会話のロールプレイシナリオを作成してください。
+    
+    【現在の状況】
     {$situationText}
     
     役割定義:
@@ -54,6 +69,8 @@ if ($type === 'new') {
     - 'sample_user_japanese': それに対するユーザー（あなた）の返答例です。
     
     指示:
+    - 指定されたシチュエーションをさらに具体的に深掘りし、そのシーンでしかあり得ないような、具体的でリアリティのある発話を生成してください。
+    - どこでも言えるような汎用的なフレーズ（例：「こんにちは」「お元気ですか」など）は避け、学習者がそのシーンの語彙を学べるような内容にしてください。
     - 文字数は{$length}文字程度にしてください。
     - 1人の発話のみを含めてください。複数人の会話形式にはしないでください。
     - 生成する英語は、以下の基準に従ってください:
