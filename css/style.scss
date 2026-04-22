@@ -1,3 +1,5 @@
+@use "sass:color";
+
 // Variables - Neumorphism System
 $bg-color: #e0e5ec;
 $primary-color: #007AFF; // Keep blue as accent
@@ -41,7 +43,7 @@ $font-stack: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Hel
     }
 
     strong {
-        color: darken($primary-color, 10%);
+        color: color.adjust($primary-color, $lightness: -10%);
         font-weight: 700;
         background: rgba($primary-color, 0.05);
         padding: 0 2px;
@@ -59,7 +61,7 @@ $font-stack: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Hel
         padding: 2px 4px;
         border-radius: 4px;
         font-size: 0.9em;
-        color: darken($danger-color, 10%);
+        color: color.adjust($danger-color, $lightness: -10%);
     }
 
     pre {
@@ -522,7 +524,7 @@ body {
 
                 &:hover {
                     transform: translateY(-2px);
-                    color: lighten($primary-color, 5%);
+                    color: color.adjust($primary-color, $lightness: 5%);
                 }
 
                 &:active {
@@ -1289,7 +1291,7 @@ body {
         color: $primary-color;
 
         &:hover {
-            color: lighten($primary-color, 5%);
+            color: color.adjust($primary-color, $lightness: 5%);
         }
     }
 

@@ -74,8 +74,8 @@
                 <label for="ai-style-select">AIの話し方</label>
                 <select id="ai-style-select">
                     <option value="polite">ですます調</option>
-                    <option value="friendly">友達のようなフレンドリーな感じ</option>
-                    <option value="jk">女子高生スタイル</option>
+                    <option value="friendly">フレンドリー</option>
+                    <option value="jk">JK</option>
                 </select>
             </div>
             <div class="setting-item">
@@ -216,15 +216,24 @@
                     <h3>バリエーション</h3>
                     <div class="variation-options">
                         <button data-type="formal">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            </svg>
                             フォーマル
                         </button>
                         <button data-type="casual">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                                <line x1="9" y1="9" x2="9.01" y2="9" />
+                                <line x1="15" y1="9" x2="15.01" y2="9" />
+                            </svg>
                             カジュアル
                         </button>
                         <button data-type="simple">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                            </svg>
                             簡単
                         </button>
                     </div>
@@ -305,15 +314,15 @@
                     <h3>提案</h3>
                     <ul class="suggestions-list"></ul>
 
-                        <div class="retry-section hidden">
-                            <button class="btn btn-secondary btn-retry">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M23 4v6h-6"></path>
-                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                                </svg>
-                                再挑戦
-                            </button>
-                        </div>
+                    <div class="retry-section hidden">
+                        <button class="btn btn-secondary btn-retry">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M23 4v6h-6"></path>
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                            </svg>
+                            再挑戦
+                        </button>
+                    </div>
 
                     <div class="item-qa-section">
                         <h3>質問</h3>
