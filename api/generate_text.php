@@ -17,7 +17,7 @@ $englishLevel = $input['english_level'] ?? 'simple';
 $aiStyle = $input['ai_style'] ?? 'polite';
 
 $styleInstructions = [
-    'polite' => "丁寧な「ですます調」で回答・解説してください。",
+    'polite' => "標準的な「ですます調」で回答・解説してください。",
     'friendly' => "親しい友達のような、タメ口でフレンドリーな口調で回答・解説してください。",
     'jk' => "女子高生のような口調（例：「〜だね！」「〜じゃん？」「マジで」「うける」など）で、明るくフレンドリーに回答・解説してください。ただし、過度な褒め言葉や持ち上げすぎ（例：「天才じゃん！」など）は避け、建設的な内容を心がけてください。"
 ];
@@ -42,10 +42,10 @@ if ($type === 'new') {
         $allSituations = json_decode(file_get_contents($situationsFile), true);
         if ($allSituations && is_array($allSituations)) {
             $selectedCategories = $input['situations'] ?? [];
-            
+
             $filteredSituations = $allSituations;
             if (!empty($selectedCategories)) {
-                $filteredSituations = array_filter($allSituations, function($s) use ($selectedCategories) {
+                $filteredSituations = array_filter($allSituations, function ($s) use ($selectedCategories) {
                     return in_array($s['category'], $selectedCategories);
                 });
                 // Fallback to all if filtering results in empty (though UI shouldn't allow this easily)
@@ -53,7 +53,7 @@ if ($type === 'new') {
                     $filteredSituations = $allSituations;
                 }
             }
-            
+
             $randomSituation = $filteredSituations[array_rand($filteredSituations)];
             $situationText = "シチュエーション: " . $randomSituation['situation'] . " (" . $randomSituation['category'] . ")";
         }

@@ -285,6 +285,8 @@
                         <h3>提案</h3>
                         <ul class="suggestions-list"></ul>
 
+                        <div class="retry-results"></div>
+
                         <div class="item-qa-section">
                             <h3>質問</h3>
                             <div class="item-qa-container">
@@ -300,8 +302,6 @@
                                 </button>
                             </div>
                         </div>
-
-                        <div class="retry-results"></div>
 
                         <div class="retry-section hidden">
                             <button class="btn btn-secondary btn-retry">
@@ -328,6 +328,8 @@
                     <h3>提案</h3>
                     <ul class="suggestions-list"></ul>
 
+                    <div class="retry-results"></div>
+
                     <div class="item-qa-section">
                         <h3>質問</h3>
                         <div class="item-qa-container">
@@ -343,8 +345,6 @@
                             </button>
                         </div>
                     </div>
-
-                    <div class="retry-results"></div>
 
                     <div class="retry-section hidden">
                         <button class="btn btn-secondary btn-retry">
