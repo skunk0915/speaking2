@@ -471,6 +471,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         context: feedbackElement.closest('.practice-section') ? feedbackElement.closest('.conversation-item').querySelector('.japanese').textContent : currentContext,
                         mode: feedbackElement.closest('.practice-section') ? 'translation' : 'conversation',
                         ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite',
+                        english_level: englishLevelSelect ? englishLevelSelect.value : 'native',
                         retry_history: history,
                         suggested_sentences: getSuggestedSentences(feedbackElement.closest('.conversation-group')),
                         is_retry: true
@@ -521,6 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         context: feedbackElement.closest('.practice-section') ? feedbackElement.closest('.conversation-item').querySelector('.japanese').textContent : currentContext,
                         mode: feedbackElement.closest('.practice-section') ? 'translation' : 'conversation',
                         ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite',
+                        english_level: englishLevelSelect ? englishLevelSelect.value : 'native',
                         retry_history: history,
                         suggested_sentences: getSuggestedSentences(feedbackElement.closest('.conversation-group')),
                         is_retry: false
@@ -1153,6 +1155,7 @@ document.addEventListener('DOMContentLoaded', () => {
             variationItem.className = 'variation-result-item';
             
             let label = 'Variation';
+            if (type === 'native') label = 'Native';
             if (type === 'formal') label = 'Formal';
             if (type === 'casual') label = 'Casual';
             if (type === 'simple') label = 'Simple';
@@ -1225,6 +1228,7 @@ document.addEventListener('DOMContentLoaded', () => {
             variationItem.style.marginTop = '8px';
 
             let label = 'Variation';
+            if (type === 'native') label = 'Native';
             if (type === 'formal') label = 'Formal';
             if (type === 'casual') label = 'Casual';
             if (type === 'simple') label = 'Simple';
@@ -1289,6 +1293,12 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="variation-section hidden">
                 <h3>バリエーション</h3>
                 <div class="variation-options">
+                    <button data-type="native">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                        </svg>
+                        ネイティブ
+                    </button>
                     <button data-type="formal">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                         フォーマル

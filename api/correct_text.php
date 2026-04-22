@@ -13,6 +13,7 @@ $input = json_decode(file_get_contents('php://input'), true);
 $user_input = $input['user_input'] ?? '';
 $context = $input['context'] ?? ''; // The Japanese prompt or previous conversation context
 $aiStyle = $input['ai_style'] ?? 'polite';
+$englishLevel = $input['english_level'] ?? 'simple';
 $retry_history = $input['retry_history'] ?? [];
 $mode = $input['mode'] ?? 'conversation';
 $is_retry = $input['is_retry'] ?? false;
@@ -23,7 +24,15 @@ $styleInstructions = [
     'jk' => "女子高生のような口調（例：「〜だね！」「マジで」「うける」など）で、明るくフレンドリーに回答・解説してください。ただし、過度な褒め言葉や持ち上げすぎ（例：「天才じゃん！」など）は避け、建設的なアドバイスを重視してください。"
 ];
 
+$levelInstructions = [
+    'native' => "文法的な正確さよりも、現地のネイティブが日常会話で実際に使う『生きた表現』を優先してください。教科書的な硬い表現は避け、省略形や口語的な繋ぎ、自然なリズムを重視した、人間味のある日常表現を提案してください。",
+    'formal' => "ビジネスや正式な場で使われる、丁寧でフォーマルな表現を提案してください。",
+    'casual' => "友人同士で使うような、カジュアルで親しみやすい表現を提案してください。",
+    'simple' => "基本的で簡単な単語や文法（中学生レベル）を使用した、分かりやすい表現を提案してください。"
+];
+
 $currentStyleInst = $styleInstructions[$aiStyle] ?? $styleInstructions['polite'];
+$currentLevelInst = $levelInstructions[$englishLevel] ?? $levelInstructions['native'];
 
 $suggested_sentences = $input['suggested_sentences'] ?? [];
 
@@ -58,7 +67,8 @@ if ($mode === 'translation') {
     あなたの翻訳（「あなたの英語」）を添削してください。
 ";
     if (!$is_retry) {
-        $prompt .= "さらに自然なネイティブの表現を3つ提案してください。";
+        $prompt .= "さらに、以下の基準に従った自然な提案例を3つ作成してください:\n**{$currentLevelInst}**
+";
     }
 
     $prompt .= "
@@ -128,7 +138,8 @@ if ($mode === 'translation') {
     あなたの英語を添削してください。
 ";
     if (!$is_retry) {
-        $prompt .= "さらに自然なネイティブの表現を3つ提案してください。";
+        $prompt .= "さらに、以下の基準に従った自然な提案例を3つ作成してください:\n**{$currentLevelInst}**
+";
     }
 
     $prompt .= "
