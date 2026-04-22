@@ -1,3 +1,4 @@
+@charset "UTF-8";
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -263,7 +264,7 @@ body {
   padding: 2px 4px;
   border-radius: 4px;
   font-size: 0.9em;
-  color: rgb(252, 13.3913043478, 0);
+  color: #007AFF;
 }
 .conversation-item .practice-section .feedback-content .correction pre {
   background: #2d2d2d;
@@ -380,7 +381,7 @@ body {
   padding: 2px 4px;
   border-radius: 4px;
   font-size: 0.9em;
-  color: rgb(252, 13.3913043478, 0);
+  color: #007AFF;
 }
 .conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point pre {
   background: #2d2d2d;
@@ -718,7 +719,7 @@ body {
   padding: 2px 4px;
   border-radius: 4px;
   font-size: 0.9em;
-  color: rgb(252, 13.3913043478, 0);
+  color: #007AFF;
 }
 .feedback-section .correction pre {
   background: #2d2d2d;
@@ -1532,7 +1533,7 @@ body {
   padding: 2px 4px;
   border-radius: 4px;
   font-size: 0.9em;
-  color: rgb(252, 13.3913043478, 0);
+  color: #007AFF;
 }
 .item-qa-section .item-qa-container .qa-message.ai pre {
   background: #2d2d2d;
@@ -1744,25 +1745,29 @@ body {
 }
 .retry-results .retry-result-item .retry-user-text-wrapper {
   align-self: flex-end;
-  max-width: 85%;
+  max-width: 90%;
   background: #007AFF;
   color: white;
-  padding: 12px 16px;
-  border-radius: 16px;
+  padding: 10px 14px;
+  border-radius: 12px;
   border-bottom-right-radius: 4px;
-  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 2px 4px #a3b1c6;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 .retry-results .retry-result-item .retry-user-text-wrapper .label {
   font-size: 10px;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.8);
   text-transform: uppercase;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   display: block;
 }
 .retry-results .retry-result-item .retry-user-text-wrapper .retry-user-text {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
+  line-height: 1.4;
 }
 .retry-results .retry-result-item .retry-correction {
   align-self: flex-start;
@@ -1814,7 +1819,7 @@ body {
   padding: 2px 4px;
   border-radius: 4px;
   font-size: 0.9em;
-  color: rgb(252, 13.3913043478, 0);
+  color: #007AFF;
 }
 .retry-results .retry-result-item .retry-correction pre {
   background: #2d2d2d;
@@ -1852,21 +1857,85 @@ body {
 .user-input-display.hidden {
   display: none;
 }
-.user-input-display .label {
-  font-size: 11px;
-  font-weight: 800;
-  color: #8d97a5;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
 .user-input-display .text {
   background: #007AFF;
   color: white;
-  padding: 12px 16px;
-  border-radius: 16px;
+  padding: 10px 14px;
+  border-radius: 12px;
   border-bottom-right-radius: 4px;
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  box-shadow: 2px 2px 4px #a3b1c6;
+  max-width: 90%;
+}
+
+.situation-controls {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.situation-controls .btn-text {
+  background: transparent;
+  border: none;
+  color: #007AFF;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+.situation-controls .btn-text:hover {
+  background: rgba(0, 122, 255, 0.1);
+}
+.situation-controls .btn-text:active {
+  transform: scale(0.95);
+}
+
+.situation-tags {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.situation-tag {
+  background: rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 12px 16px;
+  border-radius: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+.situation-tag .tag-label {
+  font-size: 13px;
   font-weight: 600;
-  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
-  max-width: 85%;
+  color: #6a768a;
+  /* 視認性を高めたグレー */
+  transition: all 0.3s ease;
+}
+.situation-tag:hover {
+  transform: translateY(-1px);
+  background: rgba(0, 0, 0, 0.12);
+}
+.situation-tag.active {
+  background: #007AFF;
+  opacity: 1;
+  filter: grayscale(0);
+  box-shadow: 0 8px 20px rgba(0, 122, 255, 0.35);
+  transform: translateY(-2px) scale(1.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.situation-tag.active .tag-label {
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.situation-tag.active:hover {
+  box-shadow: 0 10px 25px rgba(0, 122, 255, 0.45);
+  transform: translateY(-3px) scale(1.03);
 }/*# sourceMappingURL=style.css.map */
