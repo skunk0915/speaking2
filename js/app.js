@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
         LENGTH: 'english-training-length',
         AI_STYLE: 'english-training-ai-style',
         ENGLISH_LEVEL: 'english-training-english-level',
-        SITUATIONS: 'english-training-situations'
+        SITUATIONS: 'english-training-situations',
+        REVIEWS: 'english-training-reviews'
     };
 
     // Load settings from localStorage
@@ -182,6 +183,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const userInput = document.getElementById('user-input');
     const btnHint = document.getElementById('btn-hint');
     const btnSend = document.getElementById('btn-send');
+    
+    // Review Tab Elements
+    const tabPractice = document.getElementById('tab-practice');
+    const tabReview = document.getElementById('tab-review');
+    const reviewContainer = document.getElementById('review-container');
+    const conversationContainer = document.getElementById('conversation-container');
+
+    let reviews = JSON.parse(localStorage.getItem(STORAGE_KEYS.REVIEWS) || '[]');
+    let currentMode = 'practice'; // 'practice' or 'review'
 
     let conversationHistory = [];
 
@@ -190,6 +200,39 @@ document.addEventListener('DOMContentLoaded', () => {
     let isRepeating = false;
     let currentContext = ""; // Store the last Japanese prompt
     let currentSampleAnswers = []; // Store current sample answers
+
+    // Tab Switching
+    function switchMode(mode) {
+        currentMode = mode;
+        if (mode === 'practice') {
+            tabPractice.classList.add('active');
+            tabReview.classList.remove('active');
+            conversationContainer.classList.remove('hidden');
+            reviewContainer.classList.add('hidden');
+            inputGroup.classList.remove('hidden');
+        } else {
+            tabReview.classList.add('active');
+            tabPractice.classList.remove('active');
+            conversationContainer.classList.add('hidden');
+            reviewContainer.classList.remove('hidden');
+            inputGroup.classList.add('hidden');
+            renderReviews();
+        }
+    }
+
+    tabPractice.addEventListener('click', () => switchMode('practice'));
+    tabReview.addEventListener('click', () => switchMode('review'));
+
+    function renderReviews() {
+        reviewContainer.innerHTML = '';
+        reviews.forEach(review => {
+            addConversationItem(review, null, true);
+        });
+        
+        if (reviews.length === 0) {
+            reviewContainer.innerHTML = '<div class="empty-state" style="text-align:center; padding:40px; color:#8d97a5;">保存されたアイテムはありません。</div>';
+        }
+    }
 
     // Event Listeners
     btnNew.addEventListener('click', () => {
@@ -756,7 +799,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // inputGroup.scrollIntoView({ behavior: 'smooth' });
     }
 
-    function addConversationItem(data, insertAfterGroup = null) {
+    function addConversationItem(data, insertAfterGroup = null, isReviewMode = false) {
         const clone = tmpl.content.cloneNode(true);
         const group = clone.querySelector('.conversation-group');
         const item = clone.querySelector('.conversation-item');
@@ -768,10 +811,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnVariationMenu = clone.querySelector('.btn-variation-menu');
         const btnPractice = clone.querySelector('.btn-practice');
         const btnQa = clone.querySelector('.btn-qa');
+        const btnSave = clone.querySelector('.btn-save');
+        const btnHistory = clone.querySelector('.btn-history');
         
         const practiceSection = clone.querySelector('.practice-section');
         const variationSection = clone.querySelector('.variation-section');
         const mainQa = clone.querySelector('.main-qa');
+        const historySection = clone.querySelector('.history-section');
+        const historyContainer = clone.querySelector('.history-container');
         
         const practiceInput = clone.querySelector('.practice-input');
         const btnPracticeSend = clone.querySelector('.btn-practice-send');
@@ -779,6 +826,87 @@ document.addEventListener('DOMContentLoaded', () => {
 
         japanese.textContent = data.japanese;
         english.textContent = data.english;
+
+        if (isReviewMode) {
+            english.classList.add('hidden');
+            btnSave.classList.add('hidden'); // Already saved
+            if (data.history && data.history.length > 0) {
+                btnHistory.classList.remove('hidden');
+                renderHistory(data.history, historyContainer);
+            }
+        }
+
+        // History Toggle
+        if (btnHistory) {
+            btnHistory.addEventListener('click', () => toggleSection(btnHistory, historySection));
+        }
+
+        function renderHistory(history, container) {
+            container.innerHTML = '';
+            history.forEach(h => {
+                const hItem = document.createElement('div');
+                hItem.className = 'history-item';
+                
+                let suggestionsHtml = '';
+                if (h.suggestions && h.suggestions.length > 0) {
+                    suggestionsHtml = `<ul class="history-suggestions">
+                        ${h.suggestions.map(s => `<li><span class="eng">${s.english}</span><span class="jp">${s.japanese}</span></li>`).join('')}
+                    </ul>`;
+                }
+
+                hItem.innerHTML = `
+                    <span class="history-user-text">${h.user_input}</span>
+                    <div class="history-correction">${marked.parse(h.correction)}</div>
+                    ${suggestionsHtml}
+                `;
+                container.appendChild(hItem);
+            });
+        }
+
+        // Save Logic
+        if (btnSave) {
+            btnSave.addEventListener('click', () => {
+                const isSaved = reviews.some(r => r.japanese === data.japanese);
+                if (isSaved) {
+                    alert('既に保存されています。');
+                    return;
+                }
+                
+                const reviewData = {
+                    id: Date.now().toString(),
+                    japanese: data.japanese,
+                    english: data.english,
+                    sample_user_answers: data.sample_user_answers,
+                    history: []
+                };
+
+                // Combine practice history and main conversation history if they exist
+                const mainHistoryStr = group.dataset.retryHistory;
+                const mainHistory = mainHistoryStr ? JSON.parse(mainHistoryStr) : [];
+                
+                reviewData.history = [
+                    ...mainHistory,
+                    ...(practiceRetryHistory || [])
+                ];
+
+                reviews.push(reviewData);
+                localStorage.setItem(STORAGE_KEYS.REVIEWS, JSON.stringify(reviews));
+                btnSave.classList.add('active');
+                btnSave.disabled = true;
+                
+                // Visual feedback
+                btnSave.style.color = '#34C759';
+            });
+        }
+
+        // Check if already saved on render
+        if (reviews.some(r => r.japanese === data.japanese)) {
+            btnSave.classList.add('active');
+            btnSave.style.color = '#34C759';
+            // We don't disable it here so user can potentially see it's saved, 
+            // but let's keep it consistent with the click handler.
+            btnSave.disabled = true;
+        }
 
         // Interaction Toggles (Practice, Variation, QA)
         const toggleSection = (btn, section, inputToFocus = null) => {
@@ -831,6 +959,8 @@ document.addEventListener('DOMContentLoaded', () => {
             btnPractice.addEventListener('click', () => toggleSection(btnPractice, practiceSection, practiceInput));
         }
 
+        let practiceRetryHistory = isReviewMode ? (data.history || []) : [];
+
         if (btnVariationMenu) {
             btnVariationMenu.addEventListener('click', () => toggleSection(btnVariationMenu, variationSection));
             
@@ -860,7 +990,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (activeBtn) {
                 const section = activeBtn === btnPractice ? practiceSection :
                                 activeBtn === btnVariationMenu ? variationSection :
-                                mainQa;
+                                activeBtn === btnQa ? mainQa : historySection;
                 const input = activeBtn === btnPractice ? practiceInput : 
                               (activeBtn === btnQa ? mainQa.querySelector('.item-qa-input') : null);
                 toggleSection(activeBtn, section, input);
@@ -886,7 +1016,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Practice Mode
         if (btnPractice) {
-            let practiceRetryHistory = [];
 
             practiceInput.addEventListener('input', () => {
                 btnPracticeSend.disabled = practiceInput.value.trim() === '';
@@ -906,26 +1035,52 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (isRetry) {
                     delete item.dataset.isPracticeRetrying;
-                    const data = await getCorrection(text, practiceFeedback, practiceRetryHistory, true);
+                    const dataCorr = await getCorrection(text, practiceFeedback, practiceRetryHistory, true);
 
-                    if (data && data.correction) {
-                        practiceRetryHistory.push({
+                    if (dataCorr && dataCorr.correction) {
+                        const newHistoryItem = {
                             user_input: text,
-                            correction: data.correction
-                        });
+                            correction: dataCorr.correction,
+                            suggestions: dataCorr.suggestions || []
+                        };
+                        practiceRetryHistory.push(newHistoryItem);
+                        
+                        // Update stored review if in review mode
+                        if (isReviewMode) {
+                            const reviewIdx = reviews.findIndex(r => r.japanese === data.japanese);
+                            if (reviewIdx !== -1) {
+                                reviews[reviewIdx].history = practiceRetryHistory;
+                                localStorage.setItem(STORAGE_KEYS.REVIEWS, JSON.stringify(reviews));
+                                btnHistory.classList.remove('hidden');
+                                renderHistory(practiceRetryHistory, historyContainer);
+                            }
+                        }
                     }
                     
                     practiceInput.value = '';
                 } else {
                     // Initial correction
-                    const data = await getCorrection(text, practiceFeedback, practiceRetryHistory, false);
+                    const dataCorr = await getCorrection(text, practiceFeedback, practiceRetryHistory, false);
 
                     // Add to history
-                    if (data && data.correction) {
-                        practiceRetryHistory.push({
+                    if (dataCorr && dataCorr.correction) {
+                        const newHistoryItem = {
                             user_input: text,
-                            correction: data.correction
-                        });
+                            correction: dataCorr.correction,
+                            suggestions: dataCorr.suggestions || []
+                        };
+                        practiceRetryHistory.push(newHistoryItem);
+
+                        // Update stored review if in review mode
+                        if (isReviewMode) {
+                            const reviewIdx = reviews.findIndex(r => r.japanese === data.japanese);
+                            if (reviewIdx !== -1) {
+                                reviews[reviewIdx].history = practiceRetryHistory;
+                                localStorage.setItem(STORAGE_KEYS.REVIEWS, JSON.stringify(reviews));
+                                btnHistory.classList.remove('hidden');
+                                renderHistory(practiceRetryHistory, historyContainer);
+                            }
+                        }
                     }
                     
                     practiceInput.value = '';
@@ -1091,7 +1246,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (insertAfterGroup) {
             insertAfterGroup.parentNode.insertBefore(clone, insertAfterGroup.nextSibling);
         } else {
-            container.appendChild(clone);
+            const targetContainer = isReviewMode ? reviewContainer : container;
+            targetContainer.appendChild(clone);
         }
 
         // Note: We don't scroll here because moveInputToBottom will handle scrolling

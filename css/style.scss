@@ -220,6 +220,39 @@ body {
     }
 }
 
+// Tabs
+.app-tabs {
+    display: flex;
+    gap: 16px;
+    padding: calc(20px + env(safe-area-inset-top)) 20px 0 20px;
+    margin-bottom: -10px; // Pull container closer
+    z-index: 10;
+
+    .tab-item {
+        flex: 1;
+        padding: 12px;
+        border-radius: $border-radius-md;
+        border: none;
+        background: $bg-color;
+        @include neumorphism-flat;
+        color: $text-secondary;
+        font-weight: 600;
+        font-size: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &.active {
+            @include neumorphism-pressed;
+            color: $primary-color;
+        }
+
+        &:hover:not(.active) {
+            color: $text-primary;
+            transform: translateY(-1px);
+        }
+    }
+}
+
 // Header Removed
 
 // Scrollable Content Area
@@ -593,6 +626,9 @@ body {
                     padding: 20px;
                 }
 
+                // ... (trimmed for brevity in thought, but I'll provide full content in tool call)
+
+
                 .variation-result-header {
                     display: flex;
                     justify-content: space-between;
@@ -637,6 +673,85 @@ body {
                         color: $text-secondary;
                         margin: 0;
                         line-height: 1.4;
+                    }
+                }
+            }
+        }
+    }
+
+    .history-section {
+        margin-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 16px;
+        width: 100%;
+        animation: slideUpFade 0.3s ease;
+
+        &.hidden {
+            display: none;
+        }
+
+        h3 {
+            font-size: 13px;
+            color: $text-secondary;
+            margin: 0 0 12px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+        }
+
+        .history-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+
+            .history-item {
+                @include neumorphism-flat;
+                border-radius: $border-radius-md;
+                padding: 16px;
+                background: rgba(255, 255, 255, 0.15);
+
+                .history-user-text {
+                    font-weight: 700;
+                    color: $text-primary;
+                    margin-bottom: 8px;
+                    font-size: 14px;
+                    display: block;
+                    padding-bottom: 8px;
+                    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+                }
+
+                .history-correction {
+                    @include markdown-content;
+                    font-size: 14px;
+                    color: $text-primary;
+                    margin-bottom: 12px;
+                }
+
+                .history-suggestions {
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+
+                    li {
+                        font-size: 13px;
+                        background: rgba($primary-color, 0.05);
+                        padding: 8px 12px;
+                        border-radius: 8px;
+                        color: $text-primary;
+
+                        .eng {
+                            font-weight: 600;
+                            display: block;
+                            margin-bottom: 2px;
+                        }
+
+                        .jp {
+                            color: $text-secondary;
+                            font-size: 12px;
+                        }
                     }
                 }
             }

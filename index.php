@@ -40,8 +40,17 @@
     <div class="app-container">
 
 
-        <main id="conversation-container" class="conversation-container">
+        <div class="app-tabs">
+            <button id="tab-practice" class="tab-item active">練習</button>
+            <button id="tab-review" class="tab-item">復習</button>
+        </div>
+
+        <main id="conversation-container" class="conversation-container section-active">
             <!-- Conversation items will be injected here -->
+        </main>
+
+        <main id="review-container" class="conversation-container hidden">
+            <!-- Review items will be injected here -->
         </main>
 
 
@@ -220,6 +229,26 @@
                             <line x1="12" y1="17" x2="12.01" y2="17"></line>
                         </svg>
                     </button>
+                    <button class="btn-save" title="復習に保存">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v13a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                    </button>
+                    <button class="btn-history hidden" title="過去の添削を閲覧">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="history-section hidden">
+                    <h3>過去の添削</h3>
+                    <div class="history-container">
+                        <!-- Saved corrections will be injected here -->
+                    </div>
                 </div>
 
                 <div class="variation-section hidden">
