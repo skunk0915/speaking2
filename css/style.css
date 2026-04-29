@@ -357,7 +357,11 @@ body {
   flex-direction: column;
   gap: 12px;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item {
+.conversation-item .suggestion-item,
+.conversation-item .variation-result-item {
+  background: #e0e5ec;
+  box-shadow: 9px 9px 16px #a3b1c6, -9px -9px 16px #f5f5f5;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -365,31 +369,59 @@ body {
   gap: 12px;
   padding: 16px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: 12px;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content {
+.conversation-item .suggestion-item.loading,
+.conversation-item .variation-result-item.loading {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+.conversation-item .suggestion-item .suggestion-content,
+.conversation-item .suggestion-item .variation-result-text,
+.conversation-item .variation-result-item .suggestion-content,
+.conversation-item .variation-result-item .variation-result-text {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content p {
+.conversation-item .suggestion-item .suggestion-content p,
+.conversation-item .suggestion-item .variation-result-text p,
+.conversation-item .variation-result-item .suggestion-content p,
+.conversation-item .variation-result-item .variation-result-text p {
   margin: 0;
   line-height: 1.5;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .english {
+.conversation-item .suggestion-item .suggestion-content .english,
+.conversation-item .suggestion-item .suggestion-content .variation-result-eng,
+.conversation-item .suggestion-item .variation-result-text .english,
+.conversation-item .suggestion-item .variation-result-text .variation-result-eng,
+.conversation-item .variation-result-item .suggestion-content .english,
+.conversation-item .variation-result-item .suggestion-content .variation-result-eng,
+.conversation-item .variation-result-item .variation-result-text .english,
+.conversation-item .variation-result-item .variation-result-text .variation-result-eng {
   font-size: 16px;
   color: #4a4a4a;
   font-weight: 600;
   margin-bottom: 0;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .japanese {
+.conversation-item .suggestion-item .suggestion-content .japanese,
+.conversation-item .suggestion-item .suggestion-content .variation-result-jp,
+.conversation-item .suggestion-item .variation-result-text .japanese,
+.conversation-item .suggestion-item .variation-result-text .variation-result-jp,
+.conversation-item .variation-result-item .suggestion-content .japanese,
+.conversation-item .variation-result-item .suggestion-content .variation-result-jp,
+.conversation-item .variation-result-item .variation-result-text .japanese,
+.conversation-item .variation-result-item .variation-result-text .variation-result-jp {
   font-size: 13px;
   color: #8d97a5;
   margin-bottom: 0;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point {
+.conversation-item .suggestion-item .suggestion-content .point,
+.conversation-item .suggestion-item .variation-result-text .point,
+.conversation-item .variation-result-item .suggestion-content .point,
+.conversation-item .variation-result-item .variation-result-text .point {
   font-size: 13px;
   color: #4a4a4a;
   background: rgba(0, 122, 255, 0.08);
@@ -398,38 +430,71 @@ body {
   margin-top: 4px;
   display: block;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point p {
+.conversation-item .suggestion-item .suggestion-content .point p,
+.conversation-item .suggestion-item .variation-result-text .point p,
+.conversation-item .variation-result-item .suggestion-content .point p,
+.conversation-item .variation-result-item .variation-result-text .point p {
   margin: 0 0 12px 0;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point p:last-child {
+.conversation-item .suggestion-item .suggestion-content .point p:last-child,
+.conversation-item .suggestion-item .variation-result-text .point p:last-child,
+.conversation-item .variation-result-item .suggestion-content .point p:last-child,
+.conversation-item .variation-result-item .variation-result-text .point p:last-child {
   margin-bottom: 0;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point ul,
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point ol {
+.conversation-item .suggestion-item .suggestion-content .point ul,
+.conversation-item .suggestion-item .suggestion-content .point ol,
+.conversation-item .suggestion-item .variation-result-text .point ul,
+.conversation-item .suggestion-item .variation-result-text .point ol,
+.conversation-item .variation-result-item .suggestion-content .point ul,
+.conversation-item .variation-result-item .suggestion-content .point ol,
+.conversation-item .variation-result-item .variation-result-text .point ul,
+.conversation-item .variation-result-item .variation-result-text .point ol {
   margin: 0 0 12px 20px;
   padding: 0;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point ul li,
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point ol li {
+.conversation-item .suggestion-item .suggestion-content .point ul li,
+.conversation-item .suggestion-item .suggestion-content .point ol li,
+.conversation-item .suggestion-item .variation-result-text .point ul li,
+.conversation-item .suggestion-item .variation-result-text .point ol li,
+.conversation-item .variation-result-item .suggestion-content .point ul li,
+.conversation-item .variation-result-item .suggestion-content .point ol li,
+.conversation-item .variation-result-item .variation-result-text .point ul li,
+.conversation-item .variation-result-item .variation-result-text .point ol li {
   margin-bottom: 6px;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point ul li::marker,
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point ol li::marker {
+.conversation-item .suggestion-item .suggestion-content .point ul li::marker,
+.conversation-item .suggestion-item .suggestion-content .point ol li::marker,
+.conversation-item .suggestion-item .variation-result-text .point ul li::marker,
+.conversation-item .suggestion-item .variation-result-text .point ol li::marker,
+.conversation-item .variation-result-item .suggestion-content .point ul li::marker,
+.conversation-item .variation-result-item .suggestion-content .point ol li::marker,
+.conversation-item .variation-result-item .variation-result-text .point ul li::marker,
+.conversation-item .variation-result-item .variation-result-text .point ol li::marker {
   color: #007AFF;
   font-weight: 700;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point strong {
+.conversation-item .suggestion-item .suggestion-content .point strong,
+.conversation-item .suggestion-item .variation-result-text .point strong,
+.conversation-item .variation-result-item .suggestion-content .point strong,
+.conversation-item .variation-result-item .variation-result-text .point strong {
   color: rgb(0, 97.6, 204);
   font-weight: 700;
   background: rgba(0, 122, 255, 0.05);
   padding: 0 2px;
   border-radius: 2px;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point em {
+.conversation-item .suggestion-item .suggestion-content .point em,
+.conversation-item .suggestion-item .variation-result-text .point em,
+.conversation-item .variation-result-item .suggestion-content .point em,
+.conversation-item .variation-result-item .variation-result-text .point em {
   font-style: italic;
   color: #8d97a5;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point code {
+.conversation-item .suggestion-item .suggestion-content .point code,
+.conversation-item .suggestion-item .variation-result-text .point code,
+.conversation-item .variation-result-item .suggestion-content .point code,
+.conversation-item .variation-result-item .variation-result-text .point code {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   background: rgba(0, 0, 0, 0.05);
   padding: 2px 4px;
@@ -437,7 +502,10 @@ body {
   font-size: 0.9em;
   color: #007AFF;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point pre {
+.conversation-item .suggestion-item .suggestion-content .point pre,
+.conversation-item .suggestion-item .variation-result-text .point pre,
+.conversation-item .variation-result-item .suggestion-content .point pre,
+.conversation-item .variation-result-item .variation-result-text .point pre {
   background: #2d2d2d;
   color: #f8f8f2;
   padding: 12px;
@@ -445,37 +513,81 @@ body {
   overflow-x: auto;
   margin: 12px 0;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point pre code {
+.conversation-item .suggestion-item .suggestion-content .point pre code,
+.conversation-item .suggestion-item .variation-result-text .point pre code,
+.conversation-item .variation-result-item .suggestion-content .point pre code,
+.conversation-item .variation-result-item .variation-result-text .point pre code {
   background: transparent;
   padding: 0;
   color: inherit;
   font-size: 14px;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point blockquote {
+.conversation-item .suggestion-item .suggestion-content .point blockquote,
+.conversation-item .suggestion-item .variation-result-text .point blockquote,
+.conversation-item .variation-result-item .suggestion-content .point blockquote,
+.conversation-item .variation-result-item .variation-result-text .point blockquote {
   margin: 12px 0;
   padding-left: 12px;
   border-left: 4px solid #a3b1c6;
   color: #8d97a5;
   font-style: italic;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point hr {
+.conversation-item .suggestion-item .suggestion-content .point hr,
+.conversation-item .suggestion-item .variation-result-text .point hr,
+.conversation-item .variation-result-item .suggestion-content .point hr,
+.conversation-item .variation-result-item .variation-result-text .point hr {
   border: none;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   margin: 16px 0;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-content .point .label {
+.conversation-item .suggestion-item .suggestion-content .point .label,
+.conversation-item .suggestion-item .variation-result-text .point .label,
+.conversation-item .variation-result-item .suggestion-content .point .label,
+.conversation-item .variation-result-item .variation-result-text .point .label {
   font-weight: 700;
   color: #007AFF;
   font-size: 11px;
   margin-right: 4px;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-actions {
+.conversation-item .suggestion-item .variation-result-header,
+.conversation-item .variation-result-item .variation-result-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.conversation-item .suggestion-item .variation-result-header .variation-result-type,
+.conversation-item .variation-result-item .variation-result-header .variation-result-type {
+  font-size: 11px;
+  font-weight: 800;
+  color: #007AFF;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(0, 122, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.conversation-item .suggestion-item .suggestion-actions,
+.conversation-item .suggestion-item .variation-actions,
+.conversation-item .variation-result-item .suggestion-actions,
+.conversation-item .variation-result-item .variation-actions {
   display: flex;
   flex-direction: column;
   gap: 8px;
   flex-shrink: 0;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-actions button {
+.conversation-item .suggestion-item .suggestion-actions.variation-actions,
+.conversation-item .suggestion-item .variation-actions.variation-actions,
+.conversation-item .variation-result-item .suggestion-actions.variation-actions,
+.conversation-item .variation-result-item .variation-actions.variation-actions {
+  flex-direction: row;
+  align-self: center;
+}
+.conversation-item .suggestion-item .suggestion-actions button,
+.conversation-item .suggestion-item .variation-actions button,
+.conversation-item .variation-result-item .suggestion-actions button,
+.conversation-item .variation-result-item .variation-actions button {
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -488,48 +600,46 @@ body {
   transition: all 0.3s ease;
   border: 1px solid #ddd;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-actions button:active, .conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-actions button.active {
+.conversation-item .suggestion-item .suggestion-actions button:active, .conversation-item .suggestion-item .suggestion-actions button.active,
+.conversation-item .suggestion-item .variation-actions button:active,
+.conversation-item .suggestion-item .variation-actions button.active,
+.conversation-item .variation-result-item .suggestion-actions button:active,
+.conversation-item .variation-result-item .suggestion-actions button.active,
+.conversation-item .variation-result-item .variation-actions button:active,
+.conversation-item .variation-result-item .variation-actions button.active {
   box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
   color: #007AFF;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-actions button:hover {
+.conversation-item .suggestion-item .suggestion-actions button:hover,
+.conversation-item .suggestion-item .variation-actions button:hover,
+.conversation-item .variation-result-item .suggestion-actions button:hover,
+.conversation-item .variation-result-item .variation-actions button:hover {
   color: #007AFF;
   transform: translateY(-1px);
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-actions button {
+.conversation-item .suggestion-item .suggestion-actions button,
+.conversation-item .suggestion-item .variation-actions button,
+.conversation-item .variation-result-item .suggestion-actions button,
+.conversation-item .variation-result-item .variation-actions button {
   width: 36px;
   height: 36px;
+  border: none;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-actions button svg {
+.conversation-item .suggestion-item .suggestion-actions button svg,
+.conversation-item .suggestion-item .variation-actions button svg,
+.conversation-item .variation-result-item .suggestion-actions button svg,
+.conversation-item .variation-result-item .variation-actions button svg {
   width: 16px;
   height: 16px;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .suggestion-actions button.btn-repeat-suggestion.active {
+.conversation-item .suggestion-item .suggestion-actions button.active,
+.conversation-item .suggestion-item .variation-actions button.active,
+.conversation-item .variation-result-item .suggestion-actions button.active,
+.conversation-item .variation-result-item .variation-actions button.active {
   color: #007AFF;
-  box-shadow: inset 2px 2px 4px #a3b1c6, inset -2px -2px 4px #f5f5f5;
-}
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .variation-section {
-  width: 100%;
-  margin-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 12px;
-  animation: slideUpFade 0.3s ease;
-}
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .variation-section.hidden {
-  display: none;
-}
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .variation-section h3 {
-  font-size: 12px;
-  margin-bottom: 8px;
-  color: #8d97a5;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .variation-section .variation-options {
-  margin-bottom: 12px;
-}
-.conversation-item .practice-section .feedback-content .suggestions-list .suggestion-item .variation-section .variation-result-container {
-  margin-top: 12px;
+  background: #e0e5ec;
+  box-shadow: inset 6px 6px 10px #a3b1c6, inset -6px -6px 10px #f5f5f5;
+  border: none;
 }
 .conversation-item .variation-section {
   margin-top: 16px;
@@ -594,79 +704,6 @@ body {
 }
 .conversation-item .variation-section .variation-result-container.hidden {
   display: none;
-}
-.conversation-item .variation-section .variation-result-container .variation-result-item {
-  background: #e0e5ec;
-  box-shadow: 9px 9px 16px #a3b1c6, -9px -9px 16px #f5f5f5;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 14px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-.conversation-item .variation-section .variation-result-container .variation-result-item.loading {
-  display: flex;
-  justify-content: center;
-  padding: 20px;
-}
-.conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-.conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-header .variation-result-type {
-  font-size: 11px;
-  font-weight: 800;
-  color: #007AFF;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  background: rgba(0, 122, 255, 0.1);
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-.conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-header .btn-variation-play {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #e0e5ec;
-  box-shadow: 7px 7px 14px #a3b1c6, -7px -7px 14px #f5f5f5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #4a4a4a;
-  transition: all 0.3s ease;
-  border: 1px solid #ddd;
-}
-.conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-header .btn-variation-play:active, .conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-header .btn-variation-play.active {
-  box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
-  color: #007AFF;
-}
-.conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-header .btn-variation-play:hover {
-  color: #007AFF;
-  transform: translateY(-1px);
-}
-.conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-header .btn-variation-play {
-  width: 32px;
-  height: 32px;
-  border: none;
-}
-.conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-header .btn-variation-play svg {
-  width: 14px;
-  height: 14px;
-}
-.conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-text .variation-result-eng {
-  font-size: 16px;
-  color: #4a4a4a;
-  font-weight: 600;
-  margin: 0 0 4px 0;
-  line-height: 1.4;
-}
-.conversation-item .variation-section .variation-result-container .variation-result-item .variation-result-text .variation-result-jp {
-  font-size: 13px;
-  color: #8d97a5;
-  margin: 0;
-  line-height: 1.4;
 }
 .conversation-item .history-section {
   margin-top: 16px;
@@ -1624,9 +1661,30 @@ body {
   border: 3px solid rgba(0, 0, 0, 0.1);
   border-top: 3px solid #007AFF;
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   animation: spin 0.8s linear infinite;
+}
+.loader.small {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+button .loader {
+  width: 18px;
+  height: 18px;
+  border-width: 2px;
+  margin: 0 auto;
+}
+
+.error-text {
+  font-size: 13px;
+  color: #FF3B30;
+  text-align: center;
+  padding: 12px;
+  width: 100%;
+  font-weight: 500;
 }
 
 .hidden {

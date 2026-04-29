@@ -433,113 +433,120 @@ body {
                 display: flex;
                 flex-direction: column;
                 gap: 12px;
+            }
+        }
+    }
 
-                .suggestion-item {
-                    display: flex;
-                    flex-wrap: wrap;
-                    align-items: flex-start; // Align to top
-                    justify-content: space-between;
-                    gap: 12px;
-                    padding: 16px; // Increased padding
-                    border-radius: $border-radius-md;
-                    background: rgba(255, 255, 255, 0.3);
-                    border: 1px solid rgba(255, 255, 255, 0.2);
+    .suggestion-item,
+    .variation-result-item {
+        @include neumorphism-flat;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px;
+        border-radius: $border-radius-md;
+        margin-top: 12px;
 
-                    .suggestion-content {
-                        flex: 1;
-                        display: flex;
-                        flex-direction: column;
-                        gap: 6px;
+        &.loading {
+            display: flex;
+            justify-content: center;
+            padding: 24px;
+        }
 
-                        p {
-                            margin: 0;
-                            line-height: 1.5;
-                        }
+        .suggestion-content,
+        .variation-result-text {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
 
-                        .english {
-                            font-size: 16px;
-                            color: $text-primary;
-                            font-weight: 600;
-                            margin-bottom: 0;
-                        }
+            p {
+                margin: 0;
+                line-height: 1.5;
+            }
 
-                        .japanese {
-                            font-size: 13px;
-                            color: $text-secondary;
-                            margin-bottom: 0;
-                        }
+            .english,
+            .variation-result-eng {
+                font-size: 16px;
+                color: $text-primary;
+                font-weight: 600;
+                margin-bottom: 0;
+            }
 
-                        .point {
-                            font-size: 13px;
-                            color: $text-primary;
-                            background: rgba($primary-color, 0.08);
-                            padding: 8px 10px;
-                            border-radius: 8px;
-                            margin-top: 4px;
-                            display: block;
-                            @include markdown-content;
+            .japanese,
+            .variation-result-jp {
+                font-size: 13px;
+                color: $text-secondary;
+                margin-bottom: 0;
+            }
 
-                            .label {
-                                font-weight: 700;
-                                color: $primary-color;
-                                font-size: 11px;
-                                margin-right: 4px;
-                            }
-                        }
-                    }
+            .point {
+                font-size: 13px;
+                color: $text-primary;
+                background: rgba($primary-color, 0.08);
+                padding: 8px 10px;
+                border-radius: 8px;
+                margin-top: 4px;
+                display: block;
+                @include markdown-content;
 
-                    .suggestion-actions {
-                        display: flex;
-                        flex-direction: column;
-                        gap: 8px;
-                        flex-shrink: 0;
+                .label {
+                    font-weight: 700;
+                    color: $primary-color;
+                    font-size: 11px;
+                    margin-right: 4px;
+                }
+            }
+        }
 
-                        button {
-                            @include neumorphism-icon-btn;
-                            width: 36px;
-                            height: 36px;
+        .variation-result-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
 
-                            svg {
-                                width: 16px;
-                                height: 16px;
-                            }
+            .variation-result-type {
+                font-size: 11px;
+                font-weight: 800;
+                color: $primary-color;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                background: rgba($primary-color, 0.1);
+                padding: 2px 8px;
+                border-radius: 4px;
+            }
+        }
 
-                            &.btn-repeat-suggestion {
-                                &.active {
-                                    color: $primary-color;
-                                    box-shadow: inset 2px 2px 4px $shadow-dark, inset -2px -2px 4px $shadow-light;
-                                }
-                            }
-                        }
-                    }
+        .suggestion-actions,
+        .variation-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
 
-                    .variation-section {
-                        width: 100%;
-                        margin-top: 12px;
-                        border-top: 1px solid rgba(255, 255, 255, 0.1);
-                        padding-top: 12px;
-                        animation: slideUpFade 0.3s ease;
+            // For variation results, we might want them horizontal
+            &.variation-actions {
+                flex-direction: row;
+                align-self: center;
+            }
 
-                        &.hidden {
-                            display: none;
-                        }
+            button {
+                @include neumorphism-icon-btn;
+                width: 36px;
+                height: 36px;
+                border: none;
 
-                        h3 {
-                            font-size: 12px;
-                            margin-bottom: 8px;
-                            color: $text-secondary;
-                            font-weight: 700;
-                            text-transform: uppercase;
-                        }
+                svg {
+                    width: 16px;
+                    height: 16px;
+                }
 
-                        .variation-options {
-                            margin-bottom: 12px;
-                        }
-
-                        .variation-result-container {
-                            margin-top: 12px;
-                        }
-                    }
+                &.active {
+                    color: $primary-color;
+                    @include neumorphism-pressed;
                 }
             }
         }
@@ -611,70 +618,6 @@ body {
 
             &.hidden {
                 display: none;
-            }
-
-            .variation-result-item {
-                @include neumorphism-flat;
-                border-radius: $border-radius-md;
-                padding: 16px;
-                background: rgba(255, 255, 255, 0.2);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-
-                &.loading {
-                    display: flex;
-                    justify-content: center;
-                    padding: 20px;
-                }
-
-                // ... (trimmed for brevity in thought, but I'll provide full content in tool call)
-
-
-                .variation-result-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 8px;
-
-                    .variation-result-type {
-                        font-size: 11px;
-                        font-weight: 800;
-                        color: $primary-color;
-                        text-transform: uppercase;
-                        letter-spacing: 0.05em;
-                        background: rgba($primary-color, 0.1);
-                        padding: 2px 8px;
-                        border-radius: 4px;
-                    }
-
-                    .btn-variation-play {
-                        @include neumorphism-icon-btn;
-                        width: 32px;
-                        height: 32px;
-                        border: none;
-
-                        svg {
-                            width: 14px;
-                            height: 14px;
-                        }
-                    }
-                }
-
-                .variation-result-text {
-                    .variation-result-eng {
-                        font-size: 16px;
-                        color: $text-primary;
-                        font-weight: 600;
-                        margin: 0 0 4px 0;
-                        line-height: 1.4;
-                    }
-
-                    .variation-result-jp {
-                        font-size: 13px;
-                        color: $text-secondary;
-                        margin: 0;
-                        line-height: 1.4;
-                    }
-                }
             }
         }
     }
@@ -1460,9 +1403,31 @@ body {
     border: 3px solid rgba(0, 0, 0, 0.1);
     border-top: 3px solid $primary-color;
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     animation: spin 0.8s linear infinite;
+
+    &.small {
+        width: 16px;
+        height: 16px;
+        border-width: 2px;
+    }
+}
+
+button .loader {
+    width: 18px;
+    height: 18px;
+    border-width: 2px;
+    margin: 0 auto;
+}
+
+.error-text {
+    font-size: 13px;
+    color: $danger-color;
+    text-align: center;
+    padding: 12px;
+    width: 100%;
+    font-weight: 500;
 }
 
 .hidden {

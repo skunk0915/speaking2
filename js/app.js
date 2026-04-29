@@ -847,18 +847,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 const hItem = document.createElement('div');
                 hItem.className = 'history-item';
                 
-                let suggestionsHtml = '';
+                const suggestionsContainer = document.createElement('ul');
+                suggestionsContainer.className = 'history-suggestions';
+                
                 if (h.suggestions && h.suggestions.length > 0) {
-                    suggestionsHtml = `<ul class="history-suggestions">
-                        ${h.suggestions.map(s => `<li><span class="eng">${s.english}</span><span class="jp">${s.japanese}</span></li>`).join('')}
-                    </ul>`;
+                    h.suggestions.forEach(s => {
+                        const sEl = createSuggestionElement(s, suggestionsContainer);
+                        suggestionsContainer.appendChild(sEl);
+                    });
                 }
 
                 hItem.innerHTML = `
                     <span class="history-user-text">${h.user_input}</span>
                     <div class="history-correction">${marked.parse(h.correction)}</div>
-                    ${suggestionsHtml}
                 `;
+                if (h.suggestions && h.suggestions.length > 0) {
+                    hItem.appendChild(suggestionsContainer);
+                }
                 container.appendChild(hItem);
             });
         }
@@ -917,7 +922,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const others = [
                 { b: btnPractice, s: practiceSection },
                 { b: btnVariationMenu, s: variationSection },
-                { b: btnQa, s: mainQa }
+                { b: btnQa, s: mainQa },
+                { b: btnHistory, s: historySection }
             ];
 
             others.forEach(pair => {
@@ -978,7 +984,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             setupItemQa(mainQa, {
                 english: data.english,
-                situation: currentContext
+                situation: data.japanese
             });
         }
 
@@ -1274,13 +1280,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const resultContainer = originalItemElement.querySelector('.variation-result-container');
         if (!resultContainer) return;
 
-        // Show result container
         resultContainer.classList.remove('hidden');
 
         // Add loading item
         const loadingItem = document.createElement('div');
         loadingItem.className = 'variation-result-item loading';
-        loadingItem.innerHTML = `<div class="loader" style="margin: 0 auto; width: 20px; height: 20px; border-width: 2px;"></div>`;
+        loadingItem.innerHTML = `<div class="loader"></div>`;
         resultContainer.appendChild(loadingItem);
         loadingItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
@@ -1306,7 +1311,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             loadingItem.remove();
 
-            // Render Variation Item
             const variationItem = document.createElement('div');
             variationItem.className = 'variation-result-item';
             
@@ -1319,11 +1323,16 @@ document.addEventListener('DOMContentLoaded', () => {
             variationItem.innerHTML = `
                 <div class="variation-result-header">
                     <span class="variation-result-type">${label}</span>
-                    <button class="btn-variation-play" title="再生">
-                        <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                        <svg class="icon-pause hidden" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-                        <div class="loader hidden" style="width:12px; height:12px; border-width: 2px;"></div>
-                    </button>
+                    <div class="variation-actions">
+                        <button class="btn-play-suggestion" title="再生">
+                            <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            <svg class="icon-pause hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                            <div class="loader hidden"></div>
+                        </button>
+                        <button class="btn-repeat-suggestion" title="リピート再生">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="variation-result-text">
                     <p class="variation-result-eng">${data.english}</p>
@@ -1331,9 +1340,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
 
-            const btnPlay = variationItem.querySelector('.btn-variation-play');
+            const btnPlay = variationItem.querySelector('.btn-play-suggestion');
+            const btnRepeat = variationItem.querySelector('.btn-repeat-suggestion');
+            
             btnPlay.addEventListener('click', () => {
-                playSuggestionAudio(data.english, btnPlay); // Reusing suggestion audio logic (simple play)
+                playSuggestionAudio(data.english, btnPlay, btnRepeat);
+            });
+
+            btnRepeat.addEventListener('click', () => {
+                btnRepeat.classList.toggle('active');
             });
 
             resultContainer.appendChild(variationItem);
@@ -1341,7 +1356,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error(error);
-            loadingItem.innerHTML = '<p style="font-size:12px; color:red; text-align:center;">Failed to generate.</p>';
+            loadingItem.innerHTML = '<p class="error-text">生成に失敗しました。</p>';
             setTimeout(() => loadingItem.remove(), 2000);
         }
     }
@@ -1352,8 +1367,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         resultContainer.classList.remove('hidden');
         const loadingItem = document.createElement('div');
-        loadingItem.className = 'variation-result-item';
-        loadingItem.innerHTML = `<div class="loader" style="margin: 0 auto; width: 16px; height: 16px; border-width: 2px;"></div>`;
+        loadingItem.className = 'variation-result-item loading';
+        loadingItem.innerHTML = `<div class="loader"></div>`;
         resultContainer.appendChild(loadingItem);
 
         const existingVariations = Array.from(resultContainer.querySelectorAll('.variation-result-eng')).map(el => el.textContent);
@@ -1380,8 +1395,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const variationItem = document.createElement('div');
             variationItem.className = 'variation-result-item';
-            variationItem.style.padding = '8px';
-            variationItem.style.marginTop = '8px';
 
             let label = 'Variation';
             if (type === 'native') label = 'Native';
@@ -1391,29 +1404,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
             variationItem.innerHTML = `
                 <div class="variation-result-header">
-                    <span class="variation-result-type" style="font-size:9px;">${label}</span>
-                    <button class="btn-variation-play" style="width:24px; height:24px;" title="再生">
-                        <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                        <svg class="icon-pause hidden" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-                        <div class="loader hidden" style="width:10px; height:10px; border-width: 2px;"></div>
-                    </button>
+                    <span class="variation-result-type">${label}</span>
+                    <div class="variation-actions">
+                        <button class="btn-play-suggestion" title="再生">
+                            <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            <svg class="icon-pause hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                            <div class="loader hidden"></div>
+                        </button>
+                        <button class="btn-repeat-suggestion" title="リピート再生">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="variation-result-text">
-                    <p class="variation-result-eng" style="font-size:13px;">${data.english}</p>
-                    <p class="variation-result-jp" style="font-size:11px;">${data.japanese}</p>
+                    <p class="variation-result-eng">${data.english}</p>
+                    <p class="variation-result-jp">${data.japanese}</p>
                 </div>
             `;
 
-            const btnPlay = variationItem.querySelector('.btn-variation-play');
+            const btnPlay = variationItem.querySelector('.btn-play-suggestion');
+            const btnRepeat = variationItem.querySelector('.btn-repeat-suggestion');
+
             btnPlay.addEventListener('click', () => {
-                playSuggestionAudio(data.english, btnPlay);
+                playSuggestionAudio(data.english, btnPlay, btnRepeat);
+            });
+
+            btnRepeat.addEventListener('click', () => {
+                btnRepeat.classList.toggle('active');
             });
 
             resultContainer.appendChild(variationItem);
 
         } catch (error) {
             console.error(error);
-            loadingItem.innerHTML = '<p style="font-size:10px; color:red;">Error</p>';
+            loadingItem.innerHTML = '<p class="error-text">生成に失敗しました。</p>';
             setTimeout(() => loadingItem.remove(), 2000);
         }
     }
@@ -1437,7 +1461,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button class="btn-play-suggestion" title="再生">
                     <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                     <svg class="icon-pause hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-                    <div class="loader hidden" style="width:16px;height:16px;border-width:2px;"></div>
+                    <div class="loader hidden"></div>
                 </button>
                 <button class="btn-repeat-suggestion" title="リピート再生">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
