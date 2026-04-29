@@ -315,7 +315,16 @@
                     </div>
                     <div class="feedback-content hidden">
                         <div class="user-input-display hidden"></div>
-                        <h3>添削</h3>
+                        <div class="feedback-header">
+                            <h3>添削</h3>
+                            <button class="btn-save" title="復習に保存">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v13a2 2 0 0 1-2 2z"></path>
+                                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                    <polyline points="7 3 7 8 15 8"></polyline>
+                                </svg>
+                            </button>
+                        </div>
                         <p class="correction"></p>
                         <h3>提案</h3>
                         <ul class="suggestions-list"></ul>
@@ -352,13 +361,31 @@
             </div>
 
             <div class="user-message hidden">
-                <p class="user-text"></p>
+                <div class="user-message-header">
+                    <p class="user-text"></p>
+                    <button class="btn-save" title="復習に保存">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v13a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div class="feedback-section hidden">
                 <div class="feedback-content">
                     <div class="user-input-display hidden"></div>
-                    <h3>添削</h3>
+                    <div class="feedback-header">
+                        <h3>添削</h3>
+                        <button class="btn-save" title="復習に保存">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v13a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                <polyline points="7 3 7 8 15 8"></polyline>
+                            </svg>
+                        </button>
+                    </div>
                     <p class="correction"></p>
                     <h3>提案</h3>
                     <ul class="suggestions-list"></ul>

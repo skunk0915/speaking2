@@ -829,7 +829,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (isReviewMode) {
             english.classList.add('hidden');
-            btnSave.classList.add('hidden'); // Already saved
+            // btnSave.classList.add('hidden'); // Show it even in review mode to allow un-saving
             if (data.history && data.history.length > 0) {
                 btnHistory.classList.remove('hidden');
                 renderHistory(data.history, historyContainer);
@@ -868,15 +868,31 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Save Logic
-        if (btnSave) {
-            btnSave.addEventListener('click', () => {
-                const isSaved = reviews.some(r => r.japanese === data.japanese);
-                if (isSaved) {
-                    alert('既に保存されています。');
-                    return;
+        // Save Logic (Toggleable)
+        const updateAllSaveButtons = (isActive) => {
+            const allBtnSaves = group.querySelectorAll('.btn-save');
+            allBtnSaves.forEach(btn => {
+                if (isActive) {
+                    btn.classList.add('active');
+                    btn.style.color = '#34C759';
+                } else {
+                    btn.classList.remove('active');
+                    btn.style.color = '';
                 }
-                
+            });
+        };
+
+        const toggleSave = () => {
+            const index = reviews.findIndex(r => r.japanese === data.japanese);
+            const isSaved = index !== -1;
+
+            if (isSaved) {
+                // Un-save
+                reviews.splice(index, 1);
+                localStorage.setItem(STORAGE_KEYS.REVIEWS, JSON.stringify(reviews));
+                updateAllSaveButtons(false);
+            } else {
+                // Save
                 const reviewData = {
                     id: Date.now().toString(),
                     japanese: data.japanese,
@@ -885,7 +901,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     history: []
                 };
 
-                // Combine practice history and main conversation history if they exist
                 const mainHistoryStr = group.dataset.retryHistory;
                 const mainHistory = mainHistoryStr ? JSON.parse(mainHistoryStr) : [];
                 
@@ -896,21 +911,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 reviews.push(reviewData);
                 localStorage.setItem(STORAGE_KEYS.REVIEWS, JSON.stringify(reviews));
-                btnSave.classList.add('active');
-                btnSave.disabled = true;
-                
-                // Visual feedback
-                btnSave.style.color = '#34C759';
-            });
+                updateAllSaveButtons(true);
+            }
+        };
+
+        if (btnSave) {
+            btnSave.addEventListener('click', toggleSave);
         }
 
-        // Check if already saved on render
+        // Add listeners to feedback/practice/user save buttons
+        const feedbackSaveBtn = group.querySelector('.feedback-section .btn-save');
+        const practiceSaveBtn = group.querySelector('.practice-section .btn-save');
+        const userMessageSaveBtn = group.querySelector('.user-message .btn-save');
+        if (feedbackSaveBtn) feedbackSaveBtn.addEventListener('click', toggleSave);
+        if (practiceSaveBtn) practiceSaveBtn.addEventListener('click', toggleSave);
+        if (userMessageSaveBtn) userMessageSaveBtn.addEventListener('click', toggleSave);
+
+        // Initial check
         if (reviews.some(r => r.japanese === data.japanese)) {
-            btnSave.classList.add('active');
-            btnSave.style.color = '#34C759';
-            // We don't disable it here so user can potentially see it's saved, 
-            // but let's keep it consistent with the click handler.
-            btnSave.disabled = true;
+            updateAllSaveButtons(true);
         }
 
         // Interaction Toggles (Practice, Variation, QA)
@@ -1097,7 +1116,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             // Retry Button Logic
-            const btnRetryList = item.querySelectorAll('.btn-retry');
+            const btnRetryList = group.querySelectorAll('.btn-retry');
             btnRetryList.forEach(btnRetry => {
                 btnRetry.addEventListener('click', () => {
                     const feedback = btnRetry.closest('.feedback-content') || btnRetry.closest('.feedback-section');
