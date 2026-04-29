@@ -919,14 +919,6 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSave.addEventListener('click', toggleSave);
         }
 
-        // Add listeners to feedback/practice/user save buttons
-        const feedbackSaveBtn = group.querySelector('.feedback-section .btn-save');
-        const practiceSaveBtn = group.querySelector('.practice-section .btn-save');
-        const userMessageSaveBtn = group.querySelector('.user-message .btn-save');
-        if (feedbackSaveBtn) feedbackSaveBtn.addEventListener('click', toggleSave);
-        if (practiceSaveBtn) practiceSaveBtn.addEventListener('click', toggleSave);
-        if (userMessageSaveBtn) userMessageSaveBtn.addEventListener('click', toggleSave);
-
         // Initial check
         if (reviews.some(r => r.japanese === data.japanese)) {
             updateAllSaveButtons(true);
