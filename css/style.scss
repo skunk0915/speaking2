@@ -225,7 +225,7 @@ body {
     display: flex;
     gap: 16px;
     padding: calc(20px + env(safe-area-inset-top)) 20px 0 20px;
-    margin-bottom: -10px; // Pull container closer
+    // margin-bottom: -10px; // Pull container closer
     z-index: 10;
 
     .tab-item {
@@ -258,7 +258,7 @@ body {
 // Scrollable Content Area
 .conversation-container {
     flex: 1;
-    padding: calc(20px + env(safe-area-inset-top)) 20px 40px 20px; // Adjusted top padding
+    padding: 20px 20px 40px 20px;
     display: flex;
     flex-direction: column;
     gap: 30px;
@@ -320,7 +320,8 @@ body {
         display: flex;
         gap: 16px;
         align-items: center;
-        justify-content: flex-end;
+        justify-content: flex-start;
+        flex-wrap: wrap;
 
         button {
             @include neumorphism-icon-btn;

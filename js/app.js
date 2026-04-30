@@ -874,10 +874,8 @@ document.addEventListener('DOMContentLoaded', () => {
             allBtnSaves.forEach(btn => {
                 if (isActive) {
                     btn.classList.add('active');
-                    btn.style.color = '#34C759';
                 } else {
                     btn.classList.remove('active');
-                    btn.style.color = '';
                 }
             });
         };
