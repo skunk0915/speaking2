@@ -321,29 +321,34 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     btnHint.addEventListener('click', () => {
-        hintDisplay.classList.remove('hidden');
-        hintList.innerHTML = '';
-        currentSampleAnswers.forEach(ans => {
-            const div = document.createElement('div');
-            div.className = 'hint-item';
-            
-            const jaText = typeof ans === 'object' ? ans.ja : ans;
-            const enText = typeof ans === 'object' ? ans.en : '';
+        const isOpening = hintDisplay.classList.contains('hidden');
+        hintDisplay.classList.toggle('hidden');
+        btnHint.classList.toggle('active', isOpening);
+        
+        if (isOpening) {
+            hintList.innerHTML = '';
+            currentSampleAnswers.forEach(ans => {
+                const div = document.createElement('div');
+                div.className = 'hint-item';
+                
+                const jaText = typeof ans === 'object' ? ans.ja : ans;
+                const enText = typeof ans === 'object' ? ans.en : '';
 
-            div.innerHTML = `
-                <p class="ja-hint">${jaText}</p>
-                ${enText ? `<p class="en-hint hidden">${enText}</p>` : ''}
-            `;
-            
-            div.addEventListener('click', (e) => {
-                const enHint = div.querySelector('.en-hint');
-                if (enHint) {
-                    // Toggle visibility of English translation
-                    enHint.classList.toggle('hidden');
-                }
+                div.innerHTML = `
+                    <p class="ja-hint">${jaText}</p>
+                    ${enText ? `<p class="en-hint hidden">${enText}</p>` : ''}
+                `;
+                
+                div.addEventListener('click', (e) => {
+                    const enHint = div.querySelector('.en-hint');
+                    if (enHint) {
+                        // Toggle visibility of English translation
+                        enHint.classList.toggle('hidden');
+                    }
+                });
+                hintList.appendChild(div);
             });
-            hintList.appendChild(div);
-        });
+        }
     });
 
     // Initial Load
@@ -790,6 +795,7 @@ document.addEventListener('DOMContentLoaded', () => {
         container.appendChild(inputGroup);
         // Reset hint display
         hintDisplay.classList.add('hidden');
+        btnHint.classList.remove('active');
         hintList.innerHTML = '';
         userInput.value = '';
         userInput.style.height = 'auto';
@@ -1464,20 +1470,20 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="suggestion-content">
                 <p class="english">${engText}</p>
                 ${jpText ? `<p class="japanese">${jpText}</p>` : ''}
+                <div class="suggestion-actions">
+                    <button class="btn-play-suggestion" title="再生">
+                        <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <svg class="icon-pause hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                        <div class="loader hidden"></div>
+                    </button>
+                    <button class="btn-repeat-suggestion" title="リピート再生">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                    </button>
+                    <button class="btn-variation-menu" title="バリエーション生成">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+                    </button>
+                </div>
                 ${pointText ? `<p class="point"><span class="label">POINT</span> ${marked.parse(pointText).replace(/^<p>|<\/p>$/g, '')}</p>` : ''}
-            </div>
-            <div class="suggestion-actions">
-                <button class="btn-play-suggestion" title="再生">
-                    <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <svg class="icon-pause hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-                    <div class="loader hidden"></div>
-                </button>
-                <button class="btn-repeat-suggestion" title="リピート再生">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-                </button>
-                <button class="btn-variation-menu" title="バリエーション生成">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
-                </button>
             </div>
             <div class="variation-section hidden">
                 <h3>バリエーション</h3>

@@ -19,7 +19,7 @@
     <link rel="apple-touch-icon" href="img/icon-192.png">
 
     <!-- Favicon placeholder to avoid 404 -->
-    <link rel="icon" href="data:,">
+    <link rel="icon" href="img/icon-192.png">
 
     <script>
         if ('serviceWorker' in navigator) {

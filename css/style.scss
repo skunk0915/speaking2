@@ -442,9 +442,8 @@ body {
     .variation-result-item {
         @include neumorphism-flat;
         display: flex;
-        flex-wrap: wrap;
-        align-items: flex-start;
-        justify-content: space-between;
+        flex-direction: column; // Changed from row to column to stack content and variations
+        align-items: stretch;
         gap: 12px;
         padding: 16px;
         border-radius: $border-radius-md;
@@ -524,15 +523,11 @@ body {
         .suggestion-actions,
         .variation-actions {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
+            flex-direction: row; // Horizontal layout
+            gap: 12px;
             flex-shrink: 0;
-
-            // For variation results, we might want them horizontal
-            &.variation-actions {
-                flex-direction: row;
-                align-self: center;
-            }
+            margin-top: 4px;
+            margin-bottom: 4px;
 
             button {
                 @include neumorphism-icon-btn;
@@ -773,9 +768,8 @@ body {
 
         li.suggestion-item {
             display: flex;
-            flex-wrap: wrap;
-            align-items: flex-start; // Align to top
-            justify-content: space-between;
+            flex-direction: column; // Changed to column
+            align-items: stretch;
             gap: 12px;
             padding: 16px; // Increased padding
             border-radius: $border-radius-md;
@@ -823,9 +817,11 @@ body {
 
             .suggestion-actions {
                 display: flex;
-                flex-direction: column;
-                gap: 8px;
+                flex-direction: row; // Changed to row
+                gap: 12px;
                 flex-shrink: 0;
+                margin-top: 4px;
+                margin-bottom: 4px;
 
                 button {
                     @include neumorphism-icon-btn;
