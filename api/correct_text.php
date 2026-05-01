@@ -11,12 +11,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $input = json_decode(file_get_contents('php://input'), true);
 $user_input = $input['user_input'] ?? '';
+$intended_japanese = $input['intended_japanese'] ?? '';
 $context = $input['context'] ?? ''; // The Japanese prompt or previous conversation context
 $aiStyle = $input['ai_style'] ?? 'polite';
 $englishLevel = $input['english_level'] ?? 'simple';
 $retry_history = $input['retry_history'] ?? [];
 $mode = $input['mode'] ?? 'conversation';
 $is_retry = $input['is_retry'] ?? false;
+
+$intendedJpText = "";
+if (!empty($intended_japanese)) {
+    $intendedJpText = "\n### ユーザーがこの英文で伝えようとした日本語の意図:\n{$intended_japanese}\n";
+}
 
 $styleInstructions = [
     'polite' => "丁寧な「ですます調」で回答・解説してください。",
@@ -112,6 +118,7 @@ if ($mode === 'translation') {
     $prompt .= "
     日本語の原文:
     {$context}
+    {$intendedJpText}
     {$suggestedSentencesText}
     {$historyText}
     あなたの今回の英語:
@@ -184,6 +191,7 @@ if ($mode === 'translation') {
     $prompt .= "
     状況/問いかけ（相手の発話）:
     {$context}
+    {$intendedJpText}
     {$suggestedSentencesText}
     {$historyText}
     あなたの今回の回答:

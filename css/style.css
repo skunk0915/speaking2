@@ -1161,8 +1161,19 @@ body {
   gap: 12px;
   align-items: flex-end;
 }
-.input-group .input-row textarea {
+.input-group .input-row .input-text-container {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.input-group .input-row .input-actions {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.input-group .input-row textarea {
+  width: 100%;
   background: #e0e5ec;
   box-shadow: inset 6px 6px 10px #a3b1c6, inset -6px -6px 10px #f5f5f5;
   border: none;
@@ -1187,6 +1198,13 @@ body {
 .input-group .input-row textarea::placeholder {
   color: #8d97a5;
   opacity: 0.7;
+}
+.input-group .input-row textarea#user-input-jp {
+  font-size: 14px;
+  color: #8d97a5;
+  min-height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  display: none;
 }
 .input-group .input-row .btn-icon {
   width: 44px;
@@ -2004,7 +2022,20 @@ button .loader {
   box-shadow: 2px 2px 4px #a3b1c6;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+}
+.retry-results .retry-result-item .retry-user-text-wrapper .intended-jp {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  line-height: 1.4;
+}
+.retry-results .retry-result-item .retry-user-text-wrapper .retry-user-text-row {
+  display: flex;
+  flex-direction: column;
 }
 .retry-results .retry-result-item .retry-user-text-wrapper .label {
   font-size: 10px;
@@ -2106,6 +2137,20 @@ button .loader {
 }
 .user-input-display.hidden {
   display: none;
+}
+.user-input-display .intended-jp {
+  font-size: 13px;
+  color: #8d97a5;
+  margin-bottom: 6px;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.4);
+  padding: 6px 12px;
+  border-radius: 10px;
+  border-bottom-right-radius: 2px;
+  box-shadow: inset 1px 1px 2px #a3b1c6, inset -1px -1px 2px #f5f5f5;
+  line-height: 1.4;
+  text-align: left;
+  max-width: 90%;
 }
 .user-input-display .text {
   background: #007AFF;

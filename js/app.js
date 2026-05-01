@@ -181,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const hintDisplay = document.getElementById('hint-display');
     const hintList = hintDisplay.querySelector('.hint-list');
     const userInput = document.getElementById('user-input');
+    const userInputJp = document.getElementById('user-input-jp');
     const btnHint = document.getElementById('btn-hint');
     const btnSend = document.getElementById('btn-send');
     
@@ -245,17 +246,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     userInput.addEventListener('input', () => {
-        btnSend.disabled = userInput.value.trim() === '';
+        const hasValue = userInput.value.trim() !== '';
+        btnSend.disabled = !hasValue;
+        
+        // Show/hide Japanese input based on whether English input has content
+        userInputJp.style.display = hasValue ? 'block' : (userInputJp.value.trim() !== '' ? 'block' : 'none');
+        
         userInput.style.height = 'auto';
         userInput.style.height = Math.min(userInput.scrollHeight, 100) + 'px';
     });
 
+    userInputJp.addEventListener('input', () => {
+        userInputJp.style.height = 'auto';
+        userInputJp.style.height = Math.min(userInputJp.scrollHeight, 100) + 'px';
+    });
+
     btnSend.addEventListener('click', async () => {
         const text = userInput.value.trim();
+        const textJp = userInputJp.value.trim();
         if (!text) return;
 
         // Disable input
         userInput.disabled = true;
+        userInputJp.disabled = true;
         btnSend.disabled = true;
 
         // Find the feedback section of the last item
@@ -274,11 +287,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 const retryHistory = JSON.parse(lastGroup.dataset.retryHistory);
 
-                const data = await getCorrection(text, feedbackSection, retryHistory, true);
+                const data = await getCorrection(text, feedbackSection, retryHistory, true, textJp);
 
                 // Update retry history with the latest result
                 if (data && data.correction) {
-                    retryHistory.push({ user_input: text, correction: data.correction });
+                    retryHistory.push({ user_input: text, correction: data.correction, intended_japanese: textJp });
                     lastGroup.dataset.retryHistory = JSON.stringify(retryHistory);
                 }
 
@@ -303,11 +316,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 const retryHistory = JSON.parse(lastGroup.dataset.retryHistory);
 
-                const data = await getCorrection(text, feedbackSection, retryHistory, false);
+                const data = await getCorrection(text, feedbackSection, retryHistory, false, textJp);
 
                 // Update retry history with the latest result
                 if (data && data.correction) {
-                    retryHistory.push({ user_input: text, correction: data.correction });
+                    retryHistory.push({ user_input: text, correction: data.correction, intended_japanese: textJp });
                     lastGroup.dataset.retryHistory = JSON.stringify(retryHistory);
                 }
 
@@ -317,6 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         userInput.disabled = false;
+        userInputJp.disabled = false;
         userInput.focus({ preventScroll: true });
     });
 
@@ -336,15 +350,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 div.innerHTML = `
                     <p class="ja-hint">${jaText}</p>
-                    ${enText ? `<p class="en-hint hidden">${enText}</p>` : ''}
                 `;
                 
                 div.addEventListener('click', (e) => {
-                    const enHint = div.querySelector('.en-hint');
-                    if (enHint) {
-                        // Toggle visibility of English translation
-                        enHint.classList.toggle('hidden');
-                    }
+                    // Fill Japanese input
+                    userInputJp.value = jaText;
+                    userInputJp.style.display = 'block'; // Show it
+                    userInputJp.style.height = 'auto';
+                    userInputJp.style.height = Math.min(userInputJp.scrollHeight, 100) + 'px';
+                    
+                    // Focus English input to encourage starting
+                    userInput.focus();
                 });
                 hintList.appendChild(div);
             });
@@ -484,7 +500,7 @@ document.addEventListener('DOMContentLoaded', () => {
         container.scrollTop = container.scrollHeight;
     }
 
-    async function getCorrection(userText, feedbackElement, history = [], isRetry = false) {
+    async function getCorrection(userText, feedbackElement, history = [], isRetry = false, intendedJp = "") {
         const correctionP = feedbackElement.querySelector('.correction');
         const suggestionsList = feedbackElement.querySelector('.suggestions-list');
         const qaSection = feedbackElement.querySelector('.item-qa-section');
@@ -502,8 +518,11 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingItem.className = 'retry-result-item loading';
             loadingItem.innerHTML = `
                 <div class="retry-user-text-wrapper">
-                    <span class="label">再挑戦:</span>
-                    <span class="retry-user-text">${userText}</span>
+                    ${intendedJp ? `<div class="intended-jp">${intendedJp}</div>` : ''}
+                    <div class="retry-user-text-row">
+                        <span class="label">再挑戦:</span>
+                        <span class="retry-user-text">${userText}</span>
+                    </div>
                 </div>
                 <div class="loader" style="display:inline-block; margin-top:8px; width:16px; height:16px; border-width:2px;"></div>
             `;
@@ -522,7 +541,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         english_level: englishLevelSelect ? englishLevelSelect.value : 'native',
                         retry_history: history,
                         suggested_sentences: getSuggestedSentences(feedbackElement.closest('.conversation-group')),
-                        is_retry: true
+                        is_retry: true,
+                        intended_japanese: intendedJp
                     })
                 });
 
@@ -533,8 +553,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadingItem.classList.remove('loading');
                 loadingItem.innerHTML = `
                     <div class="retry-user-text-wrapper">
-                        <span class="label">再挑戦:</span>
-                        <span class="retry-user-text">${userText}</span>
+                        ${intendedJp ? `<div class="intended-jp">${intendedJp}</div>` : ''}
+                        <div class="retry-user-text-row">
+                            <span class="label">再挑戦:</span>
+                            <span class="retry-user-text">${userText}</span>
+                        </div>
                     </div>
                     <div class="retry-correction">${marked.parse(data.correction)}</div>
                 `;
@@ -557,7 +580,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (retrySection) retrySection.classList.add('hidden');
 
             if (userInputDisplay) {
-                userInputDisplay.innerHTML = `<div class="text">${userText}</div>`;
+                userInputDisplay.innerHTML = `
+                    ${intendedJp ? `<div class="intended-jp">${intendedJp}</div>` : ''}
+                    <div class="text">${userText}</div>
+                `;
                 userInputDisplay.classList.remove('hidden');
             }
 
@@ -573,7 +599,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         english_level: englishLevelSelect ? englishLevelSelect.value : 'native',
                         retry_history: history,
                         suggested_sentences: getSuggestedSentences(feedbackElement.closest('.conversation-group')),
-                        is_retry: false
+                        is_retry: false,
+                        intended_japanese: intendedJp
                     })
                 });
 
@@ -798,7 +825,10 @@ document.addEventListener('DOMContentLoaded', () => {
         btnHint.classList.remove('active');
         hintList.innerHTML = '';
         userInput.value = '';
+        userInputJp.value = '';
+        userInputJp.style.display = 'none'; // Hide again
         userInput.style.height = 'auto';
+        userInputJp.style.height = 'auto';
         btnSend.disabled = true;
 
         // Scroll to input
