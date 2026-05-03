@@ -407,11 +407,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Q&A Logic (Per Item)
-    async function setupItemQa(feedbackElement, contextData) {
+    async function setupItemQa(feedbackElement, contextData, initialHistory = [], onUpdate = null) {
         const qaContainer = feedbackElement.querySelector('.item-qa-container');
-        const qaInput = feedbackElement.querySelector('.item-qa-input');
-        const btnQaSend = feedbackElement.querySelector('.btn-item-qa-send');
-        let itemQaHistory = [];
+        let qaInput = feedbackElement.querySelector('.item-qa-input');
+        let btnQaSend = feedbackElement.querySelector('.btn-item-qa-send');
+
+        // To avoid duplicate listeners when re-initializing, replace the elements with clones
+        const newQaInput = qaInput.cloneNode(true);
+        qaInput.parentNode.replaceChild(newQaInput, qaInput);
+        qaInput = newQaInput;
+
+        const newBtnQaSend = btnQaSend.cloneNode(true);
+        btnQaSend.parentNode.replaceChild(newBtnQaSend, btnQaSend);
+        btnQaSend = newBtnQaSend;
+
+        // Store history on the element so it can be retrieved during saving
+        feedbackElement.itemQaHistory = [...initialHistory];
+
+        // Render initial history
+        qaContainer.innerHTML = '';
+        feedbackElement.itemQaHistory.forEach(msg => {
+            appendItemQaMessage(qaContainer, msg.text, msg.role);
+        });
 
         qaInput.addEventListener('input', () => {
             btnQaSend.disabled = qaInput.value.trim() === '';
@@ -431,14 +448,15 @@ document.addEventListener('DOMContentLoaded', () => {
             btnQaSend.disabled = true;
 
             // Add to history
-            itemQaHistory.push({ role: 'user', text: text });
+            feedbackElement.itemQaHistory.push({ role: 'user', text: text });
+            if (onUpdate) onUpdate(feedbackElement.itemQaHistory);
 
             // Call API
-            await sendItemQuestion(text, contextData, itemQaHistory, qaContainer);
+            await sendItemQuestion(text, contextData, feedbackElement.itemQaHistory, qaContainer, onUpdate);
         });
     }
 
-    async function sendItemQuestion(text, contextData, history, container) {
+    async function sendItemQuestion(text, contextData, history, container, onUpdate = null) {
         // Show loading
         const loadingId = 'qa-loading-' + Date.now();
         const loadingDiv = document.createElement('div');
@@ -475,11 +493,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.answer) {
                 appendItemQaMessage(container, data.answer, 'ai');
                 history.push({ role: 'ai', text: data.answer });
+                if (onUpdate) onUpdate(history);
             }
 
         } catch (error) {
             console.error(error);
-            document.getElementById(loadingId).remove();
+            const lEl = document.getElementById(loadingId);
+            if (lEl) lEl.remove();
             appendItemQaMessage(container, 'エラーが発生しました。', 'ai');
         }
     }
@@ -916,6 +936,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         };
 
+        const updateSavedData = (key, value) => {
+            const reviewIdx = reviews.findIndex(r => r.japanese === data.japanese);
+            if (reviewIdx !== -1) {
+                reviews[reviewIdx][key] = value;
+                localStorage.setItem(STORAGE_KEYS.REVIEWS, JSON.stringify(reviews));
+            }
+        };
+
         const toggleSave = () => {
             const index = reviews.findIndex(r => r.japanese === data.japanese);
             const isSaved = index !== -1;
@@ -932,7 +960,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     japanese: data.japanese,
                     english: data.english,
                     sample_user_answers: data.sample_user_answers,
-                    history: []
+                    history: [],
+                    qa_history: (mainQa && mainQa.itemQaHistory) ? mainQa.itemQaHistory : []
                 };
 
                 const mainHistoryStr = group.dataset.retryHistory;
@@ -1030,7 +1059,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setupItemQa(mainQa, {
                 english: data.english,
                 situation: data.japanese
-            });
+            }, data.qa_history || [], (newHistory) => updateSavedData('qa_history', newHistory));
         }
 
         // Translation Toggle
@@ -1097,14 +1126,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         practiceRetryHistory.push(newHistoryItem);
                         
                         // Update stored review if in review mode
+                        // Update stored review
+                        updateSavedData('history', practiceRetryHistory);
                         if (isReviewMode) {
-                            const reviewIdx = reviews.findIndex(r => r.japanese === data.japanese);
-                            if (reviewIdx !== -1) {
-                                reviews[reviewIdx].history = practiceRetryHistory;
-                                localStorage.setItem(STORAGE_KEYS.REVIEWS, JSON.stringify(reviews));
-                                btnHistory.classList.remove('hidden');
-                                renderHistory(practiceRetryHistory, historyContainer);
-                            }
+                            btnHistory.classList.remove('hidden');
+                            renderHistory(practiceRetryHistory, historyContainer);
                         }
                     }
                     
@@ -1123,14 +1149,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         practiceRetryHistory.push(newHistoryItem);
 
                         // Update stored review if in review mode
+                        // Update stored review
+                        updateSavedData('history', practiceRetryHistory);
                         if (isReviewMode) {
-                            const reviewIdx = reviews.findIndex(r => r.japanese === data.japanese);
-                            if (reviewIdx !== -1) {
-                                reviews[reviewIdx].history = practiceRetryHistory;
-                                localStorage.setItem(STORAGE_KEYS.REVIEWS, JSON.stringify(reviews));
-                                btnHistory.classList.remove('hidden');
-                                renderHistory(practiceRetryHistory, historyContainer);
-                            }
+                            btnHistory.classList.remove('hidden');
+                            renderHistory(practiceRetryHistory, historyContainer);
                         }
                     }
                     

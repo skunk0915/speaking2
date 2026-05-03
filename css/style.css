@@ -289,17 +289,22 @@ body {
 }
 .conversation-item .practice-section .feedback-content .correction ul,
 .conversation-item .practice-section .feedback-content .correction ol {
-  margin: 0 0 12px 20px;
+  margin: 16px 0 12px 20px;
   padding: 0;
 }
 .conversation-item .practice-section .feedback-content .correction ul li,
 .conversation-item .practice-section .feedback-content .correction ol li {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  padding-left: 4px;
 }
 .conversation-item .practice-section .feedback-content .correction ul li::marker,
 .conversation-item .practice-section .feedback-content .correction ol li::marker {
   color: #007AFF;
   font-weight: 700;
+  font-size: 1.1em;
+}
+.conversation-item .practice-section .feedback-content .correction ul {
+  list-style-type: "・";
 }
 .conversation-item .practice-section .feedback-content .correction strong {
   color: rgb(0, 97.6, 204);
@@ -449,7 +454,7 @@ body {
 .conversation-item .variation-result-item .suggestion-content .point ol,
 .conversation-item .variation-result-item .variation-result-text .point ul,
 .conversation-item .variation-result-item .variation-result-text .point ol {
-  margin: 0 0 12px 20px;
+  margin: 16px 0 12px 20px;
   padding: 0;
 }
 .conversation-item .suggestion-item .suggestion-content .point ul li,
@@ -460,7 +465,8 @@ body {
 .conversation-item .variation-result-item .suggestion-content .point ol li,
 .conversation-item .variation-result-item .variation-result-text .point ul li,
 .conversation-item .variation-result-item .variation-result-text .point ol li {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  padding-left: 4px;
 }
 .conversation-item .suggestion-item .suggestion-content .point ul li::marker,
 .conversation-item .suggestion-item .suggestion-content .point ol li::marker,
@@ -472,6 +478,13 @@ body {
 .conversation-item .variation-result-item .variation-result-text .point ol li::marker {
   color: #007AFF;
   font-weight: 700;
+  font-size: 1.1em;
+}
+.conversation-item .suggestion-item .suggestion-content .point ul,
+.conversation-item .suggestion-item .variation-result-text .point ul,
+.conversation-item .variation-result-item .suggestion-content .point ul,
+.conversation-item .variation-result-item .variation-result-text .point ul {
+  list-style-type: "・";
 }
 .conversation-item .suggestion-item .suggestion-content .point strong,
 .conversation-item .suggestion-item .variation-result-text .point strong,
@@ -747,17 +760,22 @@ body {
 }
 .conversation-item .history-section .history-container .history-item .history-correction ul,
 .conversation-item .history-section .history-container .history-item .history-correction ol {
-  margin: 0 0 12px 20px;
+  margin: 16px 0 12px 20px;
   padding: 0;
 }
 .conversation-item .history-section .history-container .history-item .history-correction ul li,
 .conversation-item .history-section .history-container .history-item .history-correction ol li {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  padding-left: 4px;
 }
 .conversation-item .history-section .history-container .history-item .history-correction ul li::marker,
 .conversation-item .history-section .history-container .history-item .history-correction ol li::marker {
   color: #007AFF;
   font-weight: 700;
+  font-size: 1.1em;
+}
+.conversation-item .history-section .history-container .history-item .history-correction ul {
+  list-style-type: "・";
 }
 .conversation-item .history-section .history-container .history-item .history-correction strong {
   color: rgb(0, 97.6, 204);
@@ -909,17 +927,22 @@ body {
 }
 .feedback-section .correction ul,
 .feedback-section .correction ol {
-  margin: 0 0 12px 20px;
+  margin: 16px 0 12px 20px;
   padding: 0;
 }
 .feedback-section .correction ul li,
 .feedback-section .correction ol li {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  padding-left: 4px;
 }
 .feedback-section .correction ul li::marker,
 .feedback-section .correction ol li::marker {
   color: #007AFF;
   font-weight: 700;
+  font-size: 1.1em;
+}
+.feedback-section .correction ul {
+  list-style-type: "・";
 }
 .feedback-section .correction strong {
   color: rgb(0, 97.6, 204);
@@ -1772,17 +1795,22 @@ button .loader {
 }
 .item-qa-section .item-qa-container .qa-message.ai ul,
 .item-qa-section .item-qa-container .qa-message.ai ol {
-  margin: 0 0 12px 20px;
+  margin: 16px 0 12px 20px;
   padding: 0;
 }
 .item-qa-section .item-qa-container .qa-message.ai ul li,
 .item-qa-section .item-qa-container .qa-message.ai ol li {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  padding-left: 4px;
 }
 .item-qa-section .item-qa-container .qa-message.ai ul li::marker,
 .item-qa-section .item-qa-container .qa-message.ai ol li::marker {
   color: #007AFF;
   font-weight: 700;
+  font-size: 1.1em;
+}
+.item-qa-section .item-qa-container .qa-message.ai ul {
+  list-style-type: "・";
 }
 .item-qa-section .item-qa-container .qa-message.ai strong {
   color: rgb(0, 97.6, 204);
@@ -2071,17 +2099,22 @@ button .loader {
 }
 .retry-results .retry-result-item .retry-correction ul,
 .retry-results .retry-result-item .retry-correction ol {
-  margin: 0 0 12px 20px;
+  margin: 16px 0 12px 20px;
   padding: 0;
 }
 .retry-results .retry-result-item .retry-correction ul li,
 .retry-results .retry-result-item .retry-correction ol li {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  padding-left: 4px;
 }
 .retry-results .retry-result-item .retry-correction ul li::marker,
 .retry-results .retry-result-item .retry-correction ol li::marker {
   color: #007AFF;
   font-weight: 700;
+  font-size: 1.1em;
+}
+.retry-results .retry-result-item .retry-correction ul {
+  list-style-type: "・";
 }
 .retry-results .retry-result-item .retry-correction strong {
   color: rgb(0, 97.6, 204);
