@@ -97,6 +97,13 @@
                 </select>
             </div>
             <div class="setting-item">
+                <label for="initial-mode-select">初期生成モード</label>
+                <select id="initial-mode-select">
+                    <option value="auto">自動</option>
+                    <option value="manual" selected>日本語から作成</option>
+                </select>
+            </div>
+            <div class="setting-item">
                 <label for="length-range">Length: <span id="length-val">20</span> chars</label>
                 <input type="range" id="length-range" min="10" max="500" step="10" value="20">
             </div>
@@ -318,9 +325,9 @@
                             </svg>
                         </button>
                     </div>
-                        <div class="feedback-content hidden">
-                            <div class="user-input-display hidden"></div>
-                            <h3>添削</h3>
+                    <div class="feedback-content hidden">
+                        <div class="user-input-display hidden"></div>
+                        <h3>添削</h3>
                         <p class="correction"></p>
                         <h3>提案</h3>
                         <ul class="suggestions-list"></ul>
@@ -392,7 +399,7 @@
                                 <path d="M23 4v6h-6"></path>
                                 <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                             </svg>
-                             再挑戦
+                            再挑戦
                         </button>
                     </div>
                 </div>
@@ -410,6 +417,89 @@
             </div>
         </div>
     </template>
+
+    <template id="tmpl-initial-input">
+        <div class="initial-input-container">
+            <div class="header-section">
+                <div class="icon-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </div>
+                <h3>どのような会話を始めますか？</h3>
+            </div>
+
+            <div class="mode-tabs">
+                <button class="mode-tab active" data-mode="translate">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m5 8 6 6"></path>
+                        <path d="m4 14 6-6 2-3"></path>
+                        <path d="M2 5h12"></path>
+                        <path d="M7 2h1"></path>
+                        <path d="m22 22-5-10-5 10"></path>
+                        <path d="M14 18h6"></path>
+                    </svg>
+                    <span>内容を指定</span>
+                </button>
+                <button class="mode-tab" data-mode="creative">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v8"></path>
+                        <path d="m4.93 10.93 1.41 1.41"></path>
+                        <path d="M2 18h2"></path>
+                        <path d="M20 18h2"></path>
+                        <path d="m19.07 10.93-1.41 1.41"></path>
+                        <path d="M22 22H2"></path>
+                        <path d="m8 22 4-10 4 10"></path>
+                    </svg>
+                    <span>状況を指定</span>
+                </button>
+            </div>
+
+            <div class="input-section" id="section-translate">
+                <div class="info-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                    </svg>
+                    <span>入力した日本語を忠実に英訳して開始します</span>
+                </div>
+                <textarea id="initial-japanese-input-translate" placeholder="例：そのドーナツを温めるときは700wで30秒ぐらいがちょうどいい" rows="4"></textarea>
+            </div>
+
+            <div class="input-section hidden" id="section-creative">
+                <div class="info-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2a10 10 0 1 0 10 10H12V2z"></path>
+                        <path d="M12 2a10 10 0 0 1 10 10h-10V2z"></path>
+                        <path d="M12 12L2.8 2.2"></path>
+                        <path d="M12 12L19.8 4.2"></path>
+                    </svg>
+                    <span>シチュエーションからAIが最初の発話を考えます</span>
+                </div>
+                <textarea id="initial-japanese-input-creative" placeholder="例：海外のカフェで店員に話しかけられる" rows="4"></textarea>
+            </div>
+
+            <div class="initial-input-wrapper">
+                <button id="btn-start-conversation" class="btn btn-primary btn-block" disabled>
+                    <span>会話を生成する</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m9 18 6-6-6-6"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="initial-mode-toggle">
+                <button id="btn-switch-auto" class="btn-text">または完全に自動生成で始める</button>
+            </div>
+        </div>
+    </template>
+
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <p>生成中...</p>
+        </div>
+    </div>
 
     <script src="js/app.js?v=<?php echo time(); ?>"></script>
 </body>

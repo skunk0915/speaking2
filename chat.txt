@@ -1,0 +1,56 @@
+2026-05-11 07:18:10
+USER: 最初の英文作成を現状の自動作成と別に自分で英文のもとになる日本語を入力するのも選べるようにする（それをデフォルトにする）
+AI: 最初の英文作成モードを選択できる機能を追加しました。デフォルトを「日本語から作成」に設定し、シチュエーションを自分で指定して開始できるようになりました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/index.php
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/api/generate_text.php
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+- /Users/mizy/Dropbox/speaking2/README.md
+
+2026-05-11 07:28:40
+USER: 「そのドーナツを温めるときは700wで30秒ぐらいがちょうどいい」と入力したのに「このドーナツ、温めて食べたほうがいいかな？」の例文が生成された。いや、そのまま英訳作れよ
+AI: 日本語入力時の生成ロジックを修正し、入力された内容を勝手に変えずに、忠実に英訳して会話を開始するようにプロンプトを調整しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/api/generate_text.php
+
+2026-05-11 07:32:40
+USER: 「状況を汲み取って会話を広げる」のも良いので、それ用の入力欄作って。入力したものをそのまま例文として使う欄と、シチュエーションなどをざっくり指示してあとはそれに基づいた文章を自動生成する欄
+AI: 初期入力UIをタブ形式にアップデートし、「内容を指定（忠実な英訳）」と「状況を指定（AIが生成）」の2つのモードを選べるようにしました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/index.php
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/api/generate_text.php
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+
+2026-05-11 07:34:40
+USER: いいけどこの入力欄のデザインもうちょっとデザインしてくれ
+AI: 初期入力UIのデザインを全面的にブラッシュアップしました。アイコンバッジの追加、テキストエリアの拡大とニューモーフィズム・スタイルの最適化を行い、よりプレミアムな操作感を実現しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/index.php
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+
+2026-05-11 07:39:10
+USER: 生成されたことがウインドウ外の画面下部でわかりにくいので生成されたら下にスムーズスクロールして
+AI: 会話生成や添削完了時に、画面下部へ自動的にスムーズスクロールする機能を追加しました。これにより、新しいコンテンツが追加されたことにすぐ気づけるようになりました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+
+2026-05-11 07:41:20
+USER: シチュエーション指定での英文生成が指定どおりになってない「海外旅行でホテルでの英語」と指定したのに「資料の数字が違うよ。次は確認しよう。君なら大丈夫！」って全然反映してない
+AI: プログラム内で入力された日本語を受け取る変数の定義が漏れていたため、指定したシチュエーションが無視されて自動生成（ランダム）が動いてしまっていました。修正により、入力された内容が正しく生成に反映されるようになりました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/api/generate_text.php
+
+2026-05-11 07:46:20
+USER: 「会話を生成する」ボタン押したら生成中であることをわかるようにして。画面中央にオーバーレイ表示かボタンの右など今の画面上でわかる位置に
+AI: 会話生成中に画面中央に「生成中...」というメッセージとスピナーを表示するオーバーレイを実装しました。これにより、バックエンドでの処理が進行中であることを視覚的に示せるようになりました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/index.php
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+- /Users/mizy/Dropbox/speaking2/js/app.js
+
