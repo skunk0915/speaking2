@@ -37,26 +37,38 @@ $prompt = "";
 if ($type === 'new') {
     // Load situations
     $situationsFile = __DIR__ . '/../data/situations.json';
-    $situationText = "";
-    if (file_exists($situationsFile)) {
-        $allSituations = json_decode(file_get_contents($situationsFile), true);
-        if ($allSituations && is_array($allSituations)) {
-            $selectedCategories = $input['situations'] ?? [];
-
-            $filteredSituations = $allSituations;
-            if (!empty($selectedCategories)) {
-                $filteredSituations = array_filter($allSituations, function ($s) use ($selectedCategories) {
-                    return in_array($s['category'], $selectedCategories);
-                });
-                // Fallback to all if filtering results in empty (though UI shouldn't allow this easily)
-                if (empty($filteredSituations)) {
-                    $filteredSituations = $allSituations;
-                }
-            }
-
-            $randomSituation = $filteredSituations[array_rand($filteredSituations)];
-            $situationText = "シチュエーション: " . $randomSituation['situation'] . " (" . $randomSituation['category'] . ")";
+    $inputMode = $input['input_mode'] ?? 'translate';
+    $japaneseInput = $input['japanese_input'] ?? '';
+    
+    if (!empty($japaneseInput)) {
+        if ($inputMode === 'translate') {
+            $situationText = "ユーザーの入力した発話内容: " . $japaneseInput;
+            $specificInstruction = "ユーザーが入力した『{$japaneseInput}』という内容を、相手（AI）の最初の発話として採用してください。入力された日本語の意味を正確に保ちつつ、文脈に合わせた自然でリアリティのある英語に訳してください。勝手に状況を変えたり、質問に変換したりせず、入力された内容をそのまま伝える表現にしてください。";
+        } else {
+            $situationText = "ユーザーの入力した状況・意図: " . $japaneseInput;
+            $specificInstruction = "ユーザーが入力した『{$japaneseInput}』という状況・意図を汲み取り、そのシーンで相手（AI）がユーザーに話しかける最初の言葉として最も自然でリアリティのある発話を生成してください。単なる直訳ではなく、その状況を具体化（場所や関係性など）して、会話が弾むような一言にしてください。";
         }
+    } else {
+        if (file_exists($situationsFile)) {
+            $allSituations = json_decode(file_get_contents($situationsFile), true);
+            if ($allSituations && is_array($allSituations)) {
+                $selectedCategories = $input['situations'] ?? [];
+
+                $filteredSituations = $allSituations;
+                if (!empty($selectedCategories)) {
+                    $filteredSituations = array_filter($allSituations, function ($s) use ($selectedCategories) {
+                        return in_array($s['category'], $selectedCategories);
+                    });
+                    if (empty($filteredSituations)) {
+                        $filteredSituations = $allSituations;
+                    }
+                }
+
+                $randomSituation = $filteredSituations[array_rand($filteredSituations)];
+                $situationText = "シチュエーション: " . $randomSituation['situation'] . " (" . $randomSituation['category'] . ")";
+            }
+        }
+        $specificInstruction = "指定されたシチュエーションをさらに具体的に深掘りし、そのシーンでしかあり得ないような、具体的でリアリティのある発話を生成してください。どこでも言えるような汎用的なフレーズ（例：「こんにちは」「お元気ですか」など）は避け、学習者がそのシーンの語彙を学べるような内容にしてください。";
     }
 
     $prompt = "日常会話のロールプレイシナリオを作成してください。
@@ -69,8 +81,7 @@ if ($type === 'new') {
     - 'sample_user_japanese': それに対するユーザー（あなた）の返答例です。
     
     指示:
-    - 指定されたシチュエーションをさらに具体的に深掘りし、そのシーンでしかあり得ないような、具体的でリアリティのある発話を生成してください。
-    - どこでも言えるような汎用的なフレーズ（例：「こんにちは」「お元気ですか」など）は避け、学習者がそのシーンの語彙を学べるような内容にしてください。
+    - {$specificInstruction}
     - 文字数は{$length}文字程度にしてください。
     - 1人の発話のみを含めてください。複数人の会話形式にはしないでください。
     - 生成する英語は、以下の基準に従ってください:

@@ -9,8 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const lengthVal = document.getElementById('length-val');
     const aiStyleSelect = document.getElementById('ai-style-select');
     const englishLevelSelect = document.getElementById('english-level-select');
+    const initialModeSelect = document.getElementById('initial-mode-select');
     const tmpl = document.getElementById('tmpl-conversation');
     const tmplLoading = document.getElementById('tmpl-loading');
+    const tmplInitialInput = document.getElementById('tmpl-initial-input');
 
     // Local Storage Keys
     const STORAGE_KEYS = {
@@ -19,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         LENGTH: 'english-training-length',
         AI_STYLE: 'english-training-ai-style',
         ENGLISH_LEVEL: 'english-training-english-level',
+        INITIAL_MODE: 'english-training-initial-mode',
         SITUATIONS: 'english-training-situations',
         REVIEWS: 'english-training-reviews'
     };
@@ -30,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedLength = localStorage.getItem(STORAGE_KEYS.LENGTH);
         const savedAiStyle = localStorage.getItem(STORAGE_KEYS.AI_STYLE);
         const savedEnglishLevel = localStorage.getItem(STORAGE_KEYS.ENGLISH_LEVEL);
+        const savedInitialMode = localStorage.getItem(STORAGE_KEYS.INITIAL_MODE);
 
         if (savedVoice) {
             voiceSelect.value = savedVoice;
@@ -46,6 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedEnglishLevel && englishLevelSelect) {
             englishLevelSelect.value = savedEnglishLevel;
         }
+        if (savedInitialMode && initialModeSelect) {
+            initialModeSelect.value = savedInitialMode;
+        }
         
         // Situations are handled in initSituations
     }
@@ -57,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(STORAGE_KEYS.LENGTH, lengthRange.value);
         if (aiStyleSelect) localStorage.setItem(STORAGE_KEYS.AI_STYLE, aiStyleSelect.value);
         if (englishLevelSelect) localStorage.setItem(STORAGE_KEYS.ENGLISH_LEVEL, englishLevelSelect.value);
+        if (initialModeSelect) localStorage.setItem(STORAGE_KEYS.INITIAL_MODE, initialModeSelect.value);
         
         const activeSituations = Array.from(document.querySelectorAll('.situation-tag.active')).map(t => t.dataset.category);
         localStorage.setItem(STORAGE_KEYS.SITUATIONS, JSON.stringify(activeSituations));
@@ -94,6 +102,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (englishLevelSelect) {
         englishLevelSelect.addEventListener('change', () => {
+            saveSettings();
+        });
+    }
+
+    if (initialModeSelect) {
+        initialModeSelect.addEventListener('change', () => {
             saveSettings();
         });
     }
@@ -241,7 +255,12 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = '';
             conversationHistory = [];
             stopAudio();
-            generateText('new');
+            
+            if (initialModeSelect && initialModeSelect.value === 'manual') {
+                showInitialInputUI();
+            } else {
+                generateText('new');
+            }
         }
     });
 
@@ -368,7 +387,74 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initial Load
-    generateText('new');
+    if (initialModeSelect && initialModeSelect.value === 'manual') {
+        showInitialInputUI();
+    } else {
+        generateText('new');
+    }
+
+    function showInitialInputUI() {
+        container.innerHTML = '';
+        const clone = tmplInitialInput.content.cloneNode(true);
+        const tabs = clone.querySelectorAll('.mode-tab');
+        const sectionTranslate = clone.querySelector('#section-translate');
+        const sectionCreative = clone.querySelector('#section-creative');
+        const inputTranslate = clone.querySelector('#initial-japanese-input-translate');
+        const inputCreative = clone.querySelector('#initial-japanese-input-creative');
+        const btnStart = clone.querySelector('#btn-start-conversation');
+        const btnSwitchAuto = clone.querySelector('#btn-switch-auto');
+
+        let currentMode = 'translate';
+
+        const updateBtnState = () => {
+            const currentInput = currentMode === 'translate' ? inputTranslate : inputCreative;
+            btnStart.disabled = currentInput.value.trim() === '';
+        };
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentMode = tab.dataset.mode;
+
+                if (currentMode === 'translate') {
+                    sectionTranslate.classList.remove('hidden');
+                    sectionCreative.classList.add('hidden');
+                    inputTranslate.focus();
+                } else {
+                    sectionTranslate.classList.add('hidden');
+                    sectionCreative.classList.remove('hidden');
+                    inputCreative.focus();
+                }
+                updateBtnState();
+            });
+        });
+
+        [inputTranslate, inputCreative].forEach(input => {
+            input.addEventListener('input', () => {
+                updateBtnState();
+                input.style.height = 'auto';
+                input.style.height = Math.min(input.scrollHeight, 150) + 'px';
+            });
+        });
+
+        btnStart.addEventListener('click', () => {
+            const input = currentMode === 'translate' ? inputTranslate : inputCreative;
+            const jpText = input.value.trim();
+            if (!jpText) return;
+            generateText('new', jpText, currentMode);
+        });
+
+        btnSwitchAuto.addEventListener('click', () => {
+            generateText('new');
+        });
+
+        container.appendChild(clone);
+        inputTranslate.focus();
+        
+        // Hide regular input group while waiting for initial input
+        inputGroup.classList.add('hidden');
+    }
 
     // Settings Panel Logic
     function toggleSettings(show) {
@@ -520,6 +606,15 @@ document.addEventListener('DOMContentLoaded', () => {
         container.scrollTop = container.scrollHeight;
     }
 
+    function scrollToBottom() {
+        setTimeout(() => {
+            window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: 'smooth'
+            });
+        }, 100);
+    }
+
     async function getCorrection(userText, feedbackElement, history = [], isRetry = false, intendedJp = "") {
         const correctionP = feedbackElement.querySelector('.correction');
         const suggestionsList = feedbackElement.querySelector('.suggestions-list');
@@ -652,6 +747,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (retrySection) retrySection.classList.remove('hidden');
                 feedbackElement.classList.remove('hidden');
 
+                scrollToBottom();
+
                 return data;
 
             } catch (error) {
@@ -770,8 +867,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function generateText(type) {
-        console.log('generateText called with type:', type);
+    async function generateText(type, initialJp = null, inputMode = 'translate') {
+        console.log('generateText called with type:', type, 'initialJp:', initialJp, 'mode:', inputMode);
         setLoading(true);
 
         // Show loading display
@@ -799,7 +896,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     length: length,
                     english_level: englishLevelSelect ? englishLevelSelect.value : 'native',
                     ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite',
-                    situations: Array.from(document.querySelectorAll('.situation-tag.active')).map(t => t.dataset.category)
+                    situations: Array.from(document.querySelectorAll('.situation-tag.active')).map(t => t.dataset.category),
+                    japanese_input: initialJp,
+                    input_mode: inputMode
                 })
             });
 
@@ -851,8 +950,8 @@ document.addEventListener('DOMContentLoaded', () => {
         userInputJp.style.height = 'auto';
         btnSend.disabled = true;
 
-        // Scroll to input
-        // inputGroup.scrollIntoView({ behavior: 'smooth' });
+        // Scroll to bottom after move
+        scrollToBottom();
     }
 
     function addConversationItem(data, insertAfterGroup = null, isReviewMode = false) {
@@ -1611,8 +1710,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setLoading(isLoading) {
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) {
+            if (isLoading) {
+                overlay.classList.remove('hidden');
+            } else {
+                overlay.classList.add('hidden');
+            }
+        }
         btnNew.disabled = isLoading;
-        // btnContinue.disabled = isLoading; // Removed
     }
 
     function getSuggestedSentences(groupElement) {
