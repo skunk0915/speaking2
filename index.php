@@ -331,6 +331,10 @@
                         <p class="correction"></p>
                         <h3>提案</h3>
                         <ul class="suggestions-list"></ul>
+                        <div class="reactions-container hidden">
+                            <h3>伝わりやすさの反応</h3>
+                            <div class="reactions-list"></div>
+                        </div>
 
                         <div class="retry-results"></div>
 
@@ -374,6 +378,10 @@
                     <p class="correction"></p>
                     <h3>提案</h3>
                     <ul class="suggestions-list"></ul>
+                    <div class="reactions-container hidden">
+                        <h3>伝わりやすさの反応</h3>
+                        <div class="reactions-list"></div>
+                    </div>
 
                     <div class="retry-results"></div>
 

@@ -137,8 +137,36 @@ if ($mode === 'translation') {
                 \"point\": \"解説\"
             },
             ... (必要な数だけ作成)
-        ]") . "
+        ]") . ",
+        \"reactions\": [
+            {
+                \"level\": 1,
+                \"name\": \"ルイス (初級・非日本語圏)\",
+                \"emoji\": \"🧔\",
+                \"reaction\": \"ルイス本人の言葉（日本語・一人称）。日本語を知らない彼が、ユーザーの英語を聞いてどう感じたかを日本語で。理解できた時の喜びや、難しくてわからなかった時の正直な戸惑いを表現。\",
+                \"suggestion\": \"彼ならどう返すか (英語。初級: 教科書的、短く、文法は正しい)\"
+            },
+            {
+                \"level\": 2,
+                \"name\": \"エレーナ (中級・論理重視)\",
+                \"emoji\": \"👩‍🔬\",
+                \"reaction\": \"エレーナ本人の言葉（日本語・一人称）。論理的に理解できたか、どこに情報の不足や文法の違和感を感じたかを日本語で。知的な彼女らしい、少し厳しくも的確なフィードバック。\",
+                \"suggestion\": \"彼女ならどう返すか (英語。中級: 自然で標準的、文法はきれいで正確)\"
+            },
+            {
+                \"level\": 3,
+                \"name\": \"ジェームス (上級・ネイティブ)\",
+                \"emoji\": \"👱‍♂️\",
+                \"reaction\": \"ジェームス本人の言葉（日本語・一人称）。ネイティブとしての『自然さ』や『ノリ』がどうだったかを日本語で。友達に話しかけるようなカジュアルでライブ感のある反応。\",
+                \"suggestion\": \"彼ならどう返すか (英語。上級: ネイティブ会話、省略・崩し・スラングあり)\"
+            }
+        ]
     }
+
+    ペルソナの詳細指示:
+    - レベル1 (ルイス): 教科書に載っているような、短く非常にシンプルな表現。'kinda'などは使わず、'kind of'とする。
+    - レベル2 (エレーナ): 自然だが標準的で、崩しのない正確な英文。
+    - レベル3 (ジェームス): 'gonna', 'wanna', 'kinda'などの短縮形や、主語の省略など、実際のネイティブが話すリアルな口語表現。
     ";
 } else {
     // Default Conversation Mode
@@ -213,7 +241,27 @@ if ($mode === 'translation') {
                 \"point\": \"解説\"
             },
             ... (必要な数だけ作成)
-        ]") . "
+        ]") . ",
+        \"reactions\": [
+            {
+                \"level\": 1,
+                \"name\": \"初級レベル（非ネイティブ）\",
+                \"emoji\": \"🤔\",
+                \"reaction\": \"ユーザーの英語を聞いた時の正直な反応。キーワードを拾ってなんとか意味を理解しようとする様子や、どこで詰まったかを1〜2文で。\"
+            },
+            {
+                \"level\": 2,
+                \"name\": \"中級レベル（平均的な英語力）\",
+                \"emoji\": \"🙂\",
+                \"reaction\": \"平均的な英語話者の反応。大体理解できるが不自然に感じる点や、誤解しそうなポイントがあればそれを踏まえた反応を1〜2文で。\"
+            },
+            {
+                \"level\": 3,
+                \"name\": \"ネイティブレベル\",
+                \"emoji\": \"😎\",
+                \"reaction\": \"ネイティブスピーカーの反応。自然さやニュアンスへのこだわり、完璧に伝わったか、あるいはもっと良い言い方を期待するような反応を1〜2文で。\"
+            }
+        ]
     }
     ";
 }
@@ -257,14 +305,41 @@ try {
     if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
         $text = $result['candidates'][0]['content']['parts'][0]['text'];
 
+        // Clean up any extra characters before or after the JSON object
+        $text = trim($text);
+
         // Strip markdown code blocks if present
         $text = preg_replace('/^```json\s*|\s*```$/', '', $text);
 
+        // Validate JSON content
         $json = json_decode($text, true);
 
+        // Recovery logic if JSON is invalid
         if (json_last_error() !== JSON_ERROR_NONE) {
-            // Fallback if JSON parsing fails
-            throw new Exception('Invalid JSON from Gemini: ' . json_last_error_msg());
+            $firstBrace = strpos($text, '{');
+            $lastBrace = strrpos($text, '}');
+            if ($firstBrace !== false && $lastBrace !== false && $lastBrace > $firstBrace) {
+                $temp = substr($text, $firstBrace, $lastBrace - $firstBrace + 1);
+                while (strlen($temp) > 0) {
+                    $testJson = json_decode($temp, true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $json = $testJson;
+                        break;
+                    }
+                    $nextLastBrace = strrpos(substr($temp, 0, -1), '}');
+                    if ($nextLastBrace === false) break;
+                    $temp = substr($temp, 0, $nextLastBrace + 1);
+                }
+            }
+        }
+
+        if (!$json) {
+            $errorMsg = 'Invalid JSON from Gemini: ' . json_last_error_msg();
+            file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nRaw: " . $text . "\n", FILE_APPEND);
+
+            http_response_code(500);
+            echo json_encode(['error' => $errorMsg, 'raw' => $text]);
+            exit;
         }
 
         // Handle array wrapper if present

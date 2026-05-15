@@ -684,6 +684,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (retryResults) retryResults.innerHTML = '';
             if (qaSection) qaSection.classList.add('hidden');
             if (retrySection) retrySection.classList.add('hidden');
+            const reactionsContainer = feedbackElement.querySelector('.reactions-container');
+            if (reactionsContainer) reactionsContainer.classList.add('hidden');
 
             if (userInputDisplay) {
                 userInputDisplay.innerHTML = `
@@ -734,6 +736,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     correction: data.correction
                 });
 
+
+                // Render Reactions
+                const reactionsContainer = feedbackElement.querySelector('.reactions-container');
+                const reactionsList = feedbackElement.querySelector('.reactions-list');
+                if (reactionsContainer && reactionsList && data.reactions) {
+                    reactionsContainer.classList.remove('hidden');
+                    reactionsList.innerHTML = '';
+                    data.reactions.forEach(react => {
+                        const div = document.createElement('div');
+                        div.className = `reaction-item level-${react.level}`;
+                        div.innerHTML = `
+                            <div class="reaction-avatar">${react.emoji}</div>
+                            <div class="reaction-content">
+                                <div class="reaction-name">${react.name}</div>
+                                <div class="reaction-text">${react.reaction}</div>
+                                <div class="reaction-suggestion">
+                                    <span class="label">How I'd say:</span>
+                                    <span class="text">${react.suggestion}</span>
+                                </div>
+                            </div>
+                        `;
+                        reactionsList.appendChild(div);
+                    });
+                }
 
                 if (qaSection) qaSection.classList.remove('hidden');
                 if (retrySection) retrySection.classList.remove('hidden');

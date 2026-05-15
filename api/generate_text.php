@@ -94,7 +94,7 @@ if ($type === 'new') {
     出力はJSON形式で、以下のキーを含めてください:
       - 'japanese': 生成した日本語の会話文（相手の発話）
       - 'english': その英訳
-      - 'sample_user_answers': ユーザーの返答例のリスト（1〜5個程度）。提案数は固定せず、文脈に応じてできるだけ多くのバリエーションを提示してください。ただし、似たような表現ばかりを並べるのは避け、ポジティブ・ネガティブ・質問など様々な視点で提示してください。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。;";
+      - 'sample_user_answers': ユーザーの返答例のリスト（1〜5個程度）。提案数は固定せず、文脈に応じてできるだけ多くのバリエーションを提示してください。ただし、似たような表現ばかりを並べるのは避け、ポジティブ・ネガティブ・質問など様々な視点で提示してください。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。";
 } elseif ($type === 'question') {
     $history = implode("\n", array_map(function ($item) {
         $role = $item['role'] === 'user' ? 'ユーザー' : 'AI';
@@ -356,12 +356,36 @@ try {
         // Log raw response for debugging
         file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Raw API Response: " . $text . "\n", FILE_APPEND);
 
+        // Clean up any extra characters before or after the JSON object
+        $text = trim($text);
+        
         // Strip markdown code blocks if present
         $text = preg_replace('/^```json\s*|\s*```$/', '', $text);
 
         // Validate JSON content
         $json = json_decode($text, true);
+        
+        // Recovery logic if JSON is invalid (e.g. extra characters at the end)
         if (json_last_error() !== JSON_ERROR_NONE) {
+            $firstBrace = strpos($text, '{');
+            $lastBrace = strrpos($text, '}');
+            if ($firstBrace !== false && $lastBrace !== false && $lastBrace > $firstBrace) {
+                $temp = substr($text, $firstBrace, $lastBrace - $firstBrace + 1);
+                // Progressively try to find a valid JSON object by moving the last brace index back
+                while (strlen($temp) > 0) {
+                    $testJson = json_decode($temp, true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $json = $testJson;
+                        break;
+                    }
+                    $nextLastBrace = strrpos(substr($temp, 0, -1), '}');
+                    if ($nextLastBrace === false) break;
+                    $temp = substr($temp, 0, $nextLastBrace + 1);
+                }
+            }
+        }
+
+        if (!$json) {
             $errorMsg = 'Invalid JSON from Gemini: ' . json_last_error_msg();
             file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nRaw: " . $text . "\n", FILE_APPEND);
 
