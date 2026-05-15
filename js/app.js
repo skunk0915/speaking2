@@ -733,11 +733,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     correction: data.correction
                 });
 
+
                 if (qaSection) qaSection.classList.remove('hidden');
                 if (retrySection) retrySection.classList.remove('hidden');
                 feedbackElement.classList.remove('hidden');
-
-                scrollToBottom();
 
                 return data;
 
