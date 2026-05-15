@@ -124,15 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnAll = document.getElementById('btn-situation-all');
         const btnNone = document.getElementById('btn-situation-none');
 
-        const CATEGORY_MAP = {
-            'Daily Life': '日常生活',
-            'Travel': '旅行・観光',
-            'Business': 'ビジネス',
-            'Emotions': '感情・表現',
-            'Social': '社交・交流',
-            'Academic': 'アカデミック'
-        };
-        
         try {
             const response = await fetch('data/situations.json');
             const situations = await response.json();
@@ -146,10 +137,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             situationTags.innerHTML = '';
             categories.forEach(cat => {
-                const label = CATEGORY_MAP[cat] || cat;
                 const tag = document.createElement('div');
                 tag.className = 'situation-tag' + (saved.includes(cat) ? ' active' : '');
-                tag.innerHTML = `<span class="tag-label">${label}</span>`;
+                tag.innerHTML = `<span class="tag-label">${cat}</span>`;
                 tag.dataset.category = cat;
                 
                 tag.addEventListener('click', () => {
