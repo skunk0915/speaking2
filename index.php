@@ -191,16 +191,6 @@
                     <p class="english hidden"></p>
                 </div>
                 <div class="actions">
-                    <button class="btn-translate" title="英訳を表示/非表示">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M5 8l6 6" />
-                            <path d="M4 14l6-6 2-3" />
-                            <path d="M2 5h12" />
-                            <path d="M7 2h1" />
-                            <path d="M22 22l-5-10-5 10" />
-                            <path d="M14 18h6" />
-                        </svg>
-                    </button>
                     <button class="btn-speak" title="再生">
                         <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polygon points="5 3 19 12 5 21 5 3" />
@@ -210,6 +200,16 @@
                             <rect x="14" y="4" width="4" height="16" />
                         </svg>
                         <div class="loader hidden"></div>
+                    </button>
+                    <button class="btn-translate" title="英訳を表示/非表示">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 8l6 6" />
+                            <path d="M4 14l6-6 2-3" />
+                            <path d="M2 5h12" />
+                            <path d="M7 2h1" />
+                            <path d="M22 22l-5-10-5 10" />
+                            <path d="M14 18h6" />
+                        </svg>
                     </button>
                     <button class="btn-repeat" title="リピート再生">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

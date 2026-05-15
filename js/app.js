@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedInitialMode && initialModeSelect) {
             initialModeSelect.value = savedInitialMode;
         }
-        
+
         // Situations are handled in initSituations
     }
 
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (aiStyleSelect) localStorage.setItem(STORAGE_KEYS.AI_STYLE, aiStyleSelect.value);
         if (englishLevelSelect) localStorage.setItem(STORAGE_KEYS.ENGLISH_LEVEL, englishLevelSelect.value);
         if (initialModeSelect) localStorage.setItem(STORAGE_KEYS.INITIAL_MODE, initialModeSelect.value);
-        
+
         const activeSituations = Array.from(document.querySelectorAll('.situation-tag.active')).map(t => t.dataset.category);
         localStorage.setItem(STORAGE_KEYS.SITUATIONS, JSON.stringify(activeSituations));
     }
@@ -127,44 +127,44 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('data/situations.json');
             const situations = await response.json();
-            
+
             // Extract unique categories
             const categories = [...new Set(situations.map(s => s.category))].sort();
-            
+
             // Get saved situations
             const savedStr = localStorage.getItem(STORAGE_KEYS.SITUATIONS);
             const saved = savedStr ? JSON.parse(savedStr) : categories; // Default to all selected
-            
+
             situationTags.innerHTML = '';
             categories.forEach(cat => {
                 const tag = document.createElement('div');
                 tag.className = 'situation-tag' + (saved.includes(cat) ? ' active' : '');
                 tag.innerHTML = `<span class="tag-label">${cat}</span>`;
                 tag.dataset.category = cat;
-                
+
                 tag.addEventListener('click', () => {
                     tag.classList.toggle('active');
                     saveSettings();
                 });
-                
+
                 situationTags.appendChild(tag);
             });
-            
+
             btnAll.addEventListener('click', () => {
                 document.querySelectorAll('.situation-tag').forEach(t => t.classList.add('active'));
                 saveSettings();
             });
-            
+
             btnNone.addEventListener('click', () => {
                 document.querySelectorAll('.situation-tag').forEach(t => t.classList.remove('active'));
                 saveSettings();
             });
-            
+
         } catch (e) {
             console.error('Failed to load situations:', e);
         }
     }
-    
+
     initSituations();
 
     // New UI Elements
@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const userInputJp = document.getElementById('user-input-jp');
     const btnHint = document.getElementById('btn-hint');
     const btnSend = document.getElementById('btn-send');
-    
+
     // Review Tab Elements
     const tabPractice = document.getElementById('tab-practice');
     const tabReview = document.getElementById('tab-review');
@@ -209,12 +209,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Tab Switching
     function switchMode(mode) {
         currentMode = mode;
-        if (mode === 'practice') {
+        if (mode === 'practice' || mode === 'conversation') {
             tabPractice.classList.add('active');
             tabReview.classList.remove('active');
             conversationContainer.classList.remove('hidden');
             reviewContainer.classList.add('hidden');
             inputGroup.classList.remove('hidden');
+            inputGroup.style.display = ''; 
         } else {
             tabReview.classList.add('active');
             tabPractice.classList.remove('active');
@@ -233,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
         reviews.forEach(review => {
             addConversationItem(review, null, true);
         });
-        
+
         if (reviews.length === 0) {
             reviewContainer.innerHTML = '<div class="empty-state" style="text-align:center; padding:40px; color:#8d97a5;">保存されたアイテムはありません。</div>';
         }
@@ -245,7 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = '';
             conversationHistory = [];
             stopAudio();
-            
+
             if (initialModeSelect && initialModeSelect.value === 'manual') {
                 showInitialInputUI();
             } else {
@@ -257,10 +258,10 @@ document.addEventListener('DOMContentLoaded', () => {
     userInput.addEventListener('input', () => {
         const hasValue = userInput.value.trim() !== '';
         btnSend.disabled = !hasValue;
-        
+
         // Show/hide Japanese input based on whether English input has content
         userInputJp.style.display = hasValue ? 'block' : (userInputJp.value.trim() !== '' ? 'block' : 'none');
-        
+
         userInput.style.height = 'auto';
         userInput.style.height = Math.min(userInput.scrollHeight, 100) + 'px';
     });
@@ -289,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isRetry) {
                 // Remove retry flag
                 delete lastGroup.dataset.isRetrying;
-                
+
                 const feedbackSection = lastGroup.querySelector('.feedback-section');
                 if (!lastGroup.dataset.retryHistory) {
                     lastGroup.dataset.retryHistory = JSON.stringify([]);
@@ -318,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 conversationHistory.push({ role: 'user', text: text });
 
                 const feedbackSection = lastGroup.querySelector('.feedback-section');
-                
+
                 // Initialize or get retry history for this specific message
                 if (!lastGroup.dataset.retryHistory) {
                     lastGroup.dataset.retryHistory = JSON.stringify([]);
@@ -347,27 +348,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const isOpening = hintDisplay.classList.contains('hidden');
         hintDisplay.classList.toggle('hidden');
         btnHint.classList.toggle('active', isOpening);
-        
+
         if (isOpening) {
             hintList.innerHTML = '';
             currentSampleAnswers.forEach(ans => {
                 const div = document.createElement('div');
                 div.className = 'hint-item';
-                
+
                 const jaText = typeof ans === 'object' ? ans.ja : ans;
                 const enText = typeof ans === 'object' ? ans.en : '';
 
                 div.innerHTML = `
                     <p class="ja-hint">${jaText}</p>
                 `;
-                
+
                 div.addEventListener('click', (e) => {
                     // Fill Japanese input
                     userInputJp.value = jaText;
                     userInputJp.style.display = 'block'; // Show it
                     userInputJp.style.height = 'auto';
                     userInputJp.style.height = Math.min(userInputJp.scrollHeight, 100) + 'px';
-                    
+
                     // Focus English input to encourage starting
                     userInput.focus();
                 });
@@ -441,7 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         container.appendChild(clone);
         inputTranslate.focus();
-        
+
         // Hide regular input group while waiting for initial input
         inputGroup.classList.add('hidden');
     }
@@ -583,7 +584,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function appendItemQaMessage(container, text, role) {
         const div = document.createElement('div');
         div.className = `qa-message ${role}`;
-        
+
         if (role === 'ai') {
             // Use marked for AI messages
             div.innerHTML = marked.parse(text);
@@ -617,7 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isRetry) {
             // In retry mode, show the feedback section (which was hidden)
             feedbackElement.classList.remove('hidden');
-            
+
             // Add a temporary loading item to retryResults
             const loadingItem = document.createElement('div');
             loadingItem.className = 'retry-result-item loading';
@@ -906,7 +907,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const itemElement = addConversationItem(data);
             conversationHistory.push(data);
             currentContext = data.japanese; // Update context
-            
+
             const sampleAnswers = data.sample_user_answers || (data.sample_user_japanese ? [data.sample_user_japanese] : []);
             currentSampleAnswers = sampleAnswers; // For hint button
             itemElement.dataset.sampleAnswers = JSON.stringify(sampleAnswers);
@@ -928,6 +929,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function moveInputToBottom() {
         container.appendChild(inputGroup);
+        // Ensure input group is visible (it might be hidden by showInitialInputUI)
+        inputGroup.classList.remove('hidden');
+        inputGroup.style.display = ''; // Clear any inline display:none
+
         // Reset hint display
         hintDisplay.classList.add('hidden');
         btnHint.classList.remove('active');
@@ -957,13 +962,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnQa = clone.querySelector('.btn-qa');
         const btnSave = clone.querySelector('.btn-save');
         const btnHistory = clone.querySelector('.btn-history');
-        
+
         const practiceSection = clone.querySelector('.practice-section');
         const variationSection = clone.querySelector('.variation-section');
         const mainQa = clone.querySelector('.main-qa');
         const historySection = clone.querySelector('.history-section');
         const historyContainer = clone.querySelector('.history-container');
-        
+
         const practiceInput = clone.querySelector('.practice-input');
         const btnPracticeSend = clone.querySelector('.btn-practice-send');
         const practiceFeedback = clone.querySelector('.feedback-content');
@@ -990,10 +995,10 @@ document.addEventListener('DOMContentLoaded', () => {
             history.forEach(h => {
                 const hItem = document.createElement('div');
                 hItem.className = 'history-item feedback-content';
-                
+
                 const suggestionsContainer = document.createElement('ul');
                 suggestionsContainer.className = 'suggestions-list';
-                
+
                 if (h.suggestions && h.suggestions.length > 0) {
                     h.suggestions.forEach(s => {
                         const sEl = createSuggestionElement(s, suggestionsContainer);
@@ -1060,7 +1065,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const mainHistoryStr = group.dataset.retryHistory;
                 const mainHistory = mainHistoryStr ? JSON.parse(mainHistoryStr) : [];
-                
+
                 reviewData.history = [
                     ...mainHistory,
                     ...(practiceRetryHistory || [])
@@ -1085,7 +1090,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const toggleSection = (btn, section, inputToFocus = null) => {
             if (!section) return;
             const isOpening = section.classList.contains('hidden');
-            
+
             // Close others in the same item
             const others = [
                 { b: btnPractice, s: practiceSection },
@@ -1137,7 +1142,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (btnVariationMenu) {
             btnVariationMenu.addEventListener('click', () => toggleSection(btnVariationMenu, variationSection));
-            
+
             variationSection.querySelectorAll('button').forEach(vBtn => {
                 vBtn.addEventListener('click', () => {
                     const type = vBtn.dataset.type;
@@ -1163,12 +1168,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const activeBtn = [btnPractice, btnVariationMenu, btnQa].find(b => b && b.classList.contains('active'));
             if (activeBtn) {
                 const section = activeBtn === btnPractice ? practiceSection :
-                                activeBtn === btnVariationMenu ? variationSection :
-                                activeBtn === btnQa ? mainQa : historySection;
-                const input = activeBtn === btnPractice ? practiceInput : 
-                              (activeBtn === btnQa ? mainQa.querySelector('.item-qa-input') : null);
+                    activeBtn === btnVariationMenu ? variationSection :
+                        activeBtn === btnQa ? mainQa : historySection;
+                const input = activeBtn === btnPractice ? practiceInput :
+                    (activeBtn === btnQa ? mainQa.querySelector('.item-qa-input') : null);
                 toggleSection(activeBtn, section, input);
-                
+
                 // If practice was active, always show english (remove .hidden)
                 if (activeBtn === btnPractice) {
                     english.classList.remove('hidden');
@@ -1206,7 +1211,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnPracticeSend.disabled = true;
 
                 const isRetry = item.dataset.isPracticeRetrying === 'true';
-                
+
                 if (isRetry) {
                     delete item.dataset.isPracticeRetrying;
                     const dataCorr = await getCorrection(text, practiceFeedback, practiceRetryHistory, true);
@@ -1218,7 +1223,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             suggestions: dataCorr.suggestions || []
                         };
                         practiceRetryHistory.push(newHistoryItem);
-                        
+
                         // Update stored review if in review mode
                         // Update stored review
                         updateSavedData('history', practiceRetryHistory);
@@ -1227,7 +1232,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             renderHistory(practiceRetryHistory, historyContainer);
                         }
                     }
-                    
+
                     practiceInput.value = '';
                 } else {
                     // Initial correction
@@ -1250,7 +1255,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             renderHistory(practiceRetryHistory, historyContainer);
                         }
                     }
-                    
+
                     practiceInput.value = '';
                 }
 
@@ -1264,7 +1269,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnRetry.addEventListener('click', () => {
                     const feedback = btnRetry.closest('.feedback-content') || btnRetry.closest('.feedback-section');
                     const isPractice = feedback.classList.contains('feedback-content') && practiceSection.contains(feedback);
-                    
+
                     if (isPractice) {
                         item.dataset.isPracticeRetrying = 'true';
                         practiceInput.value = '';
@@ -1283,12 +1288,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         userInput.disabled = false;
                         userInput.style.height = 'auto';
                         btnSend.disabled = userInput.value.trim() === '';
-                        
+
                         feedback.classList.add('hidden');
-                        
+
                         // Move input back to bottom
                         moveInputToBottom();
-                        
+
                         userInput.focus();
                         userInput.setSelectionRange(userInput.value.length, userInput.value.length);
                     }
@@ -1475,7 +1480,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const variationItem = document.createElement('div');
             variationItem.className = 'variation-result-item';
-            
+
             let label = 'Variation';
             if (type === 'native') label = 'Native';
             if (type === 'formal') label = 'Formal';
@@ -1504,7 +1509,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const btnPlay = variationItem.querySelector('.btn-play-suggestion');
             const btnRepeat = variationItem.querySelector('.btn-repeat-suggestion');
-            
+
             btnPlay.addEventListener('click', () => {
                 playSuggestionAudio(data.english, btnPlay, btnRepeat);
             });
@@ -1674,7 +1679,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnVariation.addEventListener('click', (e) => {
             e.stopPropagation();
             const isOpening = variationSection.classList.contains('hidden');
-            
+
             if (isOpening) {
                 variationSection.classList.remove('hiding');
                 variationSection.classList.remove('hidden');
@@ -1696,7 +1701,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     japanese: jpText,
                     english: engText
                 }, li, type);
-                
+
                 // Section remains open as per user request
             });
         });
@@ -1719,7 +1724,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function getSuggestedSentences(groupElement) {
         if (!groupElement) return [];
         const sentences = new Set();
-        
+
         // 1. Sample Answers from dataset
         if (groupElement.dataset.sampleAnswers) {
             try {
