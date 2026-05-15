@@ -404,43 +404,44 @@ body {
             }
         }
 
-        .feedback-content {
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            padding: 16px;
-            margin-top: 12px;
-            border: 1px solid #ddd;
+    }
 
-            &.hidden {
-                display: none;
+    .feedback-content {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 16px;
+        margin-top: 12px;
+        border: 1px solid #ddd;
+
+        &.hidden {
+            display: none;
+        }
+
+        h3 {
+            font-size: 12px;
+            color: $text-secondary;
+            margin-bottom: 8px;
+            margin-top: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+
+            &:first-child {
+                margin-top: 0;
             }
+        }
 
-            h3 {
-                font-size: 12px;
-                color: $text-secondary;
-                margin-bottom: 8px;
-                margin-top: 16px;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
+        .correction {
+            @include feedback-bubble;
+            margin-bottom: 16px;
+        }
 
-                &:first-child {
-                    margin-top: 0;
-                }
-            }
-
-            .correction {
-                @include feedback-bubble;
-                margin-bottom: 16px;
-            }
-
-            .suggestions-list {
-                list-style: none;
-                padding: 0;
-                margin: 0;
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
-            }
+        .suggestions-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
     }
 
@@ -650,54 +651,16 @@ body {
             gap: 16px;
 
             .history-item {
-                @include neumorphism-flat;
-                border-radius: $border-radius-md;
-                padding: 16px;
-                background: rgba(255, 255, 255, 0.15);
+                // Now uses .feedback-content classes, only need spacing here
+                margin-bottom: 24px;
+                animation: slideUpFade 0.4s ease;
 
-                .history-user-text {
-                    font-weight: 700;
-                    color: $text-primary;
-                    margin-bottom: 8px;
-                    font-size: 14px;
-                    display: block;
-                    padding-bottom: 8px;
-                    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+                &:last-child {
+                    margin-bottom: 0;
                 }
 
-                .history-correction {
-                    @include markdown-content;
-                    font-size: 14px;
-                    color: $text-primary;
-                    margin-bottom: 12px;
-                }
-
-                .history-suggestions {
-                    list-style: none;
-                    padding: 0;
-                    margin: 0;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-
-                    li {
-                        font-size: 13px;
-                        background: rgba($primary-color, 0.05);
-                        padding: 8px 12px;
-                        border-radius: 8px;
-                        color: $text-primary;
-
-                        .eng {
-                            font-weight: 600;
-                            display: block;
-                            margin-bottom: 2px;
-                        }
-
-                        .jp {
-                            color: $text-secondary;
-                            font-size: 12px;
-                        }
-                    }
+                .suggestions-list {
+                    margin-left: 0;
                 }
             }
         }

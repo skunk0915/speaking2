@@ -989,10 +989,10 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = '';
             history.forEach(h => {
                 const hItem = document.createElement('div');
-                hItem.className = 'history-item';
+                hItem.className = 'history-item feedback-content';
                 
                 const suggestionsContainer = document.createElement('ul');
-                suggestionsContainer.className = 'history-suggestions';
+                suggestionsContainer.className = 'suggestions-list';
                 
                 if (h.suggestions && h.suggestions.length > 0) {
                     h.suggestions.forEach(s => {
@@ -1002,8 +1002,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 hItem.innerHTML = `
-                    <span class="history-user-text">${h.user_input}</span>
-                    <div class="history-correction">${marked.parse(h.correction)}</div>
+                    <div class="user-input-display">
+                        ${h.intended_japanese ? `<div class="intended-jp">${h.intended_japanese}</div>` : ''}
+                        <div class="text">${h.user_input}</div>
+                    </div>
+                    <h3>添削</h3>
+                    <div class="correction">${marked.parse(h.correction)}</div>
+                    ${h.suggestions && h.suggestions.length > 0 ? `<h3>提案</h3>` : ''}
                 `;
                 if (h.suggestions && h.suggestions.length > 0) {
                     hItem.appendChild(suggestionsContainer);
@@ -1011,6 +1016,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 container.appendChild(hItem);
             });
         }
+
 
         // Save Logic (Toggleable)
         const updateAllSaveButtons = (isActive) => {

@@ -250,17 +250,17 @@ body {
   box-shadow: none;
   cursor: not-allowed;
 }
-.conversation-item .practice-section .feedback-content {
+.conversation-item .feedback-content {
   background-color: rgba(255, 255, 255, 0.2);
   border-radius: 12px;
   padding: 16px;
   margin-top: 12px;
   border: 1px solid #ddd;
 }
-.conversation-item .practice-section .feedback-content.hidden {
+.conversation-item .feedback-content.hidden {
   display: none;
 }
-.conversation-item .practice-section .feedback-content h3 {
+.conversation-item .feedback-content h3 {
   font-size: 12px;
   color: #8d97a5;
   margin-bottom: 8px;
@@ -268,10 +268,10 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-.conversation-item .practice-section .feedback-content h3:first-child {
+.conversation-item .feedback-content h3:first-child {
   margin-top: 0;
 }
-.conversation-item .practice-section .feedback-content .correction {
+.conversation-item .feedback-content .correction {
   font-size: 15px;
   line-height: 1.6;
   color: #4a4a4a;
@@ -281,43 +281,43 @@ body {
   background: rgba(255, 255, 255, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.5);
 }
-.conversation-item .practice-section .feedback-content .correction p {
+.conversation-item .feedback-content .correction p {
   margin: 0 0 12px 0;
 }
-.conversation-item .practice-section .feedback-content .correction p:last-child {
+.conversation-item .feedback-content .correction p:last-child {
   margin-bottom: 0;
 }
-.conversation-item .practice-section .feedback-content .correction ul,
-.conversation-item .practice-section .feedback-content .correction ol {
+.conversation-item .feedback-content .correction ul,
+.conversation-item .feedback-content .correction ol {
   margin: 16px 0 12px 20px;
   padding: 0;
 }
-.conversation-item .practice-section .feedback-content .correction ul li,
-.conversation-item .practice-section .feedback-content .correction ol li {
+.conversation-item .feedback-content .correction ul li,
+.conversation-item .feedback-content .correction ol li {
   margin-bottom: 8px;
   padding-left: 4px;
 }
-.conversation-item .practice-section .feedback-content .correction ul li::marker,
-.conversation-item .practice-section .feedback-content .correction ol li::marker {
+.conversation-item .feedback-content .correction ul li::marker,
+.conversation-item .feedback-content .correction ol li::marker {
   color: #007AFF;
   font-weight: 700;
   font-size: 1.1em;
 }
-.conversation-item .practice-section .feedback-content .correction ul {
+.conversation-item .feedback-content .correction ul {
   list-style-type: "・";
 }
-.conversation-item .practice-section .feedback-content .correction strong {
+.conversation-item .feedback-content .correction strong {
   color: rgb(0, 97.6, 204);
   font-weight: 700;
   background: rgba(0, 122, 255, 0.05);
   padding: 0 2px;
   border-radius: 2px;
 }
-.conversation-item .practice-section .feedback-content .correction em {
+.conversation-item .feedback-content .correction em {
   font-style: italic;
   color: #8d97a5;
 }
-.conversation-item .practice-section .feedback-content .correction code {
+.conversation-item .feedback-content .correction code {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   background: rgba(0, 0, 0, 0.05);
   padding: 2px 4px;
@@ -325,7 +325,7 @@ body {
   font-size: 0.9em;
   color: #007AFF;
 }
-.conversation-item .practice-section .feedback-content .correction pre {
+.conversation-item .feedback-content .correction pre {
   background: #2d2d2d;
   color: #f8f8f2;
   padding: 12px;
@@ -333,28 +333,28 @@ body {
   overflow-x: auto;
   margin: 12px 0;
 }
-.conversation-item .practice-section .feedback-content .correction pre code {
+.conversation-item .feedback-content .correction pre code {
   background: transparent;
   padding: 0;
   color: inherit;
   font-size: 14px;
 }
-.conversation-item .practice-section .feedback-content .correction blockquote {
+.conversation-item .feedback-content .correction blockquote {
   margin: 12px 0;
   padding-left: 12px;
   border-left: 4px solid #a3b1c6;
   color: #8d97a5;
   font-style: italic;
 }
-.conversation-item .practice-section .feedback-content .correction hr {
+.conversation-item .feedback-content .correction hr {
   border: none;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   margin: 16px 0;
 }
-.conversation-item .practice-section .feedback-content .correction {
+.conversation-item .feedback-content .correction {
   margin-bottom: 16px;
 }
-.conversation-item .practice-section .feedback-content .suggestions-list {
+.conversation-item .feedback-content .suggestions-list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -736,120 +736,14 @@ body {
   gap: 16px;
 }
 .conversation-item .history-section .history-container .history-item {
-  background: #e0e5ec;
-  box-shadow: 9px 9px 16px #a3b1c6, -9px -9px 16px #f5f5f5;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 14px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.15);
+  margin-bottom: 24px;
+  animation: slideUpFade 0.4s ease;
 }
-.conversation-item .history-section .history-container .history-item .history-user-text {
-  font-weight: 700;
-  color: #4a4a4a;
-  margin-bottom: 8px;
-  font-size: 14px;
-  display: block;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-.conversation-item .history-section .history-container .history-item .history-correction p {
-  margin: 0 0 12px 0;
-}
-.conversation-item .history-section .history-container .history-item .history-correction p:last-child {
+.conversation-item .history-section .history-container .history-item:last-child {
   margin-bottom: 0;
 }
-.conversation-item .history-section .history-container .history-item .history-correction ul,
-.conversation-item .history-section .history-container .history-item .history-correction ol {
-  margin: 16px 0 12px 20px;
-  padding: 0;
-}
-.conversation-item .history-section .history-container .history-item .history-correction ul li,
-.conversation-item .history-section .history-container .history-item .history-correction ol li {
-  margin-bottom: 8px;
-  padding-left: 4px;
-}
-.conversation-item .history-section .history-container .history-item .history-correction ul li::marker,
-.conversation-item .history-section .history-container .history-item .history-correction ol li::marker {
-  color: #007AFF;
-  font-weight: 700;
-  font-size: 1.1em;
-}
-.conversation-item .history-section .history-container .history-item .history-correction ul {
-  list-style-type: "・";
-}
-.conversation-item .history-section .history-container .history-item .history-correction strong {
-  color: rgb(0, 97.6, 204);
-  font-weight: 700;
-  background: rgba(0, 122, 255, 0.05);
-  padding: 0 2px;
-  border-radius: 2px;
-}
-.conversation-item .history-section .history-container .history-item .history-correction em {
-  font-style: italic;
-  color: #8d97a5;
-}
-.conversation-item .history-section .history-container .history-item .history-correction code {
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  background: rgba(0, 0, 0, 0.05);
-  padding: 2px 4px;
-  border-radius: 4px;
-  font-size: 0.9em;
-  color: #007AFF;
-}
-.conversation-item .history-section .history-container .history-item .history-correction pre {
-  background: #2d2d2d;
-  color: #f8f8f2;
-  padding: 12px;
-  border-radius: 8px;
-  overflow-x: auto;
-  margin: 12px 0;
-}
-.conversation-item .history-section .history-container .history-item .history-correction pre code {
-  background: transparent;
-  padding: 0;
-  color: inherit;
-  font-size: 14px;
-}
-.conversation-item .history-section .history-container .history-item .history-correction blockquote {
-  margin: 12px 0;
-  padding-left: 12px;
-  border-left: 4px solid #a3b1c6;
-  color: #8d97a5;
-  font-style: italic;
-}
-.conversation-item .history-section .history-container .history-item .history-correction hr {
-  border: none;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  margin: 16px 0;
-}
-.conversation-item .history-section .history-container .history-item .history-correction {
-  font-size: 14px;
-  color: #4a4a4a;
-  margin-bottom: 12px;
-}
-.conversation-item .history-section .history-container .history-item .history-suggestions {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.conversation-item .history-section .history-container .history-item .history-suggestions li {
-  font-size: 13px;
-  background: rgba(0, 122, 255, 0.05);
-  padding: 8px 12px;
-  border-radius: 8px;
-  color: #4a4a4a;
-}
-.conversation-item .history-section .history-container .history-item .history-suggestions li .eng {
-  font-weight: 600;
-  display: block;
-  margin-bottom: 2px;
-}
-.conversation-item .history-section .history-container .history-item .history-suggestions li .jp {
-  color: #8d97a5;
-  font-size: 12px;
+.conversation-item .history-section .history-container .history-item .suggestions-list {
+  margin-left: 0;
 }
 
 .sample-answer {
@@ -1214,10 +1108,6 @@ body {
   outline: none;
   box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #f5f5f5, 0 0 0 2px rgba(0, 122, 255, 0.1);
 }
-.input-group .input-row textarea::-moz-placeholder {
-  color: #8d97a5;
-  opacity: 0.7;
-}
 .input-group .input-row textarea::placeholder {
   color: #8d97a5;
   opacity: 0.7;
@@ -1449,9 +1339,7 @@ body {
   border: 1px solid #ddd;
 }
 .settings-panel .setting-item select {
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
+  appearance: none;
   background: #e0e5ec;
   box-shadow: inset 6px 6px 10px #a3b1c6, inset -6px -6px 10px #f5f5f5;
   border: none;
@@ -2241,9 +2129,7 @@ button .loader {
   align-items: center;
   justify-content: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
 }
 .situation-tag .tag-label {
   font-size: 13px;
@@ -2411,10 +2297,6 @@ button .loader {
   outline: none;
   border-color: rgba(0, 122, 255, 0.3);
   box-shadow: inset 8px 8px 12px #a3b1c6, inset -8px -8px 12px #f5f5f5;
-}
-.initial-input-container .input-section textarea::-moz-placeholder {
-  color: #8d97a5;
-  opacity: 0.5;
 }
 .initial-input-container .input-section textarea::placeholder {
   color: #8d97a5;
