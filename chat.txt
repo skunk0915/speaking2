@@ -146,3 +146,12 @@ USER: ペルソナの返答例が文脈的におかしい（自分が話す側�
 AI: ペルソナの「suggestion」の定義を、ユーザーの意図（課題の日本語）を各レベルで英語にするならどう表現するか、という「言い換え」の指示に明確化しました。これにより、各レベルにふさわしい模範解答が提示されるようになります。
 編集ファイル:
 - api/correct_text.php
+2026-05-16 21:52:49 会員機能（MySQL）と復習データのMySQL永続化を実装しました。
+編集ファイル: 
+- db/schema.sql
+- apply_schema.php
+- api/auth.php
+- api/reviews.php
+- index.php
+- css/style.scss
+- js/app.js

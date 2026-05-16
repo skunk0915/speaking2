@@ -141,7 +141,15 @@
                     </button>
                 </div>
             </div>
+            <div class="setting-item user-info-section">
+                <label>アカウント</label>
+                <div class="user-display">
+                    <span id="display-user-email">...</span>
+                    <button id="btn-logout" class="btn-text danger">ログアウト</button>
+                </div>
+            </div>
         </div>
+
 
         <!-- Persona Help Modal -->
         <div id="persona-help-overlay" class="modal-overlay hidden"></div>
@@ -159,7 +167,7 @@
                 <div class="help-persona-item">
                     <div class="avatar">🧔</div>
                     <div class="info">
-                        <h4>ルイス (初級)</h4>
+                        <h4>ルイス (在米ブラジル人)</h4>
                         <p class="tag">Learner English</p>
                         <p>非日本語圏の初級者。語彙が少なく、教科書的なシンプルな英語を好みます。日本語特有の曖昧な表現やカタカナ英語は通じません。</p>
                     </div>
@@ -167,7 +175,7 @@
                 <div class="help-persona-item">
                     <div class="avatar">👩‍🔬</div>
                     <div class="info">
-                        <h4>エレーナ (中級)</h4>
+                        <h4>エレーナ (教師)</h4>
                         <p class="tag">Standard English</p>
                         <p>論理重視の非ネイティブ。正確で標準的な英語を話し、曖昧さや文法ミスによる情報の欠落に厳しい視点を持ちます。</p>
                     </div>
@@ -175,7 +183,7 @@
                 <div class="help-persona-item">
                     <div class="avatar">👱‍♂️</div>
                     <div class="info">
-                        <h4>ジェームス (上級)</h4>
+                        <h4>ジェームス (ネイティブ)</h4>
                         <p class="tag">Natural Spoken English</p>
                         <p>ネイティブの友人。自然なノリを重視し、省略や崩し（gonna/wanna等）を含むリアルな口語を多用します。</p>
                     </div>
@@ -371,7 +379,11 @@
                             <div class="reactions-header">
                                 <h3>伝わりやすさの反応</h3>
                                 <button class="btn-persona-help" title="ペルソナの詳細">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                    </svg>
                                 </button>
                             </div>
                             <div class="reactions-list"></div>
@@ -423,7 +435,11 @@
                         <div class="reactions-header">
                             <h3>伝わりやすさの反応</h3>
                             <button class="btn-persona-help" title="ペルソナの詳細">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                </svg>
                             </button>
                         </div>
                         <div class="reactions-list"></div>
@@ -556,6 +572,33 @@
         <div class="loader-content">
             <div class="loader-spinner"></div>
             <p>生成中...</p>
+        </div>
+    </div>
+
+    <!-- Auth Overlay/Panel -->
+    <div id="auth-overlay" class="modal-overlay hidden"></div>
+    <div id="auth-panel" class="auth-panel">
+        <div class="auth-content">
+            <div class="auth-header">
+                <h2>English Training</h2>
+                <p>学習を記録するためにログインしてください</p>
+            </div>
+            <div id="auth-error" class="auth-error hidden"></div>
+            <div class="auth-tabs">
+                <button id="tab-login" class="auth-tab active" data-mode="login">ログイン</button>
+                <button id="tab-signup" class="auth-tab" data-mode="signup">新規登録</button>
+            </div>
+            <form id="auth-form" class="auth-form">
+                <div class="form-group">
+                    <label for="auth-email">メールアドレス</label>
+                    <input type="email" id="auth-email" required placeholder="example@mail.com">
+                </div>
+                <div class="form-group">
+                    <label for="auth-password">パスワード</label>
+                    <input type="password" id="auth-password" required placeholder="">
+                </div>
+                <button type="submit" id="btn-auth-submit" class="btn btn-primary btn-block">ログイン</button>
+            </form>
         </div>
     </div>
 

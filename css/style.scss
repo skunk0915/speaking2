@@ -454,164 +454,6 @@ body {
             flex-direction: column;
             gap: 12px;
         }
-
-        .reactions-container {
-            margin-top: 24px;
-            animation: slideUpFade 0.5s ease forwards;
-
-            .reactions-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 12px;
-                padding-bottom: 8px;
-                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-
-                h3 {
-                    margin: 0 !important;
-                    display: flex;
-                    align-items: center;
-                    font-size: 13px;
-                    color: $text-primary;
-                    font-weight: 700;
-
-                    &::before {
-                        content: '';
-                        display: inline-block;
-                        width: 4px;
-                        height: 14px;
-                        background: $primary-color;
-                        border-radius: 2px;
-                        margin-right: 8px;
-                    }
-                }
-
-                .btn-persona-help {
-                    width: 24px;
-                    height: 24px;
-                    border-radius: 50%;
-                    background: none;
-                    border: 1px solid $shadow-dark;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: $text-secondary;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                    padding: 0;
-
-                    &:hover {
-                        color: $primary-color;
-                        border-color: $primary-color;
-                        background: rgba($primary-color, 0.05);
-                    }
-
-                    svg {
-                        width: 14px;
-                        height: 14px;
-                    }
-                }
-            }
-
-            .reactions-list {
-                display: grid;
-                grid-template-columns: 1fr;
-                gap: 12px;
-
-                @media (min-width: 500px) {
-                    grid-template-columns: repeat(3, 1fr);
-                }
-            }
-        }
-
-        .reaction-item {
-            @include neumorphism-flat;
-            padding: 16px;
-            border-radius: $border-radius-md;
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            text-align: left;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            transition: transform 0.2s ease;
-
-            &:hover {
-                transform: translateY(-2px);
-            }
-
-            .reaction-top {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-
-            .reaction-avatar {
-                font-size: 24px;
-                filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-                flex-shrink: 0;
-            }
-
-            .reaction-name {
-                font-size: 11px;
-                font-weight: 800;
-                color: $text-secondary;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-                line-height: 1.2;
-            }
-
-            .reaction-text {
-                font-size: 13px;
-                color: $text-primary;
-                line-height: 1.5;
-                font-weight: 500;
-                margin: 0;
-            }
-
-            .reaction-suggestion {
-                margin-top: 4px;
-                padding: 10px;
-                background: rgba(255, 255, 255, 0.6);
-                border-radius: 10px;
-                text-align: left;
-                width: 100%;
-                border: 1px solid rgba($primary-color, 0.1);
-                box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.02);
-
-                .label {
-                    display: block;
-                    font-size: 9px;
-                    font-weight: 800;
-                    color: $primary-color;
-                    text-transform: uppercase;
-                    margin-bottom: 4px;
-                    opacity: 0.8;
-                }
-
-                .text {
-                    font-size: 13px;
-                    font-weight: 600;
-                    color: $text-primary;
-                    line-height: 1.4;
-                    font-style: italic;
-                    word-break: break-word;
-                }
-            }
-
-            &.level-1 {
-                // border-bottom: 3px solid #FFCC00;
-            }
-
-            &.level-2 {
-                // border-bottom: 3px solid #FF9500;
-            }
-
-            &.level-3 {
-                // border-bottom: 3px solid #34C759;
-            }
-        }
     }
 
     .suggestion-item,
@@ -834,6 +676,156 @@ body {
             }
         }
     }
+}
+
+// Persona Reactions (Global Styles)
+.reactions-container {
+    margin-top: 24px;
+    animation: slideUpFade 0.5s ease forwards;
+
+    .reactions-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+        h3 {
+            margin: 0 !important;
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            color: $text-primary;
+            font-weight: 700;
+
+            &::before {
+                content: '';
+                display: inline-block;
+                width: 4px;
+                height: 14px;
+                background: $primary-color;
+                border-radius: 2px;
+                margin-right: 8px;
+            }
+        }
+
+        .btn-persona-help {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: none;
+            border: 1px solid $shadow-dark;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: $text-secondary;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 0;
+
+            &:hover {
+                color: $primary-color;
+                border-color: $primary-color;
+                background: rgba($primary-color, 0.05);
+            }
+
+            svg {
+                width: 14px;
+                height: 14px;
+            }
+        }
+    }
+
+    .reactions-list {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+
+        @media (min-width: 500px) {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+}
+
+.reaction-item {
+    @include neumorphism-flat;
+    padding: 16px;
+    border-radius: $border-radius-md;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: left;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    transition: transform 0.2s ease;
+
+
+    .reaction-top {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .reaction-avatar {
+        font-size: 24px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        flex-shrink: 0;
+    }
+
+    .reaction-name {
+        font-size: 11px;
+        font-weight: 800;
+        color: $text-secondary;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        line-height: 1.2;
+    }
+
+    .reaction-text {
+        font-size: 13px;
+        color: $text-primary;
+        line-height: 1.5;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    .reaction-suggestion {
+        margin-top: 4px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 10px;
+        text-align: left;
+        width: 100%;
+        border: 1px solid rgba($primary-color, 0.1);
+        box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.02);
+
+        .label {
+            display: block;
+            font-size: 9px;
+            font-weight: 800;
+            color: $primary-color;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            opacity: 0.8;
+        }
+
+        .text {
+            font-size: 13px;
+            font-weight: 600;
+            color: $text-primary;
+            line-height: 1.4;
+            font-style: italic;
+            word-break: break-word;
+        }
+    }
+
+    &.level-1 {}
+
+    &.level-2 {}
+
+    &.level-3 {}
 }
 
 .sample-answer {
@@ -2350,6 +2342,165 @@ button .loader {
                 color: $text-secondary;
                 line-height: 1.5;
                 margin: 0;
+            }
+        }
+    }
+}
+
+// Auth Panel
+.auth-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 90%;
+    max-width: 400px;
+    background: $bg-color;
+    @include neumorphism-flat;
+    border-radius: $border-radius-lg;
+    padding: 32px;
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0;
+    pointer-events: none;
+
+    &.active {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 24px;
+
+        h2 {
+            margin: 0;
+            color: $primary-color;
+            font-size: 24px;
+        }
+
+        p {
+            margin: 8px 0 0;
+            color: $text-secondary;
+            font-size: 14px;
+        }
+    }
+
+    .auth-tabs {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            border-radius: $border-radius-md;
+            border: none;
+            background: $bg-color;
+            @include neumorphism-flat;
+            color: $text-secondary;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            &.active {
+                @include neumorphism-pressed;
+                color: $primary-color;
+            }
+        }
+    }
+
+    .auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+
+            label {
+                font-size: 13px;
+                font-weight: 600;
+                color: $text-secondary;
+                margin-left: 4px;
+            }
+
+            input {
+                padding: 12px 16px;
+                border-radius: $border-radius-md;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                background: rgba(255, 255, 255, 0.1);
+                @include neumorphism-pressed;
+                font-size: 16px;
+                color: $text-primary;
+                width: 100%;
+
+                &:focus {
+                    outline: none;
+                    border-color: $primary-color;
+                }
+            }
+        }
+    }
+
+    .auth-error {
+        background: rgba($danger-color, 0.1);
+        color: $danger-color;
+        padding: 12px;
+        border-radius: $border-radius-md;
+        font-size: 13px;
+        margin-bottom: 16px;
+        text-align: center;
+        border: 1px solid rgba($danger-color, 0.2);
+
+        &.hidden {
+            display: none;
+        }
+    }
+}
+
+.user-info-section {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+
+    .user-display {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 8px;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: $border-radius-md;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        @include neumorphism-pressed;
+
+        #display-user-email {
+            font-size: 13px;
+            color: $text-primary;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 180px;
+        }
+
+        .btn-logout {
+            font-size: 12px;
+            color: $danger-color;
+            font-weight: 700;
+            padding: 4px 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+
+            &:hover {
+                opacity: 0.7;
             }
         }
     }

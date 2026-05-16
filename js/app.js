@@ -23,7 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ENGLISH_LEVEL: 'english-training-english-level',
         INITIAL_MODE: 'english-training-initial-mode',
         SITUATIONS: 'english-training-situations',
-        REVIEWS: 'english-training-reviews'
+        SITUATIONS: 'english-training-situations'
+        // REVIEWS moved to MySQL
     };
 
     // Load settings from localStorage
@@ -165,6 +166,110 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Auth Logic
+    const authOverlay = document.getElementById('auth-overlay');
+    const authPanel = document.getElementById('auth-panel');
+    const authForm = document.getElementById('auth-form');
+    const authEmail = document.getElementById('auth-email');
+    const authPassword = document.getElementById('auth-password');
+    const authTabs = document.querySelectorAll('.auth-tab');
+    const authError = document.getElementById('auth-error');
+    const btnAuthSubmit = document.getElementById('btn-auth-submit');
+    const displayUserEmail = document.getElementById('display-user-email');
+    const btnLogout = document.getElementById('btn-logout');
+
+    authTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            authMode = tab.dataset.mode;
+            authTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            btnAuthSubmit.textContent = authMode === 'login' ? 'ログイン' : '新規登録';
+            authError.classList.add('hidden');
+        });
+    });
+
+    async function checkAuth() {
+        try {
+            const res = await fetch('api/auth.php?action=check');
+            const data = await res.json();
+            if (data.status === 'success') {
+                currentUser = data.user;
+                if (displayUserEmail) displayUserEmail.textContent = currentUser.email;
+                hideAuth();
+                // Fetch initial reviews
+                const reviewRes = await fetch('api/reviews.php');
+                const reviewData = await reviewRes.json();
+                if (reviewData.status === 'success') {
+                    reviews = reviewData.reviews;
+                }
+            } else {
+                showAuth();
+            }
+        } catch (e) {
+            console.error('Auth check failed', e);
+            showAuth();
+        }
+    }
+
+    function showAuth() {
+        if (authOverlay) authOverlay.classList.remove('hidden');
+        if (authPanel) authPanel.classList.add('active');
+    }
+
+    function hideAuth() {
+        if (authOverlay) authOverlay.classList.add('hidden');
+        if (authPanel) authPanel.classList.remove('active');
+    }
+
+    if (authForm) {
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            authError.classList.add('hidden');
+            btnAuthSubmit.disabled = true;
+
+            try {
+                const res = await fetch('api/auth.php?action=' + authMode, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: authEmail.value,
+                        password: authPassword.value
+                    })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    currentUser = data.user;
+                    if (displayUserEmail) displayUserEmail.textContent = currentUser.email;
+                    hideAuth();
+                    // Fetch reviews
+                    const reviewRes = await fetch('api/reviews.php');
+                    const reviewData = await reviewRes.json();
+                    if (reviewData.status === 'success') {
+                        reviews = reviewData.reviews;
+                    }
+                } else {
+                    authError.textContent = data.message || '認証に失敗しました';
+                    authError.classList.remove('hidden');
+                }
+            } catch (e) {
+                authError.textContent = 'エラーが発生しました';
+                authError.classList.remove('hidden');
+            } finally {
+                btnAuthSubmit.disabled = false;
+            }
+        });
+    }
+
+    if (btnLogout) {
+        btnLogout.addEventListener('click', async () => {
+            await fetch('api/auth.php?action=logout');
+            location.reload();
+        });
+    }
+
+    // Call checkAuth on init
+    checkAuth();
+
     initSituations();
 
     // New UI Elements
@@ -195,7 +300,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const reviewContainer = document.getElementById('review-container');
     const conversationContainer = document.getElementById('conversation-container');
 
-    let reviews = JSON.parse(localStorage.getItem(STORAGE_KEYS.REVIEWS) || '[]');
+    let reviews = []; // Now loaded from server
+    let currentUser = null;
+    let authMode = 'login';
     let currentMode = 'practice'; // 'practice' or 'review'
 
     let conversationHistory = [];
@@ -229,14 +336,28 @@ document.addEventListener('DOMContentLoaded', () => {
     tabPractice.addEventListener('click', () => switchMode('practice'));
     tabReview.addEventListener('click', () => switchMode('review'));
 
-    function renderReviews() {
-        reviewContainer.innerHTML = '';
-        reviews.forEach(review => {
-            addConversationItem(review, null, true);
-        });
+    async function renderReviews() {
+        reviewContainer.innerHTML = '<div style="text-align:center; padding:20px;"><div class="loader"></div></div>';
+        
+        try {
+            const res = await fetch('api/reviews.php');
+            const data = await res.json();
+            if (data.status === 'success') {
+                reviews = data.reviews;
+                reviewContainer.innerHTML = '';
+                reviews.forEach(review => {
+                    addConversationItem(review, null, true);
+                });
 
-        if (reviews.length === 0) {
-            reviewContainer.innerHTML = '<div class="empty-state" style="text-align:center; padding:40px; color:#8d97a5;">保存されたアイテムはありません。</div>';
+                if (reviews.length === 0) {
+                    reviewContainer.innerHTML = '<div class="empty-state" style="text-align:center; padding:40px; color:#8d97a5;">保存されたアイテムはありません。</div>';
+                }
+            } else {
+                reviewContainer.innerHTML = '<div class="empty-state" style="text-align:center; padding:40px; color:#FF3B30;">データの取得に失敗しました。</div>';
+            }
+        } catch (e) {
+            console.error(e);
+            reviewContainer.innerHTML = '<div class="empty-state" style="text-align:center; padding:40px; color:#FF3B30;">エラーが発生しました。</div>';
         }
     }
 
@@ -1032,10 +1153,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (isReviewMode) {
             english.classList.add('hidden');
-            // btnSave.classList.add('hidden'); // Show it even in review mode to allow un-saving
             if (data.history && data.history.length > 0) {
                 btnHistory.classList.remove('hidden');
                 renderHistory(data.history, historyContainer);
+            }
+            // Render reactions in review mode if they exist
+            if (data.reactions && data.reactions.length > 0) {
+                const practiceFeedback = clone.querySelector('.feedback-content');
+                if (practiceFeedback) {
+                    renderReactions(data.reactions, practiceFeedback);
+                }
             }
         }
 
@@ -1065,6 +1192,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${h.intended_japanese ? `<div class="intended-jp">${h.intended_japanese}</div>` : ''}
                         <div class="text">${h.user_input}</div>
                     </div>
+                    <div class="reactions-container hidden">
+                        <div class="reactions-header">
+                            <h3>伝わりやすさの反応</h3>
+                        </div>
+                        <div class="reactions-list"></div>
+                    </div>
                     <h3>添削</h3>
                     <div class="correction">${marked.parse(h.correction)}</div>
                     ${h.suggestions && h.suggestions.length > 0 ? `<h3>提案</h3>` : ''}
@@ -1072,6 +1205,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (h.suggestions && h.suggestions.length > 0) {
                     hItem.appendChild(suggestionsContainer);
                 }
+
+                // Render reactions if present in history item
+                if (h.reactions && h.reactions.length > 0) {
+                    renderReactions(h.reactions, hItem);
+                }
+
                 container.appendChild(hItem);
             });
         }
@@ -1097,24 +1236,32 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        const toggleSave = () => {
+        const toggleSave = async () => {
             const index = reviews.findIndex(r => r.japanese === data.japanese);
             const isSaved = index !== -1;
 
             if (isSaved) {
-                // Un-save
-                reviews.splice(index, 1);
-                localStorage.setItem(STORAGE_KEYS.REVIEWS, JSON.stringify(reviews));
-                updateAllSaveButtons(false);
+                // Un-save from server
+                const reviewId = reviews[index].id;
+                try {
+                    const res = await fetch(`api/reviews.php?id=${reviewId}`, { method: 'DELETE' });
+                    const resData = await res.json();
+                    if (resData.status === 'success') {
+                        reviews.splice(index, 1);
+                        updateAllSaveButtons(false);
+                    }
+                } catch (e) {
+                    console.error('Delete failed', e);
+                }
             } else {
-                // Save
+                // Save to server
                 const reviewData = {
-                    id: Date.now().toString(),
                     japanese: data.japanese,
                     english: data.english,
                     sample_user_answers: data.sample_user_answers,
                     history: [],
-                    qa_history: (mainQa && mainQa.itemQaHistory) ? mainQa.itemQaHistory : []
+                    qa_history: (mainQa && mainQa.itemQaHistory) ? mainQa.itemQaHistory : [],
+                    reactions: data.reactions || [] // Include reactions
                 };
 
                 const mainHistoryStr = group.dataset.retryHistory;
@@ -1125,9 +1272,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     ...(practiceRetryHistory || [])
                 ];
 
-                reviews.push(reviewData);
-                localStorage.setItem(STORAGE_KEYS.REVIEWS, JSON.stringify(reviews));
-                updateAllSaveButtons(true);
+                try {
+                    const res = await fetch('api/reviews.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(reviewData)
+                    });
+                    const resData = await res.json();
+                    if (resData.status === 'success') {
+                        reviewData.id = resData.id;
+                        reviews.push(reviewData);
+                        updateAllSaveButtons(true);
+                    }
+                } catch (e) {
+                    console.error('Save failed', e);
+                }
             }
         };
 
@@ -1274,7 +1433,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         const newHistoryItem = {
                             user_input: text,
                             correction: dataCorr.correction,
-                            suggestions: dataCorr.suggestions || []
+                            suggestions: dataCorr.suggestions || [],
+                            reactions: dataCorr.reactions || [],
+                            intended_japanese: dataCorr.intended_japanese || null
                         };
                         practiceRetryHistory.push(newHistoryItem);
 
@@ -1297,7 +1458,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         const newHistoryItem = {
                             user_input: text,
                             correction: dataCorr.correction,
-                            suggestions: dataCorr.suggestions || []
+                            suggestions: dataCorr.suggestions || [],
+                            reactions: dataCorr.reactions || [],
+                            intended_japanese: dataCorr.intended_japanese || null
                         };
                         practiceRetryHistory.push(newHistoryItem);
 
@@ -1811,4 +1974,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return Array.from(sentences).filter(s => s.trim() !== '');
     }
+    function renderReactions(reactions, feedbackElement) {
+        const reactionsContainer = feedbackElement.querySelector('.reactions-container');
+        const reactionsList = feedbackElement.querySelector('.reactions-list');
+        if (reactionsContainer && reactionsList && reactions) {
+            reactionsContainer.classList.remove('hidden');
+            reactionsList.innerHTML = '';
+            reactions.forEach(react => {
+                const div = document.createElement('div');
+                div.className = `reaction-item level-${react.level}`;
+                div.innerHTML = `
+                    <div class="reaction-top">
+                        <div class="reaction-avatar">${react.emoji}</div>
+                        <div class="reaction-name">${react.name}</div>
+                    </div>
+                    <div class="reaction-text">${react.reaction}</div>
+                    <div class="reaction-suggestion">
+                        <span class="label">How I'd say:</span>
+                        <span class="text">${react.suggestion || '...'}</span>
+                    </div>
+                `;
+                reactionsList.appendChild(div);
+            });
+        }
+    }
 });
+
