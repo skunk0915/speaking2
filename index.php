@@ -143,6 +143,46 @@
             </div>
         </div>
 
+        <!-- Persona Help Modal -->
+        <div id="persona-help-overlay" class="modal-overlay hidden"></div>
+        <div id="persona-help-panel" class="settings-panel">
+            <div class="settings-header">
+                <h3>ペルソナの詳細</h3>
+                <button id="btn-close-persona-help" class="btn-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="settings-body persona-help-body">
+                <div class="help-persona-item">
+                    <div class="avatar">🧔</div>
+                    <div class="info">
+                        <h4>ルイス (初級)</h4>
+                        <p class="tag">Learner English</p>
+                        <p>非日本語圏の初級者。語彙が少なく、教科書的なシンプルな英語を好みます。日本語特有の曖昧な表現やカタカナ英語は通じません。</p>
+                    </div>
+                </div>
+                <div class="help-persona-item">
+                    <div class="avatar">👩‍🔬</div>
+                    <div class="info">
+                        <h4>エレーナ (中級)</h4>
+                        <p class="tag">Standard English</p>
+                        <p>論理重視の非ネイティブ。正確で標準的な英語を話し、曖昧さや文法ミスによる情報の欠落に厳しい視点を持ちます。</p>
+                    </div>
+                </div>
+                <div class="help-persona-item">
+                    <div class="avatar">👱‍♂️</div>
+                    <div class="info">
+                        <h4>ジェームス (上級)</h4>
+                        <p class="tag">Natural Spoken English</p>
+                        <p>ネイティブの友人。自然なノリを重視し、省略や崩し（gonna/wanna等）を含むリアルな口語を多用します。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
 
         <div id="input-group" class="input-group">
@@ -327,14 +367,19 @@
                     </div>
                     <div class="feedback-content hidden">
                         <div class="user-input-display hidden"></div>
+                        <div class="reactions-container hidden">
+                            <div class="reactions-header">
+                                <h3>伝わりやすさの反応</h3>
+                                <button class="btn-persona-help" title="ペルソナの詳細">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                </button>
+                            </div>
+                            <div class="reactions-list"></div>
+                        </div>
                         <h3>添削</h3>
                         <p class="correction"></p>
                         <h3>提案</h3>
                         <ul class="suggestions-list"></ul>
-                        <div class="reactions-container hidden">
-                            <h3>伝わりやすさの反応</h3>
-                            <div class="reactions-list"></div>
-                        </div>
 
                         <div class="retry-results"></div>
 
@@ -374,14 +419,19 @@
             <div class="feedback-section hidden">
                 <div class="feedback-content">
                     <div class="user-input-display hidden"></div>
+                    <div class="reactions-container hidden">
+                        <div class="reactions-header">
+                            <h3>伝わりやすさの反応</h3>
+                            <button class="btn-persona-help" title="ペルソナの詳細">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            </button>
+                        </div>
+                        <div class="reactions-list"></div>
+                    </div>
                     <h3>添削</h3>
                     <p class="correction"></p>
                     <h3>提案</h3>
                     <ul class="suggestions-list"></ul>
-                    <div class="reactions-container hidden">
-                        <h3>伝わりやすさの反応</h3>
-                        <div class="reactions-list"></div>
-                    </div>
 
                     <div class="retry-results"></div>
 

@@ -466,6 +466,34 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleSettings(false);
     });
 
+    // Persona Help Logic
+    const personaHelpOverlay = document.getElementById('persona-help-overlay');
+    const personaHelpPanel = document.getElementById('persona-help-panel');
+    const btnClosePersonaHelp = document.getElementById('btn-close-persona-help');
+
+    function togglePersonaHelp(show) {
+        if (!personaHelpPanel || !personaHelpOverlay) return;
+        if (show) {
+            personaHelpPanel.classList.add('active');
+            personaHelpOverlay.classList.remove('hidden');
+            setTimeout(() => personaHelpOverlay.classList.add('active'), 10);
+        } else {
+            personaHelpPanel.classList.remove('active');
+            personaHelpOverlay.classList.remove('active');
+            setTimeout(() => personaHelpOverlay.classList.add('hidden'), 300);
+        }
+    }
+
+    if (btnClosePersonaHelp) btnClosePersonaHelp.addEventListener('click', () => togglePersonaHelp(false));
+    if (personaHelpOverlay) personaHelpOverlay.addEventListener('click', () => togglePersonaHelp(false));
+
+    // Delegate help button click (since they are in dynamic feedback)
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-persona-help')) {
+            togglePersonaHelp(true);
+        }
+    });
+
     // Free Text Player Logic
     const settingsFreeText = document.getElementById('settings-free-text');
     const btnSettingsPlay = document.getElementById('btn-settings-play');
@@ -747,14 +775,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         const div = document.createElement('div');
                         div.className = `reaction-item level-${react.level}`;
                         div.innerHTML = `
-                            <div class="reaction-avatar">${react.emoji}</div>
-                            <div class="reaction-content">
+                            <div class="reaction-top">
+                                <div class="reaction-avatar">${react.emoji}</div>
                                 <div class="reaction-name">${react.name}</div>
-                                <div class="reaction-text">${react.reaction}</div>
-                                <div class="reaction-suggestion">
-                                    <span class="label">How I'd say:</span>
-                                    <span class="text">${react.suggestion}</span>
-                                </div>
+                            </div>
+                            <div class="reaction-text">${react.reaction}</div>
+                            <div class="reaction-suggestion">
+                                <span class="label">How I'd say:</span>
+                                <span class="text">${react.suggestion || '...'}</span>
                             </div>
                         `;
                         reactionsList.appendChild(div);
