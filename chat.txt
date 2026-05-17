@@ -179,3 +179,13 @@ AI: iOS PWAにおけるログイン状態の永続化と、放置時の画面状
 - api/auth.php
 - js/app.js
 - chat.txt
+
+2026-05-18 06:44:00
+USER: btn-saveのアイコンをブックマークアイコンにして
+AI: 復習の保存ボタン（btn-save）のアイコンをフロッピーディスクからブックマーク（しおり）アイコンに変更し、アクティブ状態（保存済み）のときにはアイコンがテーマカラー（青色）で美しく塗りつぶされるようにスタイルを追加しました。これにより、より直感的に保存状態が把握でき、UIの高級感が向上しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/index.php
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt

@@ -351,6 +351,10 @@ body {
                 stroke-width: 2px;
             }
 
+            &.btn-save.active svg {
+                fill: currentColor;
+            }
+
             &:disabled {
                 opacity: 0.5;
                 box-shadow: none;
