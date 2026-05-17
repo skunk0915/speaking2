@@ -1277,6 +1277,10 @@ body {
   outline: none;
   box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #f5f5f5, 0 0 0 2px rgba(0, 122, 255, 0.1);
 }
+.input-group .input-row textarea::-moz-placeholder {
+  color: #8d97a5;
+  opacity: 0.7;
+}
 .input-group .input-row textarea::placeholder {
   color: #8d97a5;
   opacity: 0.7;
@@ -1508,7 +1512,9 @@ body {
   border: 1px solid #ddd;
 }
 .settings-panel .setting-item select {
-  appearance: none;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
   background: #e0e5ec;
   box-shadow: inset 6px 6px 10px #a3b1c6, inset -6px -6px 10px #f5f5f5;
   border: none;
@@ -2327,7 +2333,9 @@ button .loader {
   align-items: center;
   justify-content: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 .situation-tag .tag-label {
   font-size: 13px;
@@ -2495,6 +2503,10 @@ button .loader {
   outline: none;
   border-color: rgba(0, 122, 255, 0.3);
   box-shadow: inset 8px 8px 12px #a3b1c6, inset -8px -8px 12px #f5f5f5;
+}
+.initial-input-container .input-section textarea::-moz-placeholder {
+  color: #8d97a5;
+  opacity: 0.5;
 }
 .initial-input-container .input-section textarea::placeholder {
   color: #8d97a5;
@@ -2819,6 +2831,4 @@ button .loader {
 }
 .user-info-section .user-display .btn-logout:hover {
   opacity: 0.7;
-}
-
-/*# sourceMappingURL=style.css.map */
+}/*# sourceMappingURL=style.css.map */

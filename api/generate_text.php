@@ -34,6 +34,7 @@ $currentLevelInst = $levelInstructions[$englishLevel] ?? $levelInstructions['nat
 
 // Construct the prompt
 $prompt = "";
+$selectedSituationText = "";
 if ($type === 'new') {
     // Load situations
     $situationsFile = __DIR__ . '/../data/situations.json';
@@ -41,6 +42,7 @@ if ($type === 'new') {
     $japaneseInput = $input['japanese_input'] ?? '';
     
     if (!empty($japaneseInput)) {
+        $selectedSituationText = $japaneseInput;
         if ($inputMode === 'translate') {
             $situationText = "ユーザーの入力した発話内容: " . $japaneseInput;
             $specificInstruction = "ユーザーが入力した『{$japaneseInput}』という内容を、相手（AI）の最初の発話として採用してください。入力された日本語の意味を正確に保ちつつ、文脈に合わせた自然でリアリティのある英語に訳してください。勝手に状況を変えたり、質問に変換したりせず、入力された内容をそのまま伝える表現にしてください。";
@@ -53,6 +55,7 @@ if ($type === 'new') {
             $allSituations = json_decode(file_get_contents($situationsFile), true);
             if ($allSituations && is_array($allSituations)) {
                 $selectedCategories = $input['situations'] ?? [];
+                $excludeSituations = $input['exclude_situations'] ?? [];
 
                 $filteredSituations = $allSituations;
                 if (!empty($selectedCategories)) {
@@ -64,11 +67,26 @@ if ($type === 'new') {
                     }
                 }
 
+                // Filter out recently played situations to avoid repeats
+                if (!empty($excludeSituations)) {
+                    $trulyFiltered = array_filter($filteredSituations, function ($s) use ($excludeSituations) {
+                        return !in_array($s['situation'], $excludeSituations);
+                    });
+                    // Fallback if all situations are excluded
+                    if (!empty($trulyFiltered)) {
+                        $filteredSituations = $trulyFiltered;
+                    }
+                }
+
+                // Reset keys to sequential index to ensure perfectly uniform random selection
+                $filteredSituations = array_values($filteredSituations);
+
                 $randomSituation = $filteredSituations[array_rand($filteredSituations)];
                 $situationText = "シチュエーション: " . $randomSituation['situation'] . " (" . $randomSituation['category'] . ")";
+                $selectedSituationText = $randomSituation['situation'];
             }
         }
-        $specificInstruction = "指定されたシチュエーションをさらに具体的に深掘りし、そのシーンでしかあり得ないような、具体的でリアリティのある発話を生成してください。どこでも言えるような汎用的なフレーズ（例：「こんにちは」「お元気ですか」など）は避け、学習者がそのシーンの語彙を学べるような内容にしてください。";
+        $specificInstruction = "指定されたシチュエーションをさらに具体的に深掘りし、そのシーンでしかあり得ないような、具体的でリアリティのある発話を生成してください。どこでも言えるような汎用的なフレーズ（例：「こんにちは」「お元気ですか」など）は避け、学習者がそのシーンの語彙を学べるような内容にしてください。また、毎回同じようなフレーズになるのを防ぐため、具体的な曜日、時間、人間関係、あるいはその状況特有の細かな背景やちょっとした出来事（例：忘れ物、時間の遅れ、特別なリクエストなど）をランダムに想定し、オリジナリティとリアリティのある発話にしてください。";
     }
 
     $prompt = "日常会話のロールプレイシナリオを作成してください。
@@ -428,6 +446,10 @@ try {
         // Backward compatibility (optional but safe)
         if (!isset($json['sample_user_japanese']) && !empty($json['sample_user_answers'])) {
             $json['sample_user_japanese'] = $json['sample_user_answers'][0];
+        }
+
+        if (!empty($selectedSituationText)) {
+            $json['selected_situation'] = $selectedSituationText;
         }
 
         echo json_encode($json);

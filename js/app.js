@@ -1117,6 +1117,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const length = lengthRange.value;
 
+            // Get recently played situations to avoid duplicates
+            let excludeList = [];
+            try {
+                const savedExclude = localStorage.getItem('speaking2_recent_situations');
+                if (savedExclude) {
+                    excludeList = JSON.parse(savedExclude);
+                }
+            } catch (e) {
+                console.error('Failed to parse recent situations:', e);
+            }
+
             console.log('Fetching from api/generate_text.php...');
             const response = await fetch('api/generate_text.php', {
                 method: 'POST',
@@ -1128,6 +1139,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     english_level: englishLevelSelect ? englishLevelSelect.value : 'native',
                     ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite',
                     situations: Array.from(document.querySelectorAll('.situation-tag.active')).map(t => t.dataset.category),
+                    exclude_situations: excludeList,
                     japanese_input: initialJp,
                     input_mode: inputMode
                 })
@@ -1143,6 +1155,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!data || typeof data !== 'object') {
                 throw new Error('Invalid data format');
+            }
+
+            // Save selected situation to recent list to prevent immediate repeats
+            if (data && data.selected_situation) {
+                excludeList.push(data.selected_situation);
+                if (excludeList.length > 20) {
+                    excludeList.shift();
+                }
+                localStorage.setItem('speaking2_recent_situations', JSON.stringify(excludeList));
             }
 
             const itemElement = addConversationItem(data);
