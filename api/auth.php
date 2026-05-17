@@ -10,6 +10,21 @@ require_once __DIR__ . '/../db/db.php';
 
 header('Content-Type: application/json');
 
+// Ensure user_tokens table exists (self-healing migration)
+try {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `user_tokens` (
+      `id` int(11) NOT NULL AUTO_INCREMENT,
+      `user_id` int(11) NOT NULL,
+      `token` varchar(64) NOT NULL,
+      `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (`id`),
+      UNIQUE KEY `token` (`token`),
+      KEY `user_id` (`user_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+} catch (PDOException $e) {
+    // Ignore database errors here
+}
+
 $input = json_decode(file_get_contents('php://input'), true) ?? [];
 $action = $_GET['action'] ?? $input['action'] ?? '';
 
@@ -38,7 +53,16 @@ switch ($action) {
             $_SESSION['user_id'] = $userId;
             $_SESSION['email'] = $email;
 
-            echo json_encode(['status' => 'success', 'user' => ['id' => $userId, 'email' => $email]]);
+            // Generate remember token
+            $token = bin2hex(random_bytes(32));
+            $tokenStmt = $pdo->prepare("INSERT INTO user_tokens (user_id, token) VALUES (?, ?)");
+            $tokenStmt->execute([$userId, $token]);
+
+            echo json_encode([
+                'status' => 'success', 
+                'user' => ['id' => $userId, 'email' => $email],
+                'remember_token' => $token
+            ]);
         } catch (PDOException $e) {
             if ($e->getCode() == 23000) {
                 echo json_encode(['status' => 'error', 'message' => 'このメールアドレスは既に登録されています。']);
@@ -63,9 +87,20 @@ switch ($action) {
             $user = $stmt->fetch();
 
             if ($user && password_verify($password, $user['password_hash'])) {
-                $_SESSION['user_id'] = $user['id'];
+                $userId = $user['id'];
+                $_SESSION['user_id'] = $userId;
                 $_SESSION['email'] = $user['email'];
-                echo json_encode(['status' => 'success', 'user' => ['id' => $user['id'], 'email' => $user['email']]]);
+
+                // Generate remember token
+                $token = bin2hex(random_bytes(32));
+                $tokenStmt = $pdo->prepare("INSERT INTO user_tokens (user_id, token) VALUES (?, ?)");
+                $tokenStmt->execute([$userId, $token]);
+
+                echo json_encode([
+                    'status' => 'success', 
+                    'user' => ['id' => $userId, 'email' => $user['email']],
+                    'remember_token' => $token
+                ]);
             } else {
                 echo json_encode(['status' => 'error', 'message' => 'メールアドレスまたはパスワードが正しくありません。']);
             }
@@ -74,7 +109,45 @@ switch ($action) {
         }
         break;
 
+    case 'login_by_token':
+        $token = trim($input['token'] ?? '');
+        if (!$token) {
+            echo json_encode(['status' => 'error', 'message' => 'トークンがありません。']);
+            exit;
+        }
+
+        try {
+            // Find token
+            $stmt = $pdo->prepare("SELECT ut.user_id, u.email FROM user_tokens ut JOIN users u ON ut.user_id = u.id WHERE ut.token = ?");
+            $stmt->execute([$token]);
+            $user = $stmt->fetch();
+
+            if ($user) {
+                $_SESSION['user_id'] = $user['user_id'];
+                $_SESSION['email'] = $user['email'];
+                echo json_encode([
+                    'status' => 'success',
+                    'user' => ['id' => $user['user_id'], 'email' => $user['email']]
+                ]);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => '無効または期限切れのトークンです。']);
+            }
+        } catch (PDOException $e) {
+            echo json_encode(['status' => 'error', 'message' => 'トークン認証中にエラーが発生しました。']);
+        }
+        break;
+
     case 'logout':
+        $token = trim($input['token'] ?? '');
+        if ($token) {
+            try {
+                $stmt = $pdo->prepare("DELETE FROM user_tokens WHERE token = ?");
+                $stmt->execute([$token]);
+            } catch (PDOException $e) {
+                // Ignore DB error on logout
+            }
+        }
+
         session_destroy();
         if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();

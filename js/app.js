@@ -202,7 +202,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (reviewData.status === 'success') {
                     reviews = reviewData.reviews;
                 }
+                // Restore UI state
+                await restoreUIState();
             } else {
+                // Try logging in using remember_token from localStorage
+                const token = localStorage.getItem('speaking2_remember_token');
+                if (token) {
+                    const tokenRes = await fetch('api/auth.php?action=login_by_token', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: token })
+                    });
+                    const tokenData = await tokenRes.json();
+                    if (tokenData.status === 'success') {
+                        currentUser = tokenData.user;
+                        if (displayUserEmail) displayUserEmail.textContent = currentUser.email;
+                        hideAuth();
+                        // Fetch reviews
+                        const reviewRes = await fetch('api/reviews.php');
+                        const reviewData = await reviewRes.json();
+                        if (reviewData.status === 'success') {
+                            reviews = reviewData.reviews;
+                        }
+                        // Restore UI state
+                        await restoreUIState();
+                        return;
+                    } else {
+                        // Token is invalid/expired, remove it
+                        localStorage.removeItem('speaking2_remember_token');
+                    }
+                }
                 showAuth();
             }
         } catch (e) {
@@ -240,6 +269,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.status === 'success') {
                     currentUser = data.user;
                     if (displayUserEmail) displayUserEmail.textContent = currentUser.email;
+                    
+                    // Save remember_token if returned
+                    if (data.remember_token) {
+                        localStorage.setItem('speaking2_remember_token', data.remember_token);
+                    }
+                    
                     hideAuth();
                     // Fetch reviews
                     const reviewRes = await fetch('api/reviews.php');
@@ -247,6 +282,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (reviewData.status === 'success') {
                         reviews = reviewData.reviews;
                     }
+                    // Restore UI state
+                    await restoreUIState();
                 } else {
                     authError.textContent = data.message || '認証に失敗しました';
                     authError.classList.remove('hidden');
@@ -262,7 +299,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnLogout) {
         btnLogout.addEventListener('click', async () => {
-            await fetch('api/auth.php?action=logout');
+            const token = localStorage.getItem('speaking2_remember_token');
+            try {
+                await fetch('api/auth.php?action=logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: token })
+                });
+            } catch (e) {
+                console.error(e);
+            }
+            localStorage.removeItem('speaking2_remember_token');
+            localStorage.removeItem('speaking2_ui_state');
             location.reload();
         });
     }
@@ -331,6 +379,9 @@ document.addEventListener('DOMContentLoaded', () => {
             inputGroup.classList.add('hidden');
             renderReviews();
         }
+        if (typeof saveUIState === 'function') {
+            saveUIState();
+        }
     }
 
     tabPractice.addEventListener('click', () => switchMode('practice'));
@@ -367,6 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = '';
             conversationHistory = [];
             stopAudio();
+            localStorage.removeItem('speaking2_ui_state');
 
             if (initialModeSelect && initialModeSelect.value === 'manual') {
                 showInitialInputUI();
@@ -463,6 +515,9 @@ document.addEventListener('DOMContentLoaded', () => {
         userInput.disabled = false;
         userInputJp.disabled = false;
         userInput.focus({ preventScroll: true });
+        if (typeof saveUIState === 'function') {
+            saveUIState();
+        }
     });
 
     btnHint.addEventListener('click', () => {
@@ -676,6 +731,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // Add to history
             feedbackElement.itemQaHistory.push({ role: 'user', text: text });
             if (onUpdate) onUpdate(feedbackElement.itemQaHistory);
+            if (typeof saveUIState === 'function') {
+                saveUIState();
+            }
 
             // Call API
             await sendItemQuestion(text, contextData, feedbackElement.itemQaHistory, qaContainer, onUpdate);
@@ -720,6 +778,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 appendItemQaMessage(container, data.answer, 'ai');
                 history.push({ role: 'ai', text: data.answer });
                 if (onUpdate) onUpdate(history);
+                if (typeof saveUIState === 'function') {
+                    saveUIState();
+                }
             }
 
         } catch (error) {
@@ -1094,6 +1155,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Move input to bottom
             moveInputToBottom();
+            if (typeof saveUIState === 'function') {
+                saveUIState();
+            }
 
         } catch (error) {
             console.error('generateText Error:', error);
@@ -1259,6 +1323,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     btn.classList.remove('active');
                 }
             });
+            if (typeof saveUIState === 'function') {
+                saveUIState();
+            }
         };
 
         const updateSavedData = async (key, value) => {
@@ -1387,6 +1454,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     section.classList.add('hidden');
                     section.classList.remove('hiding');
                 }, 300);
+            }
+            if (typeof saveUIState === 'function') {
+                saveUIState();
             }
         };
 
@@ -1542,6 +1612,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 practiceInput.disabled = false;
                 btnPracticeSend.disabled = false;
+                if (typeof saveUIState === 'function') {
+                    saveUIState();
+                }
             });
 
             // Retry Button Logic
@@ -1577,6 +1650,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         userInput.focus();
                         userInput.setSelectionRange(userInput.value.length, userInput.value.length);
+                    }
+                    if (typeof saveUIState === 'function') {
+                        saveUIState();
                     }
                 });
             });
@@ -1705,6 +1781,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Note: We don't scroll here because moveInputToBottom will handle scrolling
+        group.updateSavedData = updateSavedData;
         return group;
     }
 
@@ -1801,6 +1878,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             resultContainer.appendChild(variationItem);
             variationItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            if (typeof saveUIState === 'function') {
+                saveUIState();
+            }
 
         } catch (error) {
             console.error(error);
@@ -1882,6 +1962,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             resultContainer.appendChild(variationItem);
+            if (typeof saveUIState === 'function') {
+                saveUIState();
+            }
 
         } catch (error) {
             console.error(error);
@@ -2061,6 +2144,486 @@ document.addEventListener('DOMContentLoaded', () => {
                 reactionsList.appendChild(div);
             });
         }
+    }
+
+    function saveUIState() {
+        if (!currentUser) return; // Don't save if not logged in
+        
+        const groupsData = [];
+        const groups = container.querySelectorAll('.conversation-group');
+        groups.forEach(group => {
+            const jpEl = group.querySelector('.japanese');
+            const enEl = group.querySelector('.english');
+            
+            // Retrieve sample answers
+            let sampleAnswers = [];
+            if (group.dataset.sampleAnswers) {
+                try {
+                    sampleAnswers = JSON.parse(group.dataset.sampleAnswers);
+                } catch (e) {}
+            }
+            
+            // Retrieve retry history
+            let retryHistory = [];
+            if (group.dataset.retryHistory) {
+                try {
+                    retryHistory = JSON.parse(group.dataset.retryHistory);
+                } catch (e) {}
+            }
+            
+            const isRetrying = group.dataset.isRetrying === 'true';
+            
+            // User message
+            const userMsgDiv = group.querySelector('.user-message');
+            const userText = group.querySelector('.user-text')?.textContent || '';
+            const userMsgVisible = userMsgDiv && !userMsgDiv.classList.contains('hidden');
+            
+            // Feedback section
+            const feedbackSection = group.querySelector('.feedback-section');
+            const feedbackVisible = feedbackSection && !feedbackSection.classList.contains('hidden');
+            
+            let feedbackData = null;
+            if (feedbackVisible) {
+                const correctionHtml = feedbackSection.querySelector('.correction')?.innerHTML || '';
+                
+                // Suggestions
+                const suggestions = [];
+                feedbackSection.querySelectorAll('.suggestions-list .suggestion-item').forEach(sEl => {
+                    const sEng = sEl.querySelector('.english')?.textContent || '';
+                    const sJp = sEl.querySelector('.japanese')?.textContent || '';
+                    const sPoint = sEl.querySelector('.point')?.textContent || '';
+                    suggestions.push({ english: sEng, japanese: sJp, point: sPoint });
+                });
+                
+                // Reactions
+                const reactions = [];
+                feedbackSection.querySelectorAll('.reactions-list .reaction-item').forEach(rEl => {
+                    const emoji = rEl.querySelector('.reaction-avatar')?.textContent || '';
+                    const name = rEl.querySelector('.reaction-name')?.textContent || '';
+                    const reaction = rEl.querySelector('.reaction-text')?.textContent || '';
+                    const suggestion = rEl.querySelector('.reaction-suggestion .text')?.textContent || '';
+                    
+                    let level = 1;
+                    rEl.classList.forEach(cls => {
+                        if (cls.startsWith('level-')) {
+                            level = parseInt(cls.replace('level-', ''));
+                        }
+                    });
+                    reactions.push({ emoji, name, reaction, suggestion, level });
+                });
+                
+                const qaHistory = feedbackSection.itemQaHistory || [];
+                
+                feedbackData = {
+                    correction_html: correctionHtml,
+                    suggestions: suggestions,
+                    reactions: reactions,
+                    qa_history: qaHistory
+                };
+            }
+            
+            // Main Q&A
+            const mainQa = group.querySelector('.main-qa');
+            const mainQaVisible = mainQa && !mainQa.classList.contains('hidden');
+            const mainQaHistory = mainQa?.itemQaHistory || [];
+            
+            // Practice Section
+            const practiceSection = group.querySelector('.practice-section');
+            const practiceVisible = practiceSection && !practiceSection.classList.contains('hidden');
+            let practiceData = null;
+            if (practiceVisible) {
+                const practiceInputVal = group.querySelector('.practice-input')?.value || '';
+                const practiceFeedback = practiceSection.querySelector('.feedback-content');
+                const practiceFeedbackVisible = practiceFeedback && !practiceFeedback.classList.contains('hidden');
+                
+                let practiceFeedbackData = null;
+                if (practiceFeedbackVisible) {
+                    const practiceCorrection = practiceFeedback.querySelector('.correction')?.innerHTML || '';
+                    
+                    const practiceSuggestions = [];
+                    practiceFeedback.querySelectorAll('.suggestions-list .suggestion-item').forEach(sEl => {
+                        const sEng = sEl.querySelector('.english')?.textContent || '';
+                        const sJp = sEl.querySelector('.japanese')?.textContent || '';
+                        const sPoint = sEl.querySelector('.point')?.textContent || '';
+                        practiceSuggestions.push({ english: sEng, japanese: sJp, point: sPoint });
+                    });
+                    
+                    const practiceReactions = [];
+                    practiceFeedback.querySelectorAll('.reactions-list .reaction-item').forEach(rEl => {
+                        const emoji = rEl.querySelector('.reaction-avatar')?.textContent || '';
+                        const name = rEl.querySelector('.reaction-name')?.textContent || '';
+                        const reaction = rEl.querySelector('.reaction-text')?.textContent || '';
+                        const suggestion = rEl.querySelector('.reaction-suggestion .text')?.textContent || '';
+                        
+                        let level = 1;
+                        rEl.classList.forEach(cls => {
+                            if (cls.startsWith('level-')) {
+                                level = parseInt(cls.replace('level-', ''));
+                            }
+                        });
+                        practiceReactions.push({ emoji, name, reaction, suggestion, level });
+                    });
+                    
+                    const practiceQaHistory = practiceFeedback.itemQaHistory || [];
+                    
+                    practiceFeedbackData = {
+                        correction_html: practiceCorrection,
+                        suggestions: practiceSuggestions,
+                        reactions: practiceReactions,
+                        qa_history: practiceQaHistory
+                    };
+                }
+                
+                practiceData = {
+                    visible: true,
+                    input_value: practiceInputVal,
+                    is_retrying: group.dataset.isPracticeRetrying === 'true',
+                    feedback: practiceFeedbackData
+                };
+            }
+            
+            // Variations
+            const variationSection = group.querySelector('.variation-section');
+            const variationVisible = variationSection && !variationSection.classList.contains('hidden');
+            const variations = [];
+            if (variationVisible) {
+                variationSection.querySelectorAll('.variation-result-item').forEach(vEl => {
+                    const vEng = vEl.querySelector('.variation-result-eng')?.textContent || '';
+                    const vJp = vEl.querySelector('.variation-result-jp')?.textContent || '';
+                    const vType = vEl.querySelector('.variation-result-type')?.textContent || '';
+                    variations.push({ english: vEng, japanese: vJp, type: vType });
+                });
+            }
+            
+            groupsData.push({
+                prompt: {
+                    japanese: jpEl?.textContent || '',
+                    english: enEl?.textContent || '',
+                    sample_user_answers: sampleAnswers,
+                    english_hidden: enEl?.classList.contains('hidden')
+                },
+                user_msg: {
+                    visible: userMsgVisible,
+                    text: userText
+                },
+                feedback: feedbackData,
+                main_qa: {
+                    visible: mainQaVisible,
+                    history: mainQaHistory
+                },
+                practice: practiceData,
+                variations: {
+                    visible: variationVisible,
+                    items: variations
+                },
+                retry_history: retryHistory,
+                is_retrying: isRetrying
+            });
+        });
+        
+        const uiState = {
+            currentMode: currentMode,
+            conversationHistory: conversationHistory,
+            currentContext: currentContext,
+            currentSampleAnswers: currentSampleAnswers,
+            groups: groupsData
+        };
+        
+        localStorage.setItem('speaking2_ui_state', JSON.stringify(uiState));
+    }
+
+    async function restoreUIState() {
+        const saved = localStorage.getItem('speaking2_ui_state');
+        if (!saved) {
+            // No saved state, show initial input UI or generate new conversation
+            if (initialModeSelect && initialModeSelect.value === 'manual') {
+                showInitialInputUI();
+            } else {
+                generateText('new');
+            }
+            return;
+        }
+        
+        try {
+            const state = JSON.parse(saved);
+            currentMode = state.currentMode || 'practice';
+            conversationHistory = state.conversationHistory || [];
+            currentContext = state.currentContext || '';
+            currentSampleAnswers = state.currentSampleAnswers || [];
+            
+            // Clear container first
+            container.innerHTML = '';
+            
+            if (!state.groups || state.groups.length === 0) {
+                if (initialModeSelect && initialModeSelect.value === 'manual') {
+                    showInitialInputUI();
+                } else {
+                    generateText('new');
+                }
+                return;
+            }
+            
+            // Restore each group
+            for (const gData of state.groups) {
+                const promptData = {
+                    japanese: gData.prompt.japanese,
+                    english: gData.prompt.english,
+                    sample_user_answers: gData.prompt.sample_user_answers
+                };
+                
+                const groupEl = addConversationItem(promptData);
+                
+                // Set datasets
+                groupEl.dataset.sampleAnswers = JSON.stringify(gData.prompt.sample_user_answers);
+                
+                // English visibility
+                const englishEl = groupEl.querySelector('.english');
+                if (gData.prompt.english_hidden) {
+                    englishEl.classList.add('hidden');
+                } else {
+                    englishEl.classList.remove('hidden');
+                }
+                
+                if (gData.retry_history) {
+                    groupEl.dataset.retryHistory = JSON.stringify(gData.retry_history);
+                }
+                
+                if (gData.is_retrying) {
+                    groupEl.dataset.isRetrying = 'true';
+                }
+                
+                // User message
+                const userMsgDiv = groupEl.querySelector('.user-message');
+                const userTextP = groupEl.querySelector('.user-text');
+                if (gData.user_msg.visible) {
+                    userMsgDiv.classList.remove('hidden');
+                    userTextP.textContent = gData.user_msg.text;
+                }
+                
+                // Main Q&A Section
+                if (gData.main_qa.visible) {
+                    const btnQa = groupEl.querySelector('.btn-qa');
+                    const mainQa = groupEl.querySelector('.main-qa');
+                    mainQa.classList.remove('hidden');
+                    btnQa.classList.add('active');
+                    
+                    setupItemQa(mainQa, {
+                        english: promptData.english,
+                        situation: promptData.japanese
+                    }, gData.main_qa.history || [], (newHistory) => {
+                        updateSavedDataExternal(groupEl, 'qa_history', newHistory);
+                    });
+                }
+                
+                // Variations Section
+                if (gData.variations.visible) {
+                    const btnVariationMenu = groupEl.querySelector('.btn-variation-menu');
+                    const variationSection = groupEl.querySelector('.variation-section');
+                    const resultContainer = variationSection.querySelector('.variation-result-container');
+                    
+                    variationSection.classList.remove('hidden');
+                    btnVariationMenu.classList.add('active');
+                    resultContainer.classList.remove('hidden');
+                    
+                    gData.variations.items.forEach(v => {
+                        const variationItem = document.createElement('div');
+                        variationItem.className = 'variation-result-item';
+                        
+                        variationItem.innerHTML = `
+                            <div class="variation-result-header">
+                                <span class="variation-result-type">${v.type}</span>
+                                <div class="variation-actions">
+                                    <button class="btn-play-suggestion" title="再生">
+                                        <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                        <svg class="icon-pause hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                                        <div class="loader hidden"></div>
+                                    </button>
+                                    <button class="btn-repeat-suggestion" title="リピート再生">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="variation-result-text">
+                                <p class="variation-result-eng">${v.english}</p>
+                                <p class="variation-result-jp">${v.japanese}</p>
+                            </div>
+                        `;
+                        
+                        const btnPlay = variationItem.querySelector('.btn-play-suggestion');
+                        const btnRepeat = variationItem.querySelector('.btn-repeat-suggestion');
+                        
+                        btnPlay.addEventListener('click', () => {
+                            playSuggestionAudio(v.english, btnPlay, btnRepeat);
+                        });
+                        
+                        btnRepeat.addEventListener('click', () => {
+                            btnRepeat.classList.toggle('active');
+                        });
+                        
+                        resultContainer.appendChild(variationItem);
+                    });
+                }
+                
+                // Practice Section
+                if (gData.practice && gData.practice.visible) {
+                    const btnPractice = groupEl.querySelector('.btn-practice');
+                    const practiceSection = groupEl.querySelector('.practice-section');
+                    const practiceFeedback = practiceSection.querySelector('.feedback-content');
+                    
+                    practiceSection.classList.remove('hidden');
+                    btnPractice.classList.add('active');
+                    
+                    const practiceInput = groupEl.querySelector('.practice-input');
+                    if (practiceInput && gData.practice.input_value) {
+                        practiceInput.value = gData.practice.input_value;
+                    }
+                    
+                    if (gData.practice.is_retrying) {
+                        groupEl.querySelector('.conversation-item').dataset.isPracticeRetrying = 'true';
+                    }
+                    
+                    if (gData.practice.feedback) {
+                        practiceFeedback.classList.remove('hidden');
+                        
+                        // Restore practice correction HTML
+                        practiceFeedback.querySelector('.correction').innerHTML = gData.practice.feedback.correction_html;
+                        
+                        // Suggestions
+                        const suggestionsList = practiceFeedback.querySelector('.suggestions-list');
+                        suggestionsList.innerHTML = '';
+                        
+                        const suggestionsHeader = practiceFeedback.querySelector('h3:nth-of-type(2)');
+                        if (gData.practice.feedback.suggestions && gData.practice.feedback.suggestions.length > 0) {
+                            if (suggestionsHeader) suggestionsHeader.classList.remove('hidden');
+                            gData.practice.feedback.suggestions.forEach(suggestion => {
+                                const li = createSuggestionElement(suggestion, suggestionsList);
+                                suggestionsList.appendChild(li);
+                            });
+                        } else {
+                            if (suggestionsHeader) suggestionsHeader.classList.add('hidden');
+                        }
+                        
+                        // Reactions
+                        const reactionsList = practiceFeedback.querySelector('.reactions-list');
+                        const reactionsContainer = practiceFeedback.querySelector('.reactions-container');
+                        
+                        if (gData.practice.feedback.reactions && gData.practice.feedback.reactions.length > 0) {
+                            reactionsContainer.classList.remove('hidden');
+                            reactionsList.innerHTML = '';
+                            gData.practice.feedback.reactions.forEach(react => {
+                                const div = document.createElement('div');
+                                div.className = `reaction-item level-${react.level}`;
+                                div.innerHTML = `
+                                    <div class="reaction-top">
+                                        <div class="reaction-avatar">${react.emoji}</div>
+                                        <div class="reaction-name">${react.name}</div>
+                                    </div>
+                                    <div class="reaction-text">${react.reaction}</div>
+                                    <div class="reaction-suggestion">
+                                        <span class="label">How I'd say:</span>
+                                        <span class="text">${react.suggestion || '...'}</span>
+                                    </div>
+                                `;
+                                reactionsList.appendChild(div);
+                            });
+                        }
+                        
+                        // Q&A for Practice
+                        setupItemQa(practiceFeedback, {
+                            situation: promptData.japanese,
+                            user_input: gData.user_msg.text,
+                            correction: gData.practice.feedback.correction_html
+                        }, gData.practice.feedback.qa_history || [], (newHistory) => {
+                            const practiceRetryHistory = gData.retry_history || [];
+                            if (practiceRetryHistory.length > 0) {
+                                practiceRetryHistory[practiceRetryHistory.length - 1].qa_history = newHistory;
+                            }
+                            updateSavedDataExternal(groupEl, 'history', practiceRetryHistory);
+                        });
+                    }
+                }
+                
+                // Conversation Feedback
+                if (gData.feedback) {
+                    const feedbackSection = groupEl.querySelector('.feedback-section');
+                    feedbackSection.classList.remove('hidden');
+                    
+                    // Set correction HTML
+                    feedbackSection.querySelector('.correction').innerHTML = gData.feedback.correction_html;
+                    
+                    // Suggestions
+                    const suggestionsList = feedbackSection.querySelector('.suggestions-list');
+                    suggestionsList.innerHTML = '';
+                    
+                    const suggestionsHeader = feedbackSection.querySelector('h3:nth-of-type(2)');
+                    if (gData.feedback.suggestions && gData.feedback.suggestions.length > 0) {
+                        if (suggestionsHeader) suggestionsHeader.classList.remove('hidden');
+                        gData.feedback.suggestions.forEach(suggestion => {
+                            const li = createSuggestionElement(suggestion, suggestionsList);
+                            suggestionsList.appendChild(li);
+                        });
+                    } else {
+                        if (suggestionsHeader) suggestionsHeader.classList.add('hidden');
+                    }
+                    
+                    // Reactions
+                    const reactionsList = feedbackSection.querySelector('.reactions-list');
+                    const reactionsContainer = feedbackSection.querySelector('.reactions-container');
+                    
+                    if (gData.feedback.reactions && gData.feedback.reactions.length > 0) {
+                        reactionsContainer.classList.remove('hidden');
+                        reactionsList.innerHTML = '';
+                        gData.feedback.reactions.forEach(react => {
+                            const div = document.createElement('div');
+                            div.className = `reaction-item level-${react.level}`;
+                            div.innerHTML = `
+                                <div class="reaction-top">
+                                    <div class="reaction-avatar">${react.emoji}</div>
+                                    <div class="reaction-name">${react.name}</div>
+                                </div>
+                                <div class="reaction-text">${react.reaction}</div>
+                                <div class="reaction-suggestion">
+                                    <span class="label">How I'd say:</span>
+                                    <span class="text">${react.suggestion || '...'}</span>
+                                </div>
+                            `;
+                            reactionsList.appendChild(div);
+                        });
+                    }
+                    
+                    // Q&A for Conversation Feedback
+                    setupItemQa(feedbackSection, {
+                        situation: promptData.japanese,
+                        user_input: gData.user_msg.text,
+                        correction: gData.feedback.correction_html
+                    }, gData.feedback.qa_history || [], (newHistory) => {
+                        gData.feedback.qa_history = newHistory;
+                        saveUIState();
+                    });
+                }
+            }
+            
+            // Restore active mode and tab
+            switchMode(currentMode);
+            
+            // Move input to bottom of restored content
+            moveInputToBottom();
+            
+        } catch (e) {
+            console.error('Failed to restore UI state:', e);
+            if (initialModeSelect && initialModeSelect.value === 'manual') {
+                showInitialInputUI();
+            } else {
+                generateText('new');
+            }
+        }
+    }
+
+    function updateSavedDataExternal(groupEl, key, value) {
+        if (groupEl && typeof groupEl.updateSavedData === 'function') {
+            groupEl.updateSavedData(key, value);
+        }
+        saveUIState();
     }
 });
 
