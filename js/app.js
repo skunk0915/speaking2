@@ -1482,7 +1482,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     };
                     practiceRetryHistory.push(historyItemRef);
 
-                    const dataCorr = await getCorrection(text, practiceFeedback, practiceRetryHistory, true, "", (newQaHistory) => {
+                    const dataCorr = await getCorrection(text, practiceFeedback, practiceRetryHistory.slice(0, -1), true, "", (newQaHistory) => {
                         historyItemRef.qa_history = newQaHistory;
                         updateSavedData('history', practiceRetryHistory);
                         if (isReviewMode) {
@@ -1516,7 +1516,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     };
                     practiceRetryHistory.push(historyItemRef);
 
-                    const dataCorr = await getCorrection(text, practiceFeedback, practiceRetryHistory, false, "", (newQaHistory) => {
+                    const dataCorr = await getCorrection(text, practiceFeedback, practiceRetryHistory.slice(0, -1), false, "", (newQaHistory) => {
                         historyItemRef.qa_history = newQaHistory;
                         updateSavedData('history', practiceRetryHistory);
                         if (isReviewMode) {
