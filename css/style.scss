@@ -1697,6 +1697,12 @@ button .loader {
             }
         }
     }
+
+    &.history-item-qa {
+        margin-top: 16px;
+        @include neumorphism-pressed;
+        background: rgba(0, 0, 0, 0.02);
+    }
 }
 
 .floating-settings {

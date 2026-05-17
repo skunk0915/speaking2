@@ -755,7 +755,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 100);
     }
 
-    async function getCorrection(userText, feedbackElement, history = [], isRetry = false, intendedJp = "") {
+    async function getCorrection(userText, feedbackElement, history = [], isRetry = false, intendedJp = "", onQaUpdate = null) {
         const correctionP = feedbackElement.querySelector('.correction');
         const suggestionsList = feedbackElement.querySelector('.suggestions-list');
         const qaSection = feedbackElement.querySelector('.item-qa-section');
@@ -879,11 +879,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Initialize Q&A for this item
-                setupItemQa(feedbackElement, {
-                    situation: feedbackElement.closest('.practice-section') ? feedbackElement.closest('.conversation-item').querySelector('.japanese').textContent : currentContext,
-                    user_input: userText,
-                    correction: data.correction
-                });
+                const qaSectionInFeedback = feedbackElement.querySelector('.item-qa-section');
+                if (qaSectionInFeedback) {
+                    setupItemQa(feedbackElement, {
+                        situation: feedbackElement.closest('.practice-section') ? feedbackElement.closest('.conversation-item').querySelector('.japanese').textContent : currentContext,
+                        user_input: userText,
+                        correction: data.correction
+                    }, history.qa_history || [], (newHistory) => {
+                        if (typeof onQaUpdate === 'function') onQaUpdate(newHistory);
+                    });
+                }
 
 
                 // Render Reactions
@@ -1206,10 +1211,38 @@ document.addEventListener('DOMContentLoaded', () => {
                     hItem.appendChild(suggestionsContainer);
                 }
 
-                // Render reactions if present in history item
+                // Add Q&A section to history item
+                const qaSection = document.createElement('div');
+                qaSection.className = 'item-qa-section history-item-qa';
+                qaSection.innerHTML = `
+                    <h3>質問</h3>
+                    <div class="item-qa-container"></div>
+                    <div class="item-qa-input-area">
+                        <textarea class="item-qa-input" placeholder="この添削について質問..." rows="1"></textarea>
+                        <button class="btn-icon btn-item-qa-send" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                hItem.appendChild(qaSection);
+
+                // Initialize reactions if present in history item
                 if (h.reactions && h.reactions.length > 0) {
                     renderReactions(h.reactions, hItem);
                 }
+
+                // Initialize Q&A for history item
+                setupItemQa(hItem, {
+                    situation: data.japanese,
+                    user_input: h.user_input,
+                    correction: h.correction
+                }, h.qa_history || [], (newHistory) => {
+                    h.qa_history = newHistory;
+                    updateSavedData('history', history);
+                });
 
                 container.appendChild(hItem);
             });
@@ -1228,11 +1261,21 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         };
 
-        const updateSavedData = (key, value) => {
+        const updateSavedData = async (key, value) => {
             const reviewIdx = reviews.findIndex(r => r.japanese === data.japanese);
             if (reviewIdx !== -1) {
                 reviews[reviewIdx][key] = value;
-                localStorage.setItem(STORAGE_KEYS.REVIEWS, JSON.stringify(reviews));
+                
+                // Persist to server
+                try {
+                    await fetch('api/reviews.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(reviews[reviewIdx])
+                    });
+                } catch (e) {
+                    console.error('Failed to persist review update', e);
+                }
             }
         };
 
@@ -1427,20 +1470,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (isRetry) {
                     delete item.dataset.isPracticeRetrying;
-                    const dataCorr = await getCorrection(text, practiceFeedback, practiceRetryHistory, true);
+                    
+                    // The latest history item will be updated by getCorrection's onQaUpdate
+                    const historyItemRef = {
+                        user_input: text,
+                        correction: '', // Will be filled
+                        suggestions: [],
+                        reactions: [],
+                        intended_japanese: null,
+                        qa_history: []
+                    };
+                    practiceRetryHistory.push(historyItemRef);
+
+                    const dataCorr = await getCorrection(text, practiceFeedback, practiceRetryHistory, true, "", (newQaHistory) => {
+                        historyItemRef.qa_history = newQaHistory;
+                        updateSavedData('history', practiceRetryHistory);
+                        if (isReviewMode) {
+                            renderHistory(practiceRetryHistory, historyContainer);
+                        }
+                    });
 
                     if (dataCorr && dataCorr.correction) {
-                        const newHistoryItem = {
-                            user_input: text,
-                            correction: dataCorr.correction,
-                            suggestions: dataCorr.suggestions || [],
-                            reactions: dataCorr.reactions || [],
-                            intended_japanese: dataCorr.intended_japanese || null
-                        };
-                        practiceRetryHistory.push(newHistoryItem);
-
-                        // Update stored review if in review mode
-                        // Update stored review
+                        historyItemRef.correction = dataCorr.correction;
+                        historyItemRef.suggestions = dataCorr.suggestions || [];
+                        historyItemRef.reactions = dataCorr.reactions || [];
+                        historyItemRef.intended_japanese = dataCorr.intended_japanese || null;
+                        
                         updateSavedData('history', practiceRetryHistory);
                         if (isReviewMode) {
                             btnHistory.classList.remove('hidden');
@@ -1451,21 +1506,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     practiceInput.value = '';
                 } else {
                     // Initial correction
-                    const dataCorr = await getCorrection(text, practiceFeedback, practiceRetryHistory, false);
+                    const historyItemRef = {
+                        user_input: text,
+                        correction: '', // Will be filled
+                        suggestions: [],
+                        reactions: [],
+                        intended_japanese: null,
+                        qa_history: []
+                    };
+                    practiceRetryHistory.push(historyItemRef);
 
-                    // Add to history
+                    const dataCorr = await getCorrection(text, practiceFeedback, practiceRetryHistory, false, "", (newQaHistory) => {
+                        historyItemRef.qa_history = newQaHistory;
+                        updateSavedData('history', practiceRetryHistory);
+                        if (isReviewMode) {
+                            renderHistory(practiceRetryHistory, historyContainer);
+                        }
+                    });
+
                     if (dataCorr && dataCorr.correction) {
-                        const newHistoryItem = {
-                            user_input: text,
-                            correction: dataCorr.correction,
-                            suggestions: dataCorr.suggestions || [],
-                            reactions: dataCorr.reactions || [],
-                            intended_japanese: dataCorr.intended_japanese || null
-                        };
-                        practiceRetryHistory.push(newHistoryItem);
-
-                        // Update stored review if in review mode
-                        // Update stored review
+                        historyItemRef.correction = dataCorr.correction;
+                        historyItemRef.suggestions = dataCorr.suggestions || [];
+                        historyItemRef.reactions = dataCorr.reactions || [];
+                        historyItemRef.intended_japanese = dataCorr.intended_japanese || null;
+                        
                         updateSavedData('history', practiceRetryHistory);
                         if (isReviewMode) {
                             btnHistory.classList.remove('hidden');

@@ -155,3 +155,7 @@ AI: ペルソナの「suggestion」の定義を、ユーザーの意図（課題
 - index.php
 - css/style.scss
 - js/app.js
+2026-05-17 07:29:29 - 復習コンテンツの履歴アイテムにQ&Aセクションを追加。練習時のQ&A履歴も保存・表示されるように修正。updateSavedDataをAPI経由の保存に変更。
+編集ファイル:
+/Users/mizy/Dropbox/speaking2/js/app.js
+/Users/mizy/Dropbox/speaking2/css/style.scss

@@ -1986,6 +1986,13 @@ button .loader {
   width: 18px;
   height: 18px;
 }
+.item-qa-section.history-item-qa {
+  margin-top: 16px;
+  background: #e0e5ec;
+  box-shadow: inset 6px 6px 10px #a3b1c6, inset -6px -6px 10px #f5f5f5;
+  border: none;
+  background: rgba(0, 0, 0, 0.02);
+}
 
 .floating-settings {
   position: fixed;
