@@ -547,9 +547,9 @@
                         <path d="M12 12L2.8 2.2"></path>
                         <path d="M12 12L19.8 4.2"></path>
                     </svg>
-                    <span>シチュエーションからAIが最初の発話を考えます</span>
+                    <span>まず日本語候補を10個出し、その中から選んで開始します</span>
                 </div>
-                <textarea id="initial-japanese-input-creative" placeholder="例：海外のカフェで店員に話しかけられる" rows="4"></textarea>
+                <textarea id="initial-japanese-input-creative" placeholder="例：ホテルのチェックイン / 海外のカフェで注文 / 病院の受付" rows="4"></textarea>
             </div>
 
             <div class="initial-input-wrapper">

@@ -1098,8 +1098,203 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function generateText(type, initialJp = null, inputMode = 'translate') {
-        console.log('generateText called with type:', type, 'initialJp:', initialJp, 'mode:', inputMode);
+    async function startSituationOptionsFlow(initialJp, inputMode) {
+        setLoading(true);
+        const targetLength = lengthRange ? Number(lengthRange.value) : 20;
+        
+        let excludeList = [];
+        try {
+            const savedExclude = localStorage.getItem('speaking2_recent_situations');
+            if (savedExclude) {
+                excludeList = JSON.parse(savedExclude);
+            }
+        } catch (e) {
+            console.error('Failed to parse recent situations:', e);
+        }
+
+        try {
+            const response = await fetch('api/generate_text.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'situation_options',
+                    situation: initialJp || '',
+                    length: targetLength,
+                    situations: Array.from(document.querySelectorAll('.situation-tag.active')).map(t => t.dataset.category),
+                    exclude_situations: excludeList
+                })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error('API Error: ' + response.status + ' ' + errorText);
+            }
+
+            const data = await response.json();
+            setLoading(false);
+            
+            renderSituationOptionsUI(data.situation, data.options, inputMode, targetLength);
+        } catch (error) {
+            console.error('startSituationOptionsFlow Error:', error);
+            alert('日本語訳バリエーションの生成に失敗しました: ' + error.message);
+            setLoading(false);
+            
+            if (initialModeSelect && initialModeSelect.value === 'manual') {
+                showInitialInputUI();
+            }
+        }
+    }
+
+    function renderSituationOptionsUI(situation, options, inputMode, targetLength) {
+        container.innerHTML = '';
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'situation-options-wrapper';
+        
+        const header = document.createElement('div');
+        header.className = 'situation-options-header';
+        header.innerHTML = `
+            <div class="situation-badge">シチュエーション</div>
+            <h3 class="situation-title">${situation}</h3>
+            <p class="situation-desc">まずは日本語候補を10個出しています。会話の第一声にしたいものを選んでください。</p>
+        `;
+        wrapper.appendChild(header);
+        
+        const optionsList = document.createElement('div');
+        optionsList.className = 'situation-options-list';
+
+        const optionsMeta = document.createElement('div');
+        optionsMeta.className = 'situation-options-meta';
+
+        const optionsStatus = document.createElement('p');
+        optionsStatus.className = 'situation-options-pill';
+
+        const optionsLength = document.createElement('p');
+        optionsLength.className = 'situation-options-pill';
+        optionsLength.textContent = `目安 ${targetLength}文字`;
+
+        function updateOptionsStatus() {
+            optionsStatus.textContent = `表示中の候補: ${optionsList.children.length}件`;
+        }
+        
+        function addOptions(items) {
+            let addedCount = 0;
+            items.forEach((optText, index) => {
+                const alreadyExists = Array.from(optionsList.querySelectorAll('.situation-option-item'))
+                    .some(button => button.dataset.optionText === optText);
+                if (alreadyExists) return;
+                
+                const btn = document.createElement('button');
+                btn.className = 'situation-option-item';
+                btn.dataset.optionText = optText;
+                btn.innerHTML = `
+                    <span class="option-num">${optionsList.children.length + 1}</span>
+                    <span class="option-text">${optText}</span>
+                `;
+                
+                btn.addEventListener('click', () => {
+                    generateText('new', optText, 'translate', situation);
+                });
+                
+                optionsList.appendChild(btn);
+                addedCount += 1;
+            });
+
+            updateOptionsStatus();
+            return addedCount;
+        }
+        
+        addOptions(options);
+        optionsMeta.appendChild(optionsStatus);
+        optionsMeta.appendChild(optionsLength);
+        wrapper.appendChild(optionsMeta);
+        wrapper.appendChild(optionsList);
+        
+        const actionsRow = document.createElement('div');
+        actionsRow.className = 'situation-options-actions';
+        
+        const btnMore = document.createElement('button');
+        btnMore.className = 'btn btn-secondary btn-more-options';
+        btnMore.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                <path d="M21 3v5h-5"></path>
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                <path d="M3 21v-5h5"></path>
+            </svg>
+            <span>もっと出す</span>
+        `;
+        
+        btnMore.addEventListener('click', async () => {
+            btnMore.disabled = true;
+            const originalText = btnMore.querySelector('span').textContent;
+            btnMore.querySelector('span').textContent = '読み込み中...';
+            
+            const currentOptions = Array.from(optionsList.querySelectorAll('.situation-option-item')).map(btn => btn.dataset.optionText);
+            
+            let excludeList = [];
+            try {
+                const savedExclude = localStorage.getItem('speaking2_recent_situations');
+                if (savedExclude) {
+                    excludeList = JSON.parse(savedExclude);
+                }
+            } catch (e) {}
+
+            try {
+                const response = await fetch('api/generate_text.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'situation_options',
+                        situation: situation,
+                        length: targetLength,
+                        exclude: currentOptions,
+                        situations: Array.from(document.querySelectorAll('.situation-tag.active')).map(t => t.dataset.category),
+                        exclude_situations: excludeList
+                    })
+                });
+                
+                if (!response.ok) throw new Error('API Error');
+                const data = await response.json();
+                
+                const addedCount = addOptions(data.options);
+                if (addedCount === 0) {
+                    alert('既出と異なる候補をこれ以上追加できませんでした。時間をおいてもう一度試してください。');
+                    return;
+                }
+                
+                setTimeout(() => {
+                    const lastChild = optionsList.lastChild;
+                    if (lastChild) {
+                        lastChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                }, 100);
+            } catch (e) {
+                console.error(e);
+                alert('追加のバリエーション生成に失敗しました。');
+            } finally {
+                btnMore.disabled = false;
+                btnMore.querySelector('span').textContent = originalText;
+            }
+        });
+        
+        actionsRow.appendChild(btnMore);
+        wrapper.appendChild(actionsRow);
+        
+        container.appendChild(wrapper);
+        
+        inputGroup.classList.add('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function generateText(type, initialJp = null, inputMode = 'translate', selectedSituation = null) {
+        console.log('generateText called with type:', type, 'initialJp:', initialJp, 'mode:', inputMode, 'selectedSituation:', selectedSituation);
+
+        if (type === 'new' && inputMode !== 'translate') {
+            await startSituationOptionsFlow(initialJp, inputMode);
+            return;
+        }
+
         setLoading(true);
 
         // Show loading display
@@ -1141,7 +1336,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     situations: Array.from(document.querySelectorAll('.situation-tag.active')).map(t => t.dataset.category),
                     exclude_situations: excludeList,
                     japanese_input: initialJp,
-                    input_mode: inputMode
+                    input_mode: inputMode,
+                    selected_situation: selectedSituation
                 })
             });
 

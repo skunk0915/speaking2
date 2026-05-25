@@ -32,9 +32,298 @@ $levelInstructions = [
 $currentStyleInst = $styleInstructions[$aiStyle] ?? $styleInstructions['polite'];
 $currentLevelInst = $levelInstructions[$englishLevel] ?? $levelInstructions['native'];
 
+function normalizeSituationOption($text) {
+    $text = trim((string)$text);
+    $text = preg_replace('/^[「『"\']+|[」』"\']+$/u', '', $text);
+    $text = preg_replace('/^(いらっしゃいませ|ようこそ|こんにちは|こんばんは)[。！!？?、,\s]*/u', '', $text);
+    $text = preg_replace('/^(恐れ入りますが|失礼ですが|本日は)[、,\s]*/u', '', $text);
+    $text = preg_replace('/\s+/u', '', $text);
+    $text = preg_replace('/[。．、，！!？?\-ー〜～…]/u', '', $text);
+    return mb_strtolower($text, 'UTF-8');
+}
+
+function situationOptionSimilarityBase($text) {
+    $text = normalizeSituationOption($text);
+    $text = preg_replace('/(を)?(お願いできますか|お願いします|いただけますか|伺えますか|ございますか|でしょうか|ですか|ますか|ください)$/u', '', $text);
+    return $text;
+}
+
+function areSituationOptionsSimilar($left, $right) {
+    $leftNormalized = normalizeSituationOption($left);
+    $rightNormalized = normalizeSituationOption($right);
+
+    if ($leftNormalized === '' || $rightNormalized === '') {
+        return false;
+    }
+
+    if ($leftNormalized === $rightNormalized) {
+        return true;
+    }
+
+    if (mb_strlen($leftNormalized, 'UTF-8') >= 6 && (mb_strpos($leftNormalized, $rightNormalized, 0, 'UTF-8') !== false || mb_strpos($rightNormalized, $leftNormalized, 0, 'UTF-8') !== false)) {
+        return true;
+    }
+
+    $leftBase = situationOptionSimilarityBase($left);
+    $rightBase = situationOptionSimilarityBase($right);
+    if ($leftBase !== '' && $leftBase === $rightBase) {
+        return true;
+    }
+
+    similar_text($leftNormalized, $rightNormalized, $similarity);
+    if ($similarity >= 82) {
+        return true;
+    }
+
+    if ($leftBase !== '' && $rightBase !== '') {
+        similar_text($leftBase, $rightBase, $baseSimilarity);
+        if ($baseSimilarity >= 78) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function dedupeSituationOptions(array $candidates, array $excludeList = []) {
+    $unique = [];
+    foreach ($candidates as $candidate) {
+        $candidate = trim((string)$candidate);
+        if ($candidate === '') {
+            continue;
+        }
+
+        $isDuplicate = false;
+        foreach ($excludeList as $excluded) {
+            if (areSituationOptionsSimilar($candidate, $excluded)) {
+                $isDuplicate = true;
+                break;
+            }
+        }
+        if ($isDuplicate) {
+            continue;
+        }
+
+        foreach ($unique as $existing) {
+            if (areSituationOptionsSimilar($candidate, $existing)) {
+                $isDuplicate = true;
+                break;
+            }
+        }
+        if ($isDuplicate) {
+            continue;
+        }
+
+        $unique[] = $candidate;
+    }
+
+    return array_values($unique);
+}
+
+function getSituationOptionLengthBounds($targetLength, $attempt = 1) {
+    $targetLength = max(10, (int)$targetLength);
+    $baseMargin = max(6, (int)round($targetLength * 0.08));
+    $attemptMargin = max(0, $attempt - 1) * 4;
+    $margin = $baseMargin + $attemptMargin;
+
+    return [
+        max(8, $targetLength - $margin),
+        $targetLength + $margin
+    ];
+}
+
+function countSituationOptionChars($text) {
+    $text = preg_replace('/\s+/u', '', trim((string)$text));
+    return mb_strlen($text, 'UTF-8');
+}
+
+function filterSituationOptionsByLength(array $candidates, $targetLength, $attempt = 1) {
+    [$minLength, $maxLength] = getSituationOptionLengthBounds($targetLength, $attempt);
+    $filtered = [];
+
+    foreach ($candidates as $candidate) {
+        $candidateLength = countSituationOptionChars($candidate);
+        if ($candidateLength < $minLength || $candidateLength > $maxLength) {
+            continue;
+        }
+        $filtered[] = trim((string)$candidate);
+    }
+
+    usort($filtered, function ($left, $right) use ($targetLength) {
+        $leftDelta = abs(countSituationOptionChars($left) - $targetLength);
+        $rightDelta = abs(countSituationOptionChars($right) - $targetLength);
+        if ($leftDelta === $rightDelta) {
+            return countSituationOptionChars($right) <=> countSituationOptionChars($left);
+        }
+        return $leftDelta <=> $rightDelta;
+    });
+
+    return array_values($filtered);
+}
+
+function sortSituationOptionsByLengthCloseness(array $candidates, $targetLength) {
+    $sorted = array_values(array_filter(array_map(function ($candidate) {
+        return trim((string)$candidate);
+    }, $candidates), function ($candidate) {
+        return $candidate !== '';
+    }));
+
+    usort($sorted, function ($left, $right) use ($targetLength) {
+        $leftDelta = abs(countSituationOptionChars($left) - $targetLength);
+        $rightDelta = abs(countSituationOptionChars($right) - $targetLength);
+        if ($leftDelta === $rightDelta) {
+            return countSituationOptionChars($right) <=> countSituationOptionChars($left);
+        }
+        return $leftDelta <=> $rightDelta;
+    });
+
+    return $sorted;
+}
+
+function buildSituationOptionsRewritePrompt($situation, array $seedOptions, array $excludeList = [], $targetCount = 10, $attempt = 1, $length = 20) {
+    [$minLength, $maxLength] = getSituationOptionLengthBounds($length, $attempt);
+
+    $seedInstruction = !empty($seedOptions)
+        ? "\n【長さを調整する元候補】\n- " . implode("\n- ", $seedOptions)
+        : '';
+    $excludeInstruction = !empty($excludeList)
+        ? "\n【使ってはいけない既出候補】\n- " . implode("\n- ", $excludeList)
+        : '';
+
+    return "指定されたシチュエーションの会話候補について、元候補の内容や切り口を活かしながら、文字数だけを中心に調整した日本語フレーズを{$targetCount}個生成してください。
+
+【シチュエーション】
+{$situation}
+{$seedInstruction}
+{$excludeInstruction}
+
+指示:
+- 元候補の『確認したい内容』や『話しかけの意図』は活かしつつ、文を言い換えたり情報を足したり削ったりして、各候補を{$minLength}〜{$maxLength}文字に必ず収めてください。
+- 通常生成と同じく、1人の発話のみを出してください。
+- 文字数を合わせることが最優先です。ただし、不自然な言い回しや意味崩れは避けてください。
+- 同じ内容の言い換えを並べず、切り口は散らしてください。
+- 単なる挨拶や汎用的なフレーズは避けてください。
+- 各候補について、出力前に実際の文字数を数えて条件内か確認してください。
+- 出力はJSON形式で、以下のキーを含めてください:
+  - 'situation': 使用したシチュエーション名
+  - 'options': 調整後の日本語フレーズの配列（文字列の配列、{$targetCount}個）";
+}
+
+function buildSituationOptionsPrompt($situation, array $excludeList = [], $targetCount = 10, $attempt = 1, $length = 20) {
+    $excludeInstruction = '';
+    if (!empty($excludeList)) {
+        $excludeInstruction = "\n【除外する既出候補】\n- " . implode("\n- ", $excludeList);
+    }
+
+    [$minLength, $maxLength] = getSituationOptionLengthBounds($length, $attempt);
+
+    $retryInstruction = '';
+    if ($attempt > 1) {
+        $retryInstruction = "\n- 直前までに似た候補や文字数条件を外した候補が多かったため、今回は意味の切り口が重ならない案を優先してください。\n- 同じ要件を丁寧さだけ変えて並べるのは禁止です。\n- 出力前に、各候補が他の候補と『何を確認しているか』の観点で重複していないか確認してください。\n- 各候補が{$minLength}〜{$maxLength}文字に収まっているか必ず数えてください。";
+    }
+
+    return "指定されたシチュエーションにおいて、相手（AI）がユーザーに話しかける最初の日本語フレーズ（相手の発話）の候補を{$targetCount}個生成してください。
+
+【シチュエーション】
+{$situation}
+{$excludeInstruction}
+
+指示:
+- まず頭の中で20案以上発想し、その中から意味や目的が重ならないものだけを{$targetCount}個選んでください。
+- 同じ内容の言い換えは不可です。『ご予約のお名前をお願いします』『ご予約名を伺えますか』のように、確認したい中身が同じなら重複とみなします。
+- 単なる挨拶や汎用的なフレーズは避け、その場で本当にありそうな確認・案内・依頼・質問にしてください。
+- ホテルのチェックインなら、予約確認、本人確認書類、支払い方法、朝食、部屋タイプ、チェックアウト時間、デポジット、駐車場、Wi-Fi、荷物、設備案内など、切り口を散らしてください。
+- ユーザーが英語で返答しやすく、会話が広がる具体的な一言にしてください。
+- 各フレーズは必ず{$minLength}〜{$maxLength}文字に収めてください。これは努力目標ではなく必須条件です。
+- {$length}文字前後のニュアンスに寄せ、短すぎる文や長すぎる文は出力しないでください。{$retryInstruction}
+- 出力はJSON形式で、以下のキーを含めてください:
+  - 'situation': 使用したシチュエーション名
+  - 'options': 生成した日本語フレーズの配列（文字列の配列、{$targetCount}個）";
+}
+
+function callGeminiJson($prompt) {
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/" . GEMINI_MODEL . ":generateContent?key=" . GEMINI_API_KEY;
+    $data = [
+        'contents' => [
+            [
+                'parts' => [
+                    ['text' => $prompt]
+                ]
+            ]
+        ],
+        'generationConfig' => [
+            'responseMimeType' => 'application/json'
+        ]
+    ];
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode !== 200) {
+        $errorMsg = 'API Request Failed with HTTP Code: ' . $httpCode;
+        file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nDetails: " . $response . "\n", FILE_APPEND);
+        throw new Exception($errorMsg);
+    }
+
+    $result = json_decode($response, true);
+    if (!isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+        $errorMsg = 'Invalid API Response Structure';
+        file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nFull Response: " . $response . "\n", FILE_APPEND);
+        throw new Exception($errorMsg);
+    }
+
+    $text = $result['candidates'][0]['content']['parts'][0]['text'];
+    file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Raw API Response: " . $text . "\n", FILE_APPEND);
+
+    $text = trim($text);
+    $text = preg_replace('/^```json\s*|\s*```$/', '', $text);
+
+    $json = json_decode($text, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        $firstBrace = strpos($text, '{');
+        $lastBrace = strrpos($text, '}');
+        if ($firstBrace !== false && $lastBrace !== false && $lastBrace > $firstBrace) {
+            $temp = substr($text, $firstBrace, $lastBrace - $firstBrace + 1);
+            while (strlen($temp) > 0) {
+                $testJson = json_decode($temp, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $json = $testJson;
+                    break;
+                }
+                $nextLastBrace = strrpos(substr($temp, 0, -1), '}');
+                if ($nextLastBrace === false) {
+                    break;
+                }
+                $temp = substr($temp, 0, $nextLastBrace + 1);
+            }
+        }
+    }
+
+    if (!$json) {
+        $errorMsg = 'Invalid JSON from Gemini: ' . json_last_error_msg();
+        file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nRaw: " . $text . "\n", FILE_APPEND);
+        throw new Exception($errorMsg);
+    }
+
+    if (isset($json[0]) && is_array($json[0])) {
+        $json = $json[0];
+    }
+
+    return $json;
+}
+
 // Construct the prompt
 $prompt = "";
 $selectedSituationText = "";
+$situation = '';
+$excludeList = [];
 if ($type === 'new') {
     // Load situations
     $situationsFile = __DIR__ . '/../data/situations.json';
@@ -42,7 +331,7 @@ if ($type === 'new') {
     $japaneseInput = $input['japanese_input'] ?? '';
     
     if (!empty($japaneseInput)) {
-        $selectedSituationText = $japaneseInput;
+        $selectedSituationText = $input['selected_situation'] ?? $japaneseInput;
         if ($inputMode === 'translate') {
             $situationText = "ユーザーの入力した発話内容: " . $japaneseInput;
             $specificInstruction = "ユーザーが入力した『{$japaneseInput}』という内容を、相手（AI）の最初の発話として採用してください。入力された日本語の意味を正確に保ちつつ、文脈に合わせた自然でリアリティのある英語に訳してください。勝手に状況を変えたり、質問に変換したりせず、入力された内容をそのまま伝える表現にしてください。";
@@ -112,7 +401,46 @@ if ($type === 'new') {
     出力はJSON形式で、以下のキーを含めてください:
       - 'japanese': 生成した日本語の会話文（相手の発話）
       - 'english': その英訳
-      - 'sample_user_answers': ユーザーの返答例のリスト（1〜5個程度）。提案数は固定せず、文脈に応じてできるだけ多くのバリエーションを提示してください。ただし、似たような表現ばかりを並べるのは避け、ポジティブ・ネガティブ・質問など様々な視点で提示してください。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。";
+      - 'sample_user_answers': ユーザーの返答例のリスト（1〜5個程度）。提案数は固定せず、文脈に応じてできるだけ多くのバリエーションを提示してください。ただし、似たような表現ばかりを並めるのは避け、ポジティブ・ネガティブ・質問など様々な視点で提示してください。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。";
+} elseif ($type === 'situation_options') {
+    $situation = $input['situation'] ?? '';
+    
+    if (empty($situation)) {
+        $situationsFile = __DIR__ . '/../data/situations.json';
+        if (file_exists($situationsFile)) {
+            $allSituations = json_decode(file_get_contents($situationsFile), true);
+            if ($allSituations && is_array($allSituations)) {
+                $selectedCategories = $input['situations'] ?? [];
+                $excludeSituations = $input['exclude_situations'] ?? [];
+
+                $filteredSituations = $allSituations;
+                if (!empty($selectedCategories)) {
+                    $filteredSituations = array_filter($allSituations, function ($s) use ($selectedCategories) {
+                        return in_array($s['category'], $selectedCategories);
+                    });
+                    if (empty($filteredSituations)) {
+                        $filteredSituations = $allSituations;
+                    }
+                }
+
+                if (!empty($excludeSituations)) {
+                    $trulyFiltered = array_filter($filteredSituations, function ($s) use ($excludeSituations) {
+                        return !in_array($s['situation'], $excludeSituations);
+                    });
+                    if (!empty($trulyFiltered)) {
+                        $filteredSituations = $trulyFiltered;
+                    }
+                }
+
+                $filteredSituations = array_values($filteredSituations);
+                $randomSituation = $filteredSituations[array_rand($filteredSituations)];
+                $situation = $randomSituation['situation'];
+            }
+        }
+    }
+
+    $excludeList = $input['exclude'] ?? [];
+    $prompt = buildSituationOptionsPrompt($situation, $excludeList, 10, 1, $length);
 } elseif ($type === 'question') {
     $history = implode("\n", array_map(function ($item) {
         $role = $item['role'] === 'user' ? 'ユーザー' : 'AI';
@@ -331,135 +659,111 @@ if ($type === 'new') {
       - 'sample_user_answers': ユーザーの回答例のリスト（1〜5個程度）。提案数は固定せず、文脈に応じてできるだけ多くのバリエーションを提示してください。ただし、似たような表現ばかりを並べるのは避け、ポジティブ・ネガティブ・質問など様々な視点で提示してください。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。";
 }
 
-// Call Gemini API
-$url = "https://generativelanguage.googleapis.com/v1beta/models/" . GEMINI_MODEL . ":generateContent?key=" . GEMINI_API_KEY;
-
-$data = [
-    'contents' => [
-        [
-            'parts' => [
-                ['text' => $prompt]
-            ]
-        ]
-    ],
-    'generationConfig' => [
-        'responseMimeType' => 'application/json'
-    ]
-];
-
-$ch = curl_init($url);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-
-$response = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-curl_close($ch);
-
-if ($httpCode !== 200) {
-    http_response_code(500);
-    $errorMsg = 'API Request Failed with HTTP Code: ' . $httpCode;
-    file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nDetails: " . $response . "\n", FILE_APPEND);
-    http_response_code(500);
-    echo json_encode(['error' => $errorMsg, 'details' => $response]);
-    exit;
-}
-
 try {
-    $result = json_decode($response, true);
-    if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
-        $text = $result['candidates'][0]['content']['parts'][0]['text'];
+    $json = callGeminiJson($prompt);
 
-        // Log raw response for debugging
-        file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Raw API Response: " . $text . "\n", FILE_APPEND);
+    if ($type === 'situation_options') {
+        $allCandidates = dedupeSituationOptions($json['options'] ?? [], $excludeList);
+        $options = dedupeSituationOptions(
+            filterSituationOptionsByLength($allCandidates, $length, 1),
+            $excludeList
+        );
 
-        // Clean up any extra characters before or after the JSON object
-        $text = trim($text);
-        
-        // Strip markdown code blocks if present
-        $text = preg_replace('/^```json\s*|\s*```$/', '', $text);
-
-        // Validate JSON content
-        $json = json_decode($text, true);
-        
-        // Recovery logic if JSON is invalid (e.g. extra characters at the end)
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            $firstBrace = strpos($text, '{');
-            $lastBrace = strrpos($text, '}');
-            if ($firstBrace !== false && $lastBrace !== false && $lastBrace > $firstBrace) {
-                $temp = substr($text, $firstBrace, $lastBrace - $firstBrace + 1);
-                // Progressively try to find a valid JSON object by moving the last brace index back
-                while (strlen($temp) > 0) {
-                    $testJson = json_decode($temp, true);
-                    if (json_last_error() === JSON_ERROR_NONE) {
-                        $json = $testJson;
-                        break;
-                    }
-                    $nextLastBrace = strrpos(substr($temp, 0, -1), '}');
-                    if ($nextLastBrace === false) break;
-                    $temp = substr($temp, 0, $nextLastBrace + 1);
-                }
-            }
+        for ($attempt = 2; count($options) < 10 && $attempt <= 6; $attempt++) {
+            $retryPrompt = buildSituationOptionsPrompt($situation, array_merge($excludeList, $options), 10, $attempt, $length);
+            $retryJson = callGeminiJson($retryPrompt);
+            $retryCandidates = dedupeSituationOptions($retryJson['options'] ?? [], array_merge($excludeList, $allCandidates));
+            $allCandidates = dedupeSituationOptions(array_merge($allCandidates, $retryCandidates), $excludeList);
+            $lengthMatchedOptions = filterSituationOptionsByLength($retryCandidates, $length, $attempt);
+            $options = dedupeSituationOptions(array_merge($options, $lengthMatchedOptions), $excludeList);
         }
 
-        if (!$json) {
-            $errorMsg = 'Invalid JSON from Gemini: ' . json_last_error_msg();
-            file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nRaw: " . $text . "\n", FILE_APPEND);
+        for ($attempt = 1; count($options) < 10 && $attempt <= 3; $attempt++) {
+            $seedOptions = array_slice(
+                sortSituationOptionsByLengthCloseness(
+                    array_values(array_diff($allCandidates, $options)),
+                    $length
+                ),
+                0,
+                12
+            );
 
+            if (empty($seedOptions)) {
+                break;
+            }
+
+            $rewritePrompt = buildSituationOptionsRewritePrompt(
+                $situation,
+                $seedOptions,
+                array_merge($excludeList, $options),
+                10 - count($options),
+                $attempt,
+                $length
+            );
+            $rewriteJson = callGeminiJson($rewritePrompt);
+            $rewrittenCandidates = dedupeSituationOptions($rewriteJson['options'] ?? [], array_merge($excludeList, $allCandidates, $options));
+            $allCandidates = dedupeSituationOptions(array_merge($allCandidates, $rewrittenCandidates), $excludeList);
+            $lengthMatchedRewriteOptions = filterSituationOptionsByLength($rewrittenCandidates, $length, $attempt + 1);
+            $options = dedupeSituationOptions(array_merge($options, $lengthMatchedRewriteOptions), $excludeList);
+        }
+
+        if (count($options) < 10) {
+            $closestOptions = sortSituationOptionsByLengthCloseness(
+                array_values(array_diff($allCandidates, $options)),
+                $length
+            );
+            $options = dedupeSituationOptions(
+                array_merge($options, array_slice($closestOptions, 0, 10 - count($options))),
+                $excludeList
+            );
+        }
+
+        if (empty($options)) {
+            $errorMsg = 'No situation options generated';
+            file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nData: " . print_r($json, true) . "\n", FILE_APPEND);
             http_response_code(500);
-            echo json_encode(['error' => $errorMsg, 'raw' => $text]);
+            echo json_encode(['error' => $errorMsg, 'data' => $json]);
             exit;
         }
 
-        // Handle case where Gemini returns an array of objects
-        if (isset($json[0]) && is_array($json[0])) {
-            $json = $json[0];
-        }
-
-        // Validation based on expected keys
-        if (isset($json['answer'])) {
-            // Q&A Response
-            if (empty($json['answer'])) {
-                $errorMsg = 'Empty answer from Gemini';
-                file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nData: " . print_r($json, true) . "\n", FILE_APPEND);
-                http_response_code(500);
-                echo json_encode(['error' => $errorMsg, 'data' => $json]);
-                exit;
-            }
-        } else {
-            // Conversation Response
-            if (empty($json['japanese']) || empty($json['english'])) {
-                $errorMsg = 'Incomplete data from Gemini';
-                file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nData: " . print_r($json, true) . "\n", FILE_APPEND);
-
-                http_response_code(500);
-                echo json_encode(['error' => $errorMsg, 'data' => $json]);
-                exit;
-            }
-        }
-
-        // Ensure sample_user_answers exists
-        if (!isset($json['sample_user_answers'])) {
-            $json['sample_user_answers'] = []; // Default empty if missing
-        }
-        // Backward compatibility (optional but safe)
-        if (!isset($json['sample_user_japanese']) && !empty($json['sample_user_answers'])) {
-            $json['sample_user_japanese'] = $json['sample_user_answers'][0];
-        }
-
-        if (!empty($selectedSituationText)) {
-            $json['selected_situation'] = $selectedSituationText;
-        }
-
-        echo json_encode($json);
-    } else {
-        $errorMsg = 'Invalid API Response Structure';
-        file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nFull Response: " . $response . "\n", FILE_APPEND);
-
-        http_response_code(500);
-        echo json_encode(['error' => $errorMsg]);
+        echo json_encode([
+            'situation' => $situation,
+            'options' => array_slice($options, 0, 10)
+        ]);
+        exit;
     }
+
+    // Validation based on expected keys
+    if (isset($json['answer'])) {
+        if (empty($json['answer'])) {
+            $errorMsg = 'Empty answer from Gemini';
+            file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nData: " . print_r($json, true) . "\n", FILE_APPEND);
+            http_response_code(500);
+            echo json_encode(['error' => $errorMsg, 'data' => $json]);
+            exit;
+        }
+    } else {
+        if (empty($json['japanese']) || empty($json['english'])) {
+            $errorMsg = 'Incomplete data from Gemini';
+            file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nData: " . print_r($json, true) . "\n", FILE_APPEND);
+            http_response_code(500);
+            echo json_encode(['error' => $errorMsg, 'data' => $json]);
+            exit;
+        }
+    }
+
+    if (!isset($json['sample_user_answers'])) {
+        $json['sample_user_answers'] = [];
+    }
+    if (!isset($json['sample_user_japanese']) && !empty($json['sample_user_answers'])) {
+        $json['sample_user_japanese'] = $json['sample_user_answers'][0];
+    }
+
+    if (!empty($selectedSituationText)) {
+        $json['selected_situation'] = $selectedSituationText;
+    }
+
+    echo json_encode($json);
 } catch (Exception $e) {
     $errorMsg = 'An unexpected error occurred: ' . $e->getMessage();
     file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Exception: " . $errorMsg . "\nTrace: " . $e->getTraceAsString() . "\n", FILE_APPEND);
