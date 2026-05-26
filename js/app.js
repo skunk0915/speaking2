@@ -566,16 +566,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const tabs = clone.querySelectorAll('.mode-tab');
         const sectionTranslate = clone.querySelector('#section-translate');
         const sectionCreative = clone.querySelector('#section-creative');
+        const sectionUrl = clone.querySelector('#section-url');
         const inputTranslate = clone.querySelector('#initial-japanese-input-translate');
         const inputCreative = clone.querySelector('#initial-japanese-input-creative');
+        const inputUrl = clone.querySelector('#initial-url-input');
         const btnStart = clone.querySelector('#btn-start-conversation');
         const btnSwitchAuto = clone.querySelector('#btn-switch-auto');
 
         let currentMode = 'translate';
 
         const updateBtnState = () => {
-            const currentInput = currentMode === 'translate' ? inputTranslate : inputCreative;
-            btnStart.disabled = currentInput.value.trim() === '';
+            let currentInput;
+            if (currentMode === 'translate') {
+                currentInput = inputTranslate;
+            } else if (currentMode === 'creative') {
+                currentInput = inputCreative;
+            } else {
+                currentInput = inputUrl;
+            }
+            let isValid = currentInput.value.trim() !== '';
+            
+            // 簡易URLバリデーション（http:// か https:// で始まっていることをチェック）
+            if (currentMode === 'url' && isValid) {
+                const urlVal = currentInput.value.trim();
+                isValid = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(urlVal);
+            }
+            btnStart.disabled = !isValid;
         };
 
         tabs.forEach(tab => {
@@ -584,14 +600,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 tab.classList.add('active');
                 currentMode = tab.dataset.mode;
 
+                [sectionTranslate, sectionCreative, sectionUrl].forEach(sec => {
+                    if (sec) sec.classList.add('hidden');
+                });
+
                 if (currentMode === 'translate') {
-                    sectionTranslate.classList.remove('hidden');
-                    sectionCreative.classList.add('hidden');
-                    inputTranslate.focus();
-                } else {
-                    sectionTranslate.classList.add('hidden');
-                    sectionCreative.classList.remove('hidden');
-                    inputCreative.focus();
+                    if (sectionTranslate) sectionTranslate.classList.remove('hidden');
+                    if (inputTranslate) inputTranslate.focus();
+                } else if (currentMode === 'creative') {
+                    if (sectionCreative) sectionCreative.classList.remove('hidden');
+                    if (inputCreative) inputCreative.focus();
+                } else if (currentMode === 'url') {
+                    if (sectionUrl) sectionUrl.classList.remove('hidden');
+                    if (inputUrl) inputUrl.focus();
                 }
                 updateBtnState();
             });
@@ -605,11 +626,21 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
+        if (inputUrl) {
+            inputUrl.addEventListener('input', () => {
+                updateBtnState();
+            });
+        }
+
         btnStart.addEventListener('click', () => {
-            const input = currentMode === 'translate' ? inputTranslate : inputCreative;
-            const jpText = input.value.trim();
-            if (!jpText) return;
-            generateText('new', jpText, currentMode);
+            let input;
+            if (currentMode === 'translate') input = inputTranslate;
+            else if (currentMode === 'creative') input = inputCreative;
+            else input = inputUrl;
+
+            const valText = input.value.trim();
+            if (!valText) return;
+            generateText('new', valText, currentMode);
         });
 
         btnSwitchAuto.addEventListener('click', () => {
@@ -1108,6 +1139,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (savedExclude) {
                 excludeList = JSON.parse(savedExclude);
             }
+            // Clean up URLs and invalid items from the exclude list
+            if (Array.isArray(excludeList)) {
+                excludeList = excludeList.filter(item => {
+                    if (!item || typeof item !== 'string') return false;
+                    const trimmed = item.trim();
+                    const isUrl = trimmed.startsWith('http://') || trimmed.startsWith('https://') || /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})/i.test(trimmed);
+                    return !isUrl && trimmed.length > 3;
+                });
+            } else {
+                excludeList = [];
+            }
         } catch (e) {
             console.error('Failed to parse recent situations:', e);
         }
@@ -1238,6 +1280,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (savedExclude) {
                     excludeList = JSON.parse(savedExclude);
                 }
+                // Clean up URLs and invalid items from the exclude list
+                if (Array.isArray(excludeList)) {
+                    excludeList = excludeList.filter(item => {
+                        if (!item || typeof item !== 'string') return false;
+                        const trimmed = item.trim();
+                        const isUrl = trimmed.startsWith('http://') || trimmed.startsWith('https://') || /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})/i.test(trimmed);
+                        return !isUrl && trimmed.length > 3;
+                    });
+                } else {
+                    excludeList = [];
+                }
             } catch (e) {}
 
             try {
@@ -1290,7 +1343,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function generateText(type, initialJp = null, inputMode = 'translate', selectedSituation = null) {
         console.log('generateText called with type:', type, 'initialJp:', initialJp, 'mode:', inputMode, 'selectedSituation:', selectedSituation);
 
-        if (type === 'new' && inputMode !== 'translate') {
+        if (type === 'new' && inputMode !== 'translate' && inputMode !== 'url') {
             await startSituationOptionsFlow(initialJp, inputMode);
             return;
         }
@@ -1318,6 +1371,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const savedExclude = localStorage.getItem('speaking2_recent_situations');
                 if (savedExclude) {
                     excludeList = JSON.parse(savedExclude);
+                }
+                // Clean up URLs and invalid items from the exclude list
+                if (Array.isArray(excludeList)) {
+                    excludeList = excludeList.filter(item => {
+                        if (!item || typeof item !== 'string') return false;
+                        const trimmed = item.trim();
+                        const isUrl = trimmed.startsWith('http://') || trimmed.startsWith('https://') || /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})/i.test(trimmed);
+                        return !isUrl && trimmed.length > 3;
+                    });
+                } else {
+                    excludeList = [];
                 }
             } catch (e) {
                 console.error('Failed to parse recent situations:', e);
@@ -1355,11 +1419,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Save selected situation to recent list to prevent immediate repeats
             if (data && data.selected_situation) {
-                excludeList.push(data.selected_situation);
-                if (excludeList.length > 20) {
-                    excludeList.shift();
+                const val = data.selected_situation.trim();
+                const isUrl = val.startsWith('http://') || val.startsWith('https://') || /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})/i.test(val);
+                if (!isUrl && val.length > 3) {
+                    excludeList.push(val);
+                    if (excludeList.length > 20) {
+                        excludeList.shift();
+                    }
+                    localStorage.setItem('speaking2_recent_situations', JSON.stringify(excludeList));
                 }
-                localStorage.setItem('speaking2_recent_situations', JSON.stringify(excludeList));
             }
 
             const itemElement = addConversationItem(data);

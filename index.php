@@ -525,6 +525,13 @@
                     </svg>
                     <span>状況を指定</span>
                 </button>
+                <button class="mode-tab" data-mode="url">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                    <span>URLから作成</span>
+                </button>
             </div>
 
             <div class="input-section" id="section-translate">
@@ -550,6 +557,18 @@
                     <span>まず日本語候補を10個出し、その中から選んで開始します</span>
                 </div>
                 <textarea id="initial-japanese-input-creative" placeholder="例：ホテルのチェックイン / 海外のカフェで注文 / 病院の受付" rows="4"></textarea>
+            </div>
+
+            <div class="input-section hidden" id="section-url">
+                <div class="info-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                    </svg>
+                    <span>指定したURLの文章から設定の文字数に基づき文章を作成します</span>
+                </div>
+                <input type="url" id="initial-url-input" placeholder="例: https://example.com/news-article" />
             </div>
 
             <div class="initial-input-wrapper">
