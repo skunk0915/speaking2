@@ -42,6 +42,9 @@ function fetchUrlText($url) {
         throw new Exception("URL解析サービスへの接続に失敗しました（通信エラー: {$curlErr}）。");
     }
 
+    // 不正なUTF-8バイトシーケンスを除去/代替
+    $response = mb_convert_encoding($response, 'UTF-8', 'UTF-8');
+
     if ($httpCode !== 200) {
         throw new Exception("URLからコンテンツを取得できませんでした（解析HTTPコード: {$httpCode}）。対象サイトがクローラーを完全に遮断している可能性があります。");
     }
@@ -73,6 +76,91 @@ function fetchUrlText($url) {
         'text' => $text,
         'title' => $title
     ];
+}
+
+function getRandomSegment($text, $excludeSituations) {
+    if (empty($text)) {
+        return '';
+    }
+
+    // 改行で分割
+    $lines = preg_split('/\R+/', $text);
+    $validParagraphs = [];
+    
+    // 除外リストのクリーンアップ（URLなどは除外）
+    $validExcludes = [];
+    if (!empty($excludeSituations)) {
+        $validExcludes = array_filter($excludeSituations, function($s) {
+            $s = trim($s);
+            $isUrl = preg_match('/^https?:\/\//i', $s) || preg_match('/^[a-z0-9.-]+\.[a-z]{2,6}/i', $s) || filter_var($s, FILTER_VALIDATE_URL);
+            return !$isUrl && mb_strlen($s, 'UTF-8') > 3;
+        });
+    }
+
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if (empty($line)) continue;
+        
+        // メタデータ行の除外
+        if (preg_match('/^(Title:|URL Source:|Source:|Published:|Author:)/i', $line)) continue;
+        
+        // マークダウンの飾りや画像の除外
+        if (preg_match('/^!\[.*?\]\(.*?\)/', $line)) continue; // 画像のみの行
+        if (preg_match('/^\[.*?\]\(.*?\)$/', $line)) continue; // リンクのみの行
+        if (preg_match('/^[-*_]{3,}$/', $line)) continue; // 水平線
+        
+        // 短すぎる行の除外（15文字未満は本文としては短すぎる）
+        if (mb_strlen($line, 'UTF-8') < 15) continue;
+        
+        // 除外リストに含まれるテキストがこの行に含まれている場合はスキップ
+        $containsExclude = false;
+        foreach ($validExcludes as $exclude) {
+            if (mb_strpos($line, $exclude, 0, 'UTF-8') !== false) {
+                $containsExclude = true;
+                break;
+            }
+        }
+        if ($containsExclude) continue;
+        
+        $validParagraphs[] = $line;
+    }
+    
+    // 有効な段落が少なすぎる場合は、元のテキストをそのまま返す
+    if (count($validParagraphs) < 3) {
+        return $text;
+    }
+    
+    // ランダムに開始位置を決定
+    $totalCount = count($validParagraphs);
+    $startIndex = rand(0, $totalCount - 1);
+    
+    // 開始位置から、300〜600文字程度になるように段落を結合
+    $segment = "";
+    $segmentLen = 0;
+    $targetLen = rand(350, 650); // ターゲットサイズ
+    
+    for ($i = $startIndex; $i < $totalCount; $i++) {
+        $paragraph = $validParagraphs[$i];
+        $segment .= $paragraph . "\n\n";
+        $segmentLen += mb_strlen($paragraph, 'UTF-8');
+        if ($segmentLen >= $targetLen) {
+            break;
+        }
+    }
+    
+    // もし末尾に達したのに文字数が足りない場合は、startIndexの前の段落も遡って結合する
+    if ($segmentLen < 200 && $startIndex > 0) {
+        for ($i = $startIndex - 1; $i >= 0; $i--) {
+            $paragraph = $validParagraphs[$i];
+            $segment = $paragraph . "\n\n" . $segment;
+            $segmentLen += mb_strlen($paragraph, 'UTF-8');
+            if ($segmentLen >= $targetLen) {
+                break;
+            }
+        }
+    }
+    
+    return trim($segment);
 }
 
 $input = json_decode(file_get_contents('php://input'), true);
@@ -331,7 +419,7 @@ function callGeminiJson($prompt, $temperature = null) {
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data, JSON_INVALID_UTF8_SUBSTITUTE));
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
 
     $response = curl_exec($ch);
@@ -412,8 +500,11 @@ if ($type === 'new') {
             // URLから本文テキストを取得
             try {
                 $urlResult = fetchUrlText($japaneseInput);
-                $extractedText = $urlResult['text'];
+                $fullText = $urlResult['text'];
                 $urlTitle = $urlResult['title'];
+                
+                // 全文からランダムなセグメント（数段落）を切り出す
+                $extractedText = getRandomSegment($fullText, $excludeSituations);
             } catch (Throwable $e) {
                 http_response_code(400);
                 echo json_encode(['error' => 'URLからコンテンツを取得できませんでした: ' . $e->getMessage()]);
@@ -432,12 +523,12 @@ if ($type === 'new') {
                 }
             }
 
-            $situationText = "ユーザーが指定したURLから抽出されたWebテキストデータ: \n" . $extractedText;
-            $specificInstruction = "提示されたテキストデータ（URLのコンテンツ）の「メインとなる本文コンテンツ（主要なニュース、ブログ記事、本文など）」から、意味の通る完全に完結した一文（または意味の通る短い一続きのフレーズ）を『一切アレンジせずに、そのまま一字一句違わずに抜き出して』会話の最初のお題（japanese）として採用してください。
+            $situationText = "ユーザーが指定したURLから抽出されたWebテキストデータの一部: \n" . $extractedText;
+            $specificInstruction = "提示されたテキストデータ（URLのコンテンツの一部）の「メインとなる本文コンテンツ」から、意味の通る完全に完結した一文（または意味の通る短い一続きのフレーズ）を『一切アレンジせずに、そのまま一字一句違わずに抜き出して』会話の最初のお題（japanese）として採用してください。
 - 重要ルール:
-  1. 要約、アレンジ、言い換え、質問文への書き換え、挨拶の追加、AIとしての返答の創作などは【絶対に禁止】します。必ず本文内に元から存在するテキストをそのまま（コピペのように）正確に抜き出してください。提示された本文データに存在しない内容、あるいは全く無関係な架空の日常会話や接客フレーズ（アパレルの接客、ホテル、カフェなどでのやり取りなど）を勝手に創作することは【厳禁】です。
+  1. 要約、アレンジ、言い換え、質問文への書き換え、挨拶の追加、AIとしての返答の創作などは【絶対に禁止】します。必ず本文内に元から存在するテキストをそのまま（コピペのように）正確に抜き出してください。提示されたデータに存在しない内容、あるいは全く無関係な架空の日常会話や接客フレーズ（アパレルの接客、ホテル、カフェなどでのやり取りなど）を勝手に創作することは【厳禁】です。
   2. **一文が途中で途切れないこと（文頭から文末『。』『！』『？』まで、あるいは句読点でのキリの良い区切りまで正しく抽出すること）を【絶対最優先】**にしてください。文の途中で途切れた不完全な文章（例：「〜であり、」「〜し」「〜が、」で終わるもの）や、文字数制限に合わせるために文頭を削った文章（例：「老後の資金や持ち家など、必要なものは揃っており…」から前半部分をカットして「必要なものは揃っており…」と抽出すること）は**【厳禁】**とします。多少文字数をオーバーまたはアンダーしても、必ず文として完全に自己完結している一文を丸ごと抽出してください。
-  3. 毎回同じ一文ばかりが選ばれないように、テキスト全体（前部、中部、後部など）からランダムに異なる一文を選んで抜き出してください。{$excludeInstruction}
+  3. 毎回同じ一文ばかりが選ばれないように、提示されたテキスト全体から異なる一文を選んで抜き出してください。{$excludeInstruction}
   4. ヘッダーやフッター、サイドバーなどのノイズテキスト（共有メニューや著作権表示など）は完全に無視し、必ずメインの記事本文から抜き出してください。";
         } else {
             $situationText = "ユーザーの入力した状況・意図: " . $japaneseInput;
@@ -483,11 +574,10 @@ if ($type === 'new') {
     }
 
     if (isset($inputMode) && $inputMode === 'url') {
-        $prompt = "提示されたテキストデータ（URLのコンテンツ）の「メインとなる本文コンテンツ（主要なニュース、ブログ記事、本文など）」から、意味の通った完全に完結した一文を『一切アレンジせずに、そのまま一字一句違わずに抜き出して』会話の最初のお題（japanese）として採用してください。
+        $prompt = "提示されたテキストデータ（URLのコンテンツの一部）から、意味の通った完全に完結した一文を『一切アレンジせずに、そのまま一字一句違わずに抜き出して』会話の最初のお題（japanese）として採用してください。
 
 【提示されたテキストデータ】
 {$extractedText}
-{$excludeInstruction}
 
 指示:
 - 要約、アレンジ、言い換え、質問文への書き換え、挨拶の追加、AIとしての返答の創作などは【絶対に禁止】します。必ず本文内に元から存在するテキストをそのまま正確に（コピペのように）抜き出してください。提示された本文データにない、無関係な日常会話や接客フレーズなどを勝手に創作して出力してはいけません。
@@ -495,7 +585,7 @@ if ($type === 'new') {
   - 良い例：文頭から文末まで丸ごと一文を抽出する（例：「老後の資金や持ち家など、必要なものは揃っており、将来への未知数な部分がありません。」）
   - NG例：文字数に合わせるために文頭を削って抽出する（例：「必要なものは揃っており、将来への未知数な部分がありません。」）
   - たとえ目標文字数（{$length}文字）を大きく上回る（40文字や50文字以上になる）場合であっても、一文を途切れなく完全に抽出することを【絶対最優先】としてください。
-- 毎回同じ一文ばかりが選ばれないように、テキスト全体からランダムに異なる一文を選んで抜き出してください。
+- 毎回同じ一文ばかりが選ばれないように、提示されたテキスト全体からランダムに異なる一文を選んで抜き出してください。{$excludeInstruction}
 - ヘッダーやフッター、サイドバーなどのノイズテキスト（共有メニューや著作権表示、メニュー項目など）は完全に無視し、必ずメインの記事本文から抜き出してください。
 
 生成する英語について:

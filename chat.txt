@@ -457,3 +457,15 @@ USER: 改善してない
 AI: 本番データベースに「memo」カラムが反映されていない状態でも復習データの読み込みや保存が絶対にクラッシュしないよう、SHOW COLUMNSにより「memo」カラムの有無を動的に検出してSQLを切り替える互換性ロジック（フォールバック）をapi/reviews.phpに実装しました。
 編集ファイル:
 - api/reviews.php
+
+2026-05-26 18:31:00
+USER: url指定での文章が毎回同じものばかり選定される
+AI: URL指定モードでの文章選定において、同じ文章が繰り返し選ばれる問題を解決するため、PHP側で取得したWebコンテンツからランダムな範囲（数段落のセグメント）を切り出してGeminiに送信するアルゴリズムを導入します。また、プロンプトを整理して除外リストがGeminiに正確に伝わるように指示を最適化します。
+編集ファイル:
+- api/generate_text.php
+
+2026-05-26 18:35:00
+USER: 文章の生成に失敗しました: API Error: 500 {"error":"An unexpected error occurred: API Request Failed with HTTP Code: 400 Details: {\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"* GenerateContentRequest.contents: contents is not specified\\n\",\n    \"status\": \"INVALID_ARGUMENT\"\n  }\n}\n"}
+AI: Webサイトからスクレイピングしたテキストに含まれる不正なUTF-8バイトシーケンスにより、Gemini APIへのリクエスト送信時の json_encode が失敗してリクエストボディが空になっていたことが原因です。取得したHTMLテキストの不正文字を mb_convert_encoding でクリーンアップする処理と、json_encode 時に JSON_INVALID_UTF8_SUBSTITUTE オプションを指定して失敗を防ぐ対策を実装しました。
+編集ファイル:
+- api/generate_text.php
