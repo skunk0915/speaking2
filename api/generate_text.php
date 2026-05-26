@@ -56,7 +56,6 @@ function fetchUrlText($url) {
         $parsedUrl = parse_url($url);
         $title = $parsedUrl['host'] ?? 'Web Article';
     }
-
     // Jina Readerの出力から不要な先頭のメタ情報行（Source: ...）をクリーンアップ
     $text = preg_replace('/^Source: .*?[\r\n]+/i', '', $response);
     $text = trim($text);
