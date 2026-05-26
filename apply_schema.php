@@ -13,6 +13,12 @@ try {
             echo "Executed: " . substr($stmt, 0, 50) . "...\n";
         }
     }
+    // Check if reviews.memo column exists, if not, add it
+    $result = $pdo->query("SHOW COLUMNS FROM `reviews` LIKE 'memo'");
+    if ($result->rowCount() === 0) {
+        $pdo->exec("ALTER TABLE `reviews` ADD COLUMN `memo` TEXT DEFAULT NULL");
+        echo "Added column 'memo' to 'reviews' table.\n";
+    }
     echo "Schema updated successfully.\n";
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage() . "\n";

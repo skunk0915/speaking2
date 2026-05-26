@@ -417,3 +417,43 @@ AI: Gitの競合が発生していた複数のファイル（api/generate_text.p
 - css/style.css.map
 - README.md
 - chat.txt
+
+2026-05-26 15:53:00
+USER: 添削の冒頭に回答を含めるのは不要。ブラウザを閉じて開き直したときに回答が消えていたことへの対策だと思うが、添削に回答を含めるのではなく、.feedback-content内の.user-input-displayも記憶しておけばいいだけ
+AI: 添削結果の冒頭にユーザーの回答や元の英文が重複して表示されるのを防ぐためAIプロンプトを改善しました。また、ブラウザを閉じても入力回答（.user-input-display）が消えないよう、状態保存処理（saveUIState）と復元処理（restoreUIState）に回答データの保持ロジックを追加しました。
+編集ファイル:
+- api/correct_text.php
+- js/app.js
+- README.md
+- chat.txt
+
+2026-05-26 17:49:00
+USER: 添削のあとに自分用メモも記入するフリー入力欄作って。復習用ブックマークデータにもそれを保存
+AI: 添削結果に紐づく「自分用メモ」の記入エリアを追加し、お気に入り（復習用ブックマーク）保存時およびUI状態保存時にメモもMySQL・localStorageへ永続化する機能を実装しました。
+編集ファイル:
+- db/schema.sql
+- apply_schema.php
+- api/reviews.php
+- index.php
+- css/style.scss
+- css/style.css
+- js/app.js
+- README.md
+
+2026-05-26 17:58:30
+USER: メモ欄は追加されてるが復習ブックマークがボタンを押しても機能しない
+AI: 自分用メモ欄の初期設定（setupUserMemo）においてDOM要素の置換（replaceChild）を行っていた箇所を、DOM破壊を伴わないoninputプロパティ上書き方式に変更し、保存・更新処理での配列・オブジェクトの安全チェック（型チェック）を追加することで、JSクラッシュとブックマーク機能の停止を防ぐよう修正しました。
+編集ファイル:
+- js/app.js
+
+2026-05-26 17:59:00
+USER: 復習モードにすると「データの取得に失敗しました」
+AI: MySQLに「memo」カラムがない状態で「SELECT ... memo ...」が実行されてSQLエラー（Unknown column 'memo'）になっていたため、エラー発生時の型安全対策（デコード結果の配列チェック）を施すと同時に、本番環境のデータベースに対してマイグレーション（apply_schema.php）をブラウザ経由で実行してもらうように案内しました。
+編集ファイル:
+- api/reviews.php
+
+2026-05-26 18:01:00
+USER: 改善してない
+AI: 本番データベースに「memo」カラムが反映されていない状態でも復習データの読み込みや保存が絶対にクラッシュしないよう、SHOW COLUMNSにより「memo」カラムの有無を動的に検出してSQLを切り替える互換性ロジック（フォールバック）をapi/reviews.phpに実装しました。
+編集ファイル:
+- api/reviews.php

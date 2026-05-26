@@ -1613,6 +1613,43 @@ button .loader {
 }
 
 // New Styles
+.user-memo-section {
+    @include neumorphism-flat;
+    border-radius: $border-radius-md;
+    padding: 16px;
+    margin-top: 30px;
+    margin-bottom: 20px;
+
+    h3 {
+        font-size: 14px;
+        color: $text-secondary;
+        margin: 0 0 12px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .user-memo-input {
+        width: 100%;
+        min-height: 80px;
+        padding: 12px;
+        border-radius: $border-radius-sm;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.5);
+        color: $text-primary;
+        font-family: inherit;
+        font-size: 14px;
+        line-height: 1.5;
+        resize: vertical;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+
+        &:focus {
+            border-color: $primary-color;
+            box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+        }
+    }
+}
+
 .item-qa-section {
     @include neumorphism-flat;
     border-radius: $border-radius-md;

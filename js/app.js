@@ -471,13 +471,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 const retryHistory = JSON.parse(lastGroup.dataset.retryHistory);
 
                 const data = await getCorrection(text, feedbackSection, retryHistory, true, textJp);
-
+ 
                 // Update retry history with the latest result
                 if (data && data.correction) {
-                    retryHistory.push({ user_input: text, correction: data.correction, intended_japanese: textJp });
+                    const historyItemRef = { user_input: text, correction: data.correction, intended_japanese: textJp, memo: '' };
+                    retryHistory.push(historyItemRef);
                     lastGroup.dataset.retryHistory = JSON.stringify(retryHistory);
-                }
 
+                    // Bind user memo for retry item
+                    const retryItems = feedbackSection.querySelectorAll('.retry-result-item');
+                    const lastRetryItem = retryItems[retryItems.length - 1];
+                    if (lastRetryItem) {
+                        const memoInput = lastRetryItem.querySelector('.user-memo-input');
+                        setupUserMemo(memoInput, historyItemRef, () => {
+                            lastGroup.dataset.retryHistory = JSON.stringify(retryHistory);
+                            updateSavedData('history', retryHistory);
+                        });
+                    }
+                }
+ 
                 // For retry, we don't auto-advance conversation
             } else {
                 // Show User Message
@@ -487,24 +499,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     userTextP.textContent = text;
                     userMsgDiv.classList.remove('hidden');
                 }
-
+ 
                 // Add to history
                 conversationHistory.push({ role: 'user', text: text });
-
+ 
                 const feedbackSection = lastGroup.querySelector('.feedback-section');
-
+ 
                 // Initialize or get retry history for this specific message
                 if (!lastGroup.dataset.retryHistory) {
                     lastGroup.dataset.retryHistory = JSON.stringify([]);
                 }
                 const retryHistory = JSON.parse(lastGroup.dataset.retryHistory);
-
+ 
                 const data = await getCorrection(text, feedbackSection, retryHistory, false, textJp);
-
+ 
                 // Update retry history with the latest result
                 if (data && data.correction) {
-                    retryHistory.push({ user_input: text, correction: data.correction, intended_japanese: textJp });
+                    const historyItemRef = { user_input: text, correction: data.correction, intended_japanese: textJp, memo: '' };
+                    retryHistory.push(historyItemRef);
                     lastGroup.dataset.retryHistory = JSON.stringify(retryHistory);
+
+                    // Bind user memo for initial feedback item
+                    const memoInput = feedbackSection.querySelector('.user-memo-input');
+                    setupUserMemo(memoInput, historyItemRef, () => {
+                        lastGroup.dataset.retryHistory = JSON.stringify(retryHistory);
+                        updateSavedData('history', retryHistory);
+                    });
                 }
 
                 // Auto-advance conversation
@@ -1105,6 +1125,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                     <div class="retry-correction">${marked.parse(data.correction)}</div>
+                    <div class="user-memo-section">
+                        <h3>自分用メモ</h3>
+                        <textarea class="user-memo-input" placeholder="自分用のメモ（復習時のポイントなど）を入力..." rows="2"></textarea>
+                    </div>
                 `;
                 loadingItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
@@ -1715,6 +1739,21 @@ document.addEventListener('DOMContentLoaded', () => {
         scrollToBottom();
     }
 
+    function setupUserMemo(memoTextarea, historyItem, onUpdate) {
+        if (!memoTextarea) return;
+        memoTextarea.value = historyItem.memo || '';
+        
+        memoTextarea.oninput = () => {
+            historyItem.memo = memoTextarea.value;
+            if (typeof onUpdate === 'function') {
+                onUpdate(historyItem);
+            }
+            if (typeof saveUIState === 'function') {
+                saveUIState();
+            }
+        };
+    }
+
     function addConversationItem(data, insertAfterGroup = null, isReviewMode = false) {
         const clone = tmpl.content.cloneNode(true);
         const group = clone.querySelector('.conversation-group');
@@ -1729,20 +1768,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnQa = clone.querySelector('.btn-qa');
         const btnSave = clone.querySelector('.btn-save');
         const btnHistory = clone.querySelector('.btn-history');
-
+ 
         const practiceSection = clone.querySelector('.practice-section');
         const variationSection = clone.querySelector('.variation-section');
         const mainQa = clone.querySelector('.main-qa');
         const historySection = clone.querySelector('.history-section');
         const historyContainer = clone.querySelector('.history-container');
-
+ 
         const practiceInput = clone.querySelector('.practice-input');
         const btnPracticeSend = clone.querySelector('.btn-practice-send');
         const practiceFeedback = clone.querySelector('.feedback-content');
-
+ 
         japanese.textContent = data.japanese;
         english.textContent = data.english;
-
+ 
         if (isReviewMode) {
             english.classList.add('hidden');
             if (data.history && data.history.length > 0) {
@@ -1757,28 +1796,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-
+ 
         // History Toggle
         if (btnHistory) {
             btnHistory.addEventListener('click', () => toggleSection(btnHistory, historySection));
         }
-
+ 
         function renderHistory(history, container) {
             container.innerHTML = '';
             history.forEach(h => {
                 const hItem = document.createElement('div');
                 hItem.className = 'history-item feedback-content';
-
+ 
                 const suggestionsContainer = document.createElement('ul');
                 suggestionsContainer.className = 'suggestions-list';
-
+ 
                 if (h.suggestions && h.suggestions.length > 0) {
                     h.suggestions.forEach(s => {
                         const sEl = createSuggestionElement(s, suggestionsContainer);
                         suggestionsContainer.appendChild(sEl);
                     });
                 }
-
+ 
                 hItem.innerHTML = `
                     <div class="user-input-display">
                         ${h.intended_japanese ? `<div class="intended-jp">${h.intended_japanese}</div>` : ''}
@@ -1793,11 +1832,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h3>添削</h3>
                     <div class="correction">${marked.parse(h.correction)}</div>
                     ${h.suggestions && h.suggestions.length > 0 ? `<h3>提案</h3>` : ''}
+                    <div class="user-memo-section">
+                        <h3>自分用メモ</h3>
+                        <textarea class="user-memo-input" placeholder="自分用のメモ（復習時のポイントなど）を入力..." rows="2"></textarea>
+                    </div>
                 `;
                 if (h.suggestions && h.suggestions.length > 0) {
                     hItem.appendChild(suggestionsContainer);
                 }
-
+ 
                 // Add Q&A section to history item
                 const qaSection = document.createElement('div');
                 qaSection.className = 'item-qa-section history-item-qa';
@@ -1815,12 +1858,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
                 hItem.appendChild(qaSection);
-
+ 
                 // Initialize reactions if present in history item
                 if (h.reactions && h.reactions.length > 0) {
                     renderReactions(h.reactions, hItem);
                 }
-
+ 
                 // Initialize Q&A for history item
                 setupItemQa(hItem, {
                     situation: data.japanese,
@@ -1831,6 +1874,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateSavedData('history', history);
                 });
 
+                // Initialize Memo for history item
+                const memoInput = hItem.querySelector('.user-memo-input');
+                setupUserMemo(memoInput, h, () => {
+                    updateSavedData('history', history);
+                });
+ 
                 container.appendChild(hItem);
             });
         }
@@ -1855,6 +1904,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const reviewIdx = reviews.findIndex(r => r.japanese === data.japanese);
             if (reviewIdx !== -1) {
                 reviews[reviewIdx][key] = value;
+                
+                // Sync the top-level memo when history is updated
+                if (key === 'history' && Array.isArray(value)) {
+                    let latestMemo = "";
+                    if (value.length > 0) {
+                        const lastItem = value[value.length - 1];
+                        if (lastItem && typeof lastItem === 'object') {
+                            latestMemo = lastItem.memo || "";
+                        }
+                    }
+                    reviews[reviewIdx].memo = latestMemo;
+                }
                 
                 // Persist to server
                 try {
@@ -1904,6 +1965,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     ...mainHistory,
                     ...(practiceRetryHistory || [])
                 ];
+
+                // Sync the latest memo to the top-level
+                let latestMemo = "";
+                if (reviewData.history && reviewData.history.length > 0) {
+                    const lastHistoryItem = reviewData.history[reviewData.history.length - 1];
+                    if (lastHistoryItem && typeof lastHistoryItem === 'object') {
+                        latestMemo = lastHistoryItem.memo || "";
+                    }
+                }
+                reviewData.memo = latestMemo;
 
                 try {
                     const res = await fetch('api/reviews.php', {
@@ -1987,7 +2058,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btnPractice.addEventListener('click', () => toggleSection(btnPractice, practiceSection, practiceInput));
         }
 
-        let practiceRetryHistory = isReviewMode ? (data.history || []) : [];
+        let practiceRetryHistory = data.history || [];
 
         if (btnVariationMenu) {
             btnVariationMenu.addEventListener('click', () => toggleSection(btnVariationMenu, variationSection));
@@ -2071,10 +2142,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         suggestions: [],
                         reactions: [],
                         intended_japanese: null,
-                        qa_history: []
+                        qa_history: [],
+                        memo: ''
                     };
                     practiceRetryHistory.push(historyItemRef);
-
+ 
                     const dataCorr = await getCorrection(text, practiceFeedback, practiceRetryHistory.slice(0, -1), true, "", (newQaHistory) => {
                         historyItemRef.qa_history = newQaHistory;
                         updateSavedData('history', practiceRetryHistory);
@@ -2082,20 +2154,30 @@ document.addEventListener('DOMContentLoaded', () => {
                             renderHistory(practiceRetryHistory, historyContainer);
                         }
                     });
-
+ 
                     if (dataCorr && dataCorr.correction) {
                         historyItemRef.correction = dataCorr.correction;
                         historyItemRef.suggestions = dataCorr.suggestions || [];
                         historyItemRef.reactions = dataCorr.reactions || [];
                         historyItemRef.intended_japanese = dataCorr.intended_japanese || null;
                         
+                        // Bind user memo for retry item
+                        const retryItems = practiceFeedback.querySelectorAll('.retry-result-item');
+                        const lastRetryItem = retryItems[retryItems.length - 1];
+                        if (lastRetryItem) {
+                            const memoInput = lastRetryItem.querySelector('.user-memo-input');
+                            setupUserMemo(memoInput, historyItemRef, () => {
+                                updateSavedData('history', practiceRetryHistory);
+                            });
+                        }
+
                         updateSavedData('history', practiceRetryHistory);
                         if (isReviewMode) {
                             btnHistory.classList.remove('hidden');
                             renderHistory(practiceRetryHistory, historyContainer);
                         }
                     }
-
+ 
                     practiceInput.value = '';
                 } else {
                     // Initial correction
@@ -2105,10 +2187,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         suggestions: [],
                         reactions: [],
                         intended_japanese: null,
-                        qa_history: []
+                        qa_history: [],
+                        memo: ''
                     };
                     practiceRetryHistory.push(historyItemRef);
-
+ 
                     const dataCorr = await getCorrection(text, practiceFeedback, practiceRetryHistory.slice(0, -1), false, "", (newQaHistory) => {
                         historyItemRef.qa_history = newQaHistory;
                         updateSavedData('history', practiceRetryHistory);
@@ -2116,20 +2199,26 @@ document.addEventListener('DOMContentLoaded', () => {
                             renderHistory(practiceRetryHistory, historyContainer);
                         }
                     });
-
+ 
                     if (dataCorr && dataCorr.correction) {
                         historyItemRef.correction = dataCorr.correction;
                         historyItemRef.suggestions = dataCorr.suggestions || [];
                         historyItemRef.reactions = dataCorr.reactions || [];
                         historyItemRef.intended_japanese = dataCorr.intended_japanese || null;
                         
+                        // Bind user memo for initial feedback item
+                        const memoInput = practiceFeedback.querySelector('.user-memo-input');
+                        setupUserMemo(memoInput, historyItemRef, () => {
+                            updateSavedData('history', practiceRetryHistory);
+                        });
+
                         updateSavedData('history', practiceRetryHistory);
                         if (isReviewMode) {
                             btnHistory.classList.remove('hidden');
                             renderHistory(practiceRetryHistory, historyContainer);
                         }
                     }
-
+ 
                     practiceInput.value = '';
                 }
 
@@ -2708,6 +2797,9 @@ document.addEventListener('DOMContentLoaded', () => {
             let feedbackData = null;
             if (feedbackVisible) {
                 const correctionHtml = feedbackSection.querySelector('.correction')?.innerHTML || '';
+                const userInputDisplayEl = feedbackSection.querySelector('.user-input-display');
+                const userInputDisplayHtml = userInputDisplayEl?.innerHTML || '';
+                const userInputDisplayVisible = userInputDisplayEl && !userInputDisplayEl.classList.contains('hidden');
                 
                 // Suggestions
                 const suggestions = [];
@@ -2741,7 +2833,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     correction_html: correctionHtml,
                     suggestions: suggestions,
                     reactions: reactions,
-                    qa_history: qaHistory
+                    qa_history: qaHistory,
+                    user_input_display_html: userInputDisplayHtml,
+                    user_input_display_visible: userInputDisplayVisible,
+                    memo: feedbackSection.querySelector('.user-memo-input')?.value || ''
                 };
             }
             
@@ -2762,6 +2857,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 let practiceFeedbackData = null;
                 if (practiceFeedbackVisible) {
                     const practiceCorrection = practiceFeedback.querySelector('.correction')?.innerHTML || '';
+                    const practiceUserInputDisplayEl = practiceFeedback.querySelector('.user-input-display');
+                    const practiceUserInputDisplayHtml = practiceUserInputDisplayEl?.innerHTML || '';
+                    const practiceUserInputDisplayVisible = practiceUserInputDisplayEl && !practiceUserInputDisplayEl.classList.contains('hidden');
                     
                     const practiceSuggestions = [];
                     practiceFeedback.querySelectorAll('.suggestions-list .suggestion-item').forEach(sEl => {
@@ -2793,7 +2891,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         correction_html: practiceCorrection,
                         suggestions: practiceSuggestions,
                         reactions: practiceReactions,
-                        qa_history: practiceQaHistory
+                        qa_history: practiceQaHistory,
+                        user_input_display_html: practiceUserInputDisplayHtml,
+                        user_input_display_visible: practiceUserInputDisplayVisible,
+                        memo: practiceFeedback.querySelector('.user-memo-input')?.value || ''
                     };
                 }
                 
@@ -2891,7 +2992,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const promptData = {
                     japanese: gData.prompt.japanese,
                     english: gData.prompt.english,
-                    sample_user_answers: gData.prompt.sample_user_answers
+                    sample_user_answers: gData.prompt.sample_user_answers,
+                    history: gData.retry_history || []
                 };
                 
                 const groupEl = addConversationItem(promptData);
@@ -3011,6 +3113,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Restore practice correction HTML
                         practiceFeedback.querySelector('.correction').innerHTML = gData.practice.feedback.correction_html;
                         
+                        // Restore user input display if available
+                        const userInputDisplay = practiceFeedback.querySelector('.user-input-display');
+                        if (userInputDisplay && gData.practice.feedback.user_input_display_html) {
+                            userInputDisplay.innerHTML = gData.practice.feedback.user_input_display_html;
+                            if (gData.practice.feedback.user_input_display_visible) {
+                                userInputDisplay.classList.remove('hidden');
+                            } else {
+                                userInputDisplay.classList.add('hidden');
+                            }
+                        } else if (userInputDisplay) {
+                            userInputDisplay.classList.add('hidden');
+                        }
+                        
                         // Suggestions
                         const suggestionsList = practiceFeedback.querySelector('.suggestions-list');
                         suggestionsList.innerHTML = '';
@@ -3063,6 +3178,19 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                             updateSavedDataExternal(groupEl, 'history', practiceRetryHistory);
                         });
+
+                        // Restore user memo for Practice
+                        const practiceMemoInput = practiceFeedback.querySelector('.user-memo-input');
+                        if (practiceMemoInput) {
+                            const practiceRetryHistory = gData.retry_history || [];
+                            const firstItem = practiceRetryHistory[0] || {};
+                            firstItem.memo = gData.practice.feedback.memo || '';
+                            practiceMemoInput.value = firstItem.memo;
+                            
+                            setupUserMemo(practiceMemoInput, firstItem, () => {
+                                updateSavedDataExternal(groupEl, 'history', practiceRetryHistory);
+                            });
+                        }
                     }
                 }
                 
@@ -3073,6 +3201,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     // Set correction HTML
                     feedbackSection.querySelector('.correction').innerHTML = gData.feedback.correction_html;
+                    
+                    // Restore user input display if available
+                    const userInputDisplay = feedbackSection.querySelector('.user-input-display');
+                    if (userInputDisplay && gData.feedback.user_input_display_html) {
+                        userInputDisplay.innerHTML = gData.feedback.user_input_display_html;
+                        if (gData.feedback.user_input_display_visible) {
+                            userInputDisplay.classList.remove('hidden');
+                        } else {
+                            userInputDisplay.classList.add('hidden');
+                        }
+                    } else if (userInputDisplay) {
+                        userInputDisplay.classList.add('hidden');
+                    }
                     
                     // Suggestions
                     const suggestionsList = feedbackSection.querySelector('.suggestions-list');
@@ -3123,6 +3264,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         gData.feedback.qa_history = newHistory;
                         saveUIState();
                     });
+
+                    // Restore user memo for Conversation Feedback
+                    const memoInput = feedbackSection.querySelector('.user-memo-input');
+                    if (memoInput) {
+                        const retryHistory = gData.retry_history || [];
+                        const firstItem = retryHistory[0] || {};
+                        firstItem.memo = gData.feedback.memo || '';
+                        memoInput.value = firstItem.memo;
+                        
+                        setupUserMemo(memoInput, firstItem, () => {
+                            groupEl.dataset.retryHistory = JSON.stringify(retryHistory);
+                            updateSavedDataExternal(groupEl, 'history', retryHistory);
+                        });
+                    }
                 }
             }
             

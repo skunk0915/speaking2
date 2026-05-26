@@ -393,6 +393,11 @@
 
                         <div class="retry-results"></div>
 
+                        <div class="user-memo-section">
+                            <h3>自分用メモ</h3>
+                            <textarea class="user-memo-input" placeholder="自分用のメモ（復習時のポイントなど）を入力..." rows="2"></textarea>
+                        </div>
+
                         <div class="item-qa-section">
                             <h3>質問</h3>
                             <div class="item-qa-container">
@@ -448,6 +453,11 @@
                     <ul class="suggestions-list"></ul>
 
                     <div class="retry-results"></div>
+
+                    <div class="user-memo-section">
+                        <h3>自分用メモ</h3>
+                        <textarea class="user-memo-input" placeholder="自分用のメモ（復習時のポイントなど）を入力..." rows="2"></textarea>
+                    </div>
 
                     <div class="item-qa-section">
                         <h3>質問</h3>

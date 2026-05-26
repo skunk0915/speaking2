@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS `reviews` (
   `user_id` int(11) NOT NULL,
   `japanese` text NOT NULL,
   `content` longtext NOT NULL,
+  `memo` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`)

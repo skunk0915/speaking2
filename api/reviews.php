@@ -12,17 +12,32 @@ if (!isset($_SESSION['user_id'])) {
 
 $userId = $_SESSION['user_id'];
 $method = $_SERVER['REQUEST_METHOD'];
+// Check if reviews.memo column exists in database to ensure compatibility with older schemas
+$hasMemoColumn = false;
+try {
+    $columnCheck = $pdo->query("SHOW COLUMNS FROM `reviews` LIKE 'memo'");
+    $hasMemoColumn = ($columnCheck->rowCount() > 0);
+} catch (Exception $e) {
+    $hasMemoColumn = false;
+}
 
 if ($method === 'GET') {
     // List reviews
     try {
-        $stmt = $pdo->prepare("SELECT id, content, japanese, created_at FROM reviews WHERE user_id = ? ORDER BY created_at DESC");
+        $sql = "SELECT id, content, japanese" . ($hasMemoColumn ? ", memo" : "") . ", created_at FROM reviews WHERE user_id = ? ORDER BY created_at DESC";
+        $stmt = $pdo->prepare($sql);
         $stmt->execute([$userId]);
         $reviews = $stmt->fetchAll();
         
         $results = [];
         foreach ($reviews as $r) {
             $content = json_decode($r['content'], true);
+            if (!is_array($content)) {
+                $content = [];
+            }
+            if ($hasMemoColumn && isset($r['memo']) && $r['memo'] !== null) {
+                $content['memo'] = $r['memo'];
+            }
             // Combine ID and content for the frontend
             $results[] = array_merge(['id' => $r['id']], $content);
         }
@@ -36,6 +51,7 @@ if ($method === 'GET') {
     try {
         $input = json_decode(file_get_contents('php://input'), true);
         $japanese = $input['japanese'] ?? '';
+        $memo = $input['memo'] ?? null;
         
         if (!$japanese) {
             echo json_encode(['status' => 'error', 'message' => 'Japanese content is required']);
@@ -53,13 +69,23 @@ if ($method === 'GET') {
 
         if ($existing) {
             // Update
-            $stmt = $pdo->prepare("UPDATE reviews SET content = ? WHERE id = ?");
-            $stmt->execute([$content, $existing['id']]);
+            if ($hasMemoColumn) {
+                $stmt = $pdo->prepare("UPDATE reviews SET content = ?, memo = ? WHERE id = ?");
+                $stmt->execute([$content, $memo, $existing['id']]);
+            } else {
+                $stmt = $pdo->prepare("UPDATE reviews SET content = ? WHERE id = ?");
+                $stmt->execute([$content, $existing['id']]);
+            }
             echo json_encode(['status' => 'success', 'id' => $existing['id'], 'action' => 'updated']);
         } else {
             // Insert
-            $stmt = $pdo->prepare("INSERT INTO reviews (user_id, japanese, content) VALUES (?, ?, ?)");
-            $stmt->execute([$userId, $japanese, $content]);
+            if ($hasMemoColumn) {
+                $stmt = $pdo->prepare("INSERT INTO reviews (user_id, japanese, content, memo) VALUES (?, ?, ?, ?)");
+                $stmt->execute([$userId, $japanese, $content, $memo]);
+            } else {
+                $stmt = $pdo->prepare("INSERT INTO reviews (user_id, japanese, content) VALUES (?, ?, ?)");
+                $stmt->execute([$userId, $japanese, $content]);
+            }
             echo json_encode(['status' => 'success', 'id' => $pdo->lastInsertId(), 'action' => 'inserted']);
         }
     } catch (Exception $e) {
