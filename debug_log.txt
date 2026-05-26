@@ -122,3 +122,8 @@ Data: Array
     "sample_user_japanese": "喜んで！お祝いさせてください。"
   }
 ]
+2026-05-26 05:42:41 Error: API Request Failed with HTTP Code: 0
+Details: 
+2026-05-26 05:42:41 Exception: An unexpected error occurred: API Request Failed with HTTP Code: 0
+Trace: #0 C:\Users\OW\pj\speaking2\api\generate_text.php(796): callGeminiJson()
+#1 {main}

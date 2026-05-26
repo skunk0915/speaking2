@@ -566,16 +566,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const tabs = clone.querySelectorAll('.mode-tab');
         const sectionTranslate = clone.querySelector('#section-translate');
         const sectionCreative = clone.querySelector('#section-creative');
+        const sectionUrl = clone.querySelector('#section-url');
         const inputTranslate = clone.querySelector('#initial-japanese-input-translate');
         const inputCreative = clone.querySelector('#initial-japanese-input-creative');
+        const inputUrl = clone.querySelector('#initial-url-input');
         const btnStart = clone.querySelector('#btn-start-conversation');
         const btnSwitchAuto = clone.querySelector('#btn-switch-auto');
 
         let currentMode = 'translate';
 
         const updateBtnState = () => {
-            const currentInput = currentMode === 'translate' ? inputTranslate : inputCreative;
-            btnStart.disabled = currentInput.value.trim() === '';
+            let currentInput;
+            if (currentMode === 'translate') {
+                currentInput = inputTranslate;
+            } else if (currentMode === 'creative') {
+                currentInput = inputCreative;
+            } else {
+                currentInput = inputUrl;
+            }
+            let isValid = currentInput.value.trim() !== '';
+            
+            // 簡易URLバリデーション（http:// か https:// で始まっていることをチェック）
+            if (currentMode === 'url' && isValid) {
+                const urlVal = currentInput.value.trim();
+                isValid = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(urlVal);
+            }
+            btnStart.disabled = !isValid;
         };
 
         tabs.forEach(tab => {
@@ -584,14 +600,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 tab.classList.add('active');
                 currentMode = tab.dataset.mode;
 
+                [sectionTranslate, sectionCreative, sectionUrl].forEach(sec => {
+                    if (sec) sec.classList.add('hidden');
+                });
+
                 if (currentMode === 'translate') {
-                    sectionTranslate.classList.remove('hidden');
-                    sectionCreative.classList.add('hidden');
-                    inputTranslate.focus();
-                } else {
-                    sectionTranslate.classList.add('hidden');
-                    sectionCreative.classList.remove('hidden');
-                    inputCreative.focus();
+                    if (sectionTranslate) sectionTranslate.classList.remove('hidden');
+                    if (inputTranslate) inputTranslate.focus();
+                } else if (currentMode === 'creative') {
+                    if (sectionCreative) sectionCreative.classList.remove('hidden');
+                    if (inputCreative) inputCreative.focus();
+                } else if (currentMode === 'url') {
+                    if (sectionUrl) sectionUrl.classList.remove('hidden');
+                    if (inputUrl) inputUrl.focus();
                 }
                 updateBtnState();
             });
@@ -605,11 +626,219 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
+        if (inputUrl) {
+            // 最後の入力URLを復元
+            const savedUrl = localStorage.getItem('last_input_url');
+            if (savedUrl) {
+                inputUrl.value = savedUrl;
+            }
+
+            // xボタンの要素を取得
+            const btnClearUrl = clone.querySelector('#btn-clear-url');
+            const updateClearButtonVisibility = () => {
+                if (btnClearUrl) {
+                    btnClearUrl.style.display = inputUrl.value ? 'flex' : 'none';
+                }
+            };
+
+            // 初期状態でのクリアボタンの表示制御
+            updateClearButtonVisibility();
+
+            inputUrl.addEventListener('input', () => {
+                localStorage.setItem('last_input_url', inputUrl.value);
+                updateClearButtonVisibility();
+                updateBtnState();
+            });
+
+            if (btnClearUrl) {
+                btnClearUrl.addEventListener('click', () => {
+                    inputUrl.value = '';
+                    localStorage.removeItem('last_input_url');
+                    updateClearButtonVisibility();
+                    updateBtnState();
+                    inputUrl.focus();
+                });
+            }
+
+            // 履歴リストの描画
+            const historySection = clone.querySelector('#url-history-section');
+            const historyList = clone.querySelector('#url-history-list');
+            const btnToggleHistory = clone.querySelector('#btn-toggle-history');
+
+            let isHistoryExpanded = false;
+
+            const renderUrlHistory = async () => {
+                let history = [];
+                if (typeof currentUser !== 'undefined' && currentUser) {
+                    try {
+                        const res = await fetch('api/url_history.php');
+                        const data = await res.json();
+                        if (data.status === 'success') {
+                            history = data.history;
+                        }
+                    } catch (e) {
+                        console.error('Failed to fetch URL history from server:', e);
+                    }
+                } else {
+                    try {
+                        const saved = localStorage.getItem('url_history');
+                        if (saved) history = JSON.parse(saved);
+                    } catch (e) {}
+                }
+                if (!Array.isArray(history)) history = [];
+
+                if (history.length > 0 && historyList && historySection) {
+                    historyList.innerHTML = '';
+                    
+                    // 表示件数の決定（展開時は全件、それ以外は3件）
+                    const displayLimit = isHistoryExpanded ? history.length : 3;
+                    const itemsToShow = history.slice(0, displayLimit);
+
+                    itemsToShow.forEach(item => {
+                        // 後方互換性対応: item がオブジェクトでなく文字列の場合もある
+                        const isObject = (typeof item === 'object' && item !== null);
+                        const url = isObject ? item.url : item;
+                        const title = isObject ? item.title : '';
+
+                        // アイテム全体のコンテナ (div)
+                        const containerDiv = document.createElement('div');
+                        containerDiv.className = 'url-history-item';
+
+                        // 左側のリンクボタン
+                        const linkBtn = document.createElement('button');
+                        linkBtn.type = 'button';
+                        linkBtn.className = 'url-history-link';
+                        
+                        const iconSvg = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 8V12L15 15"></path>
+                                <circle cx="12" cy="12" r="10"></circle>
+                            </svg>
+                        `;
+                        linkBtn.innerHTML = iconSvg;
+
+                        const contentDiv = document.createElement('div');
+                        contentDiv.className = 'url-history-content';
+
+                        const titleSpan = document.createElement('span');
+                        titleSpan.className = 'url-title';
+                        titleSpan.textContent = title ? title : url;
+                        contentDiv.appendChild(titleSpan);
+
+                        if (title) {
+                            const urlSpan = document.createElement('span');
+                            urlSpan.className = 'url-subtitle';
+                            urlSpan.textContent = url;
+                            contentDiv.appendChild(urlSpan);
+                        }
+
+                        linkBtn.appendChild(contentDiv);
+
+                        linkBtn.addEventListener('click', () => {
+                            inputUrl.value = url;
+                            localStorage.setItem('last_input_url', url);
+                            updateClearButtonVisibility();
+                            updateBtnState();
+                            inputUrl.focus();
+                        });
+
+                        // 右側の削除ボタン (ゴミ箱アイコン)
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.type = 'button';
+                        deleteBtn.className = 'btn-delete-history';
+                        deleteBtn.ariaLabel = '履歴を削除';
+                        
+                        const trashSvg = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                <line x1="10" y1="11" x2="10" y2="17"></line>
+                                <line x1="14" y1="11" x2="14" y2="17"></line>
+                            </svg>
+                        `;
+                        deleteBtn.innerHTML = trashSvg;
+
+                        deleteBtn.addEventListener('click', async (e) => {
+                            e.stopPropagation();
+                            
+                            if (typeof currentUser !== 'undefined' && currentUser) {
+                                try {
+                                    const res = await fetch(`api/url_history.php?url=${encodeURIComponent(url)}`, {
+                                        method: 'DELETE'
+                                    });
+                                    const delData = await res.json();
+                                    if (delData.status === 'success') {
+                                        renderUrlHistory();
+                                    } else {
+                                        alert('履歴の削除に失敗しました: ' + delData.message);
+                                    }
+                                } catch (err) {
+                                    console.error('Failed to delete URL history on server:', err);
+                                    alert('履歴の削除に失敗しました。');
+                                }
+                            } else {
+                                let currentHistory = [];
+                                try {
+                                    const saved = localStorage.getItem('url_history');
+                                    if (saved) currentHistory = JSON.parse(saved);
+                                } catch (err) {}
+                                if (!Array.isArray(currentHistory)) currentHistory = [];
+
+                                currentHistory = currentHistory.filter(h => {
+                                    const hUrl = (typeof h === 'object' && h !== null) ? h.url : h;
+                                    return hUrl !== url;
+                                });
+
+                                localStorage.setItem('url_history', JSON.stringify(currentHistory));
+                                renderUrlHistory();
+                            }
+                        });
+
+                        containerDiv.appendChild(linkBtn);
+                        containerDiv.appendChild(deleteBtn);
+                        historyList.appendChild(containerDiv);
+                    });
+
+                    // 「もっと見る」ボタンの表示制御
+                    if (btnToggleHistory) {
+                        if (history.length > 3) {
+                            btnToggleHistory.style.display = 'block';
+                            btnToggleHistory.textContent = isHistoryExpanded ? '閉じる' : 'もっと見る';
+                        } else {
+                            btnToggleHistory.style.display = 'none';
+                        }
+                    }
+
+                    historySection.style.display = 'block';
+                } else if (historySection) {
+                    historySection.style.display = 'none';
+                }
+            };
+
+            if (btnToggleHistory) {
+                btnToggleHistory.addEventListener('click', () => {
+                    isHistoryExpanded = !isHistoryExpanded;
+                    renderUrlHistory();
+                });
+            }
+
+            renderUrlHistory();
+        }
+
         btnStart.addEventListener('click', () => {
-            const input = currentMode === 'translate' ? inputTranslate : inputCreative;
-            const jpText = input.value.trim();
-            if (!jpText) return;
-            generateText('new', jpText, currentMode);
+            let input;
+            if (currentMode === 'translate') input = inputTranslate;
+            else if (currentMode === 'creative') input = inputCreative;
+            else input = inputUrl;
+
+            const valText = input.value.trim();
+            if (!valText) return;
+
+            if (currentMode === 'url') {
+                localStorage.setItem('last_input_url', valText);
+            }
+
+            generateText('new', valText, currentMode);
         });
 
         btnSwitchAuto.addEventListener('click', () => {
@@ -1108,6 +1337,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (savedExclude) {
                 excludeList = JSON.parse(savedExclude);
             }
+            // Clean up URLs and invalid items from the exclude list
+            if (Array.isArray(excludeList)) {
+                excludeList = excludeList.filter(item => {
+                    if (!item || typeof item !== 'string') return false;
+                    const trimmed = item.trim();
+                    const isUrl = trimmed.startsWith('http://') || trimmed.startsWith('https://') || /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})/i.test(trimmed);
+                    return !isUrl && trimmed.length > 3;
+                });
+            } else {
+                excludeList = [];
+            }
         } catch (e) {
             console.error('Failed to parse recent situations:', e);
         }
@@ -1238,6 +1478,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (savedExclude) {
                     excludeList = JSON.parse(savedExclude);
                 }
+                // Clean up URLs and invalid items from the exclude list
+                if (Array.isArray(excludeList)) {
+                    excludeList = excludeList.filter(item => {
+                        if (!item || typeof item !== 'string') return false;
+                        const trimmed = item.trim();
+                        const isUrl = trimmed.startsWith('http://') || trimmed.startsWith('https://') || /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})/i.test(trimmed);
+                        return !isUrl && trimmed.length > 3;
+                    });
+                } else {
+                    excludeList = [];
+                }
             } catch (e) {}
 
             try {
@@ -1290,7 +1541,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function generateText(type, initialJp = null, inputMode = 'translate', selectedSituation = null) {
         console.log('generateText called with type:', type, 'initialJp:', initialJp, 'mode:', inputMode, 'selectedSituation:', selectedSituation);
 
-        if (type === 'new' && inputMode !== 'translate') {
+        if (type === 'new' && inputMode !== 'translate' && inputMode !== 'url') {
             await startSituationOptionsFlow(initialJp, inputMode);
             return;
         }
@@ -1318,6 +1569,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const savedExclude = localStorage.getItem('speaking2_recent_situations');
                 if (savedExclude) {
                     excludeList = JSON.parse(savedExclude);
+                }
+                // Clean up URLs and invalid items from the exclude list
+                if (Array.isArray(excludeList)) {
+                    excludeList = excludeList.filter(item => {
+                        if (!item || typeof item !== 'string') return false;
+                        const trimmed = item.trim();
+                        const isUrl = trimmed.startsWith('http://') || trimmed.startsWith('https://') || /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})/i.test(trimmed);
+                        return !isUrl && trimmed.length > 3;
+                    });
+                } else {
+                    excludeList = [];
                 }
             } catch (e) {
                 console.error('Failed to parse recent situations:', e);
@@ -1353,13 +1615,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('Invalid data format');
             }
 
+            // URLモードで成功した場合、履歴に保存する
+            if (inputMode === 'url' && initialJp) {
+                const url = initialJp.trim();
+                const title = data.url_title || '';
+
+                if (typeof currentUser !== 'undefined' && currentUser) {
+                    try {
+                        await fetch('api/url_history.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url: url, title: title })
+                        });
+                    } catch (e) {
+                        console.error('Failed to save URL history to server:', e);
+                    }
+                } else {
+                    let history = [];
+                    try {
+                        const saved = localStorage.getItem('url_history');
+                        if (saved) history = JSON.parse(saved);
+                    } catch (e) {}
+                    if (!Array.isArray(history)) history = [];
+
+                    // 既存の同じURLがあれば削除
+                    history = history.filter(item => {
+                        const itemUrl = (typeof item === 'object' && item !== null) ? item.url : item;
+                        return itemUrl !== url;
+                    });
+
+                    // 先頭に追加
+                    history.unshift({ url: url, title: title });
+
+                    // 最大15件
+                    if (history.length > 15) history = history.slice(0, 15);
+
+                    localStorage.setItem('url_history', JSON.stringify(history));
+                }
+                localStorage.setItem('last_input_url', url);
+            }
+
             // Save selected situation to recent list to prevent immediate repeats
             if (data && data.selected_situation) {
-                excludeList.push(data.selected_situation);
-                if (excludeList.length > 20) {
-                    excludeList.shift();
+                const val = data.selected_situation.trim();
+                const isUrl = val.startsWith('http://') || val.startsWith('https://') || /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})/i.test(val);
+                if (!isUrl && val.length > 3) {
+                    excludeList.push(val);
+                    if (excludeList.length > 20) {
+                        excludeList.shift();
+                    }
+                    localStorage.setItem('speaking2_recent_situations', JSON.stringify(excludeList));
                 }
-                localStorage.setItem('speaking2_recent_situations', JSON.stringify(excludeList));
             }
 
             const itemElement = addConversationItem(data);

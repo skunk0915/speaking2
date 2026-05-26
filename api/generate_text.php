@@ -1,12 +1,79 @@
 <?php
 require_once __DIR__ . '/../config.php';
 
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['error' => 'Method Not Allowed']);
     exit;
+}
+
+function fetchUrlText($url) {
+    if (empty($url)) {
+        return ['text' => '', 'title' => ''];
+    }
+
+    if (!filter_var($url, FILTER_VALIDATE_URL)) {
+        throw new Exception("無効なURL形式です。");
+    }
+
+    // Jina Reader API を用いて、SPA等の動的描画コンテンツもマークダウン/プレーンテキストで取得
+    $jinaUrl = 'https://r.jina.ai/' . $url;
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $jinaUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 20); // レンダリング待ちのためタイムアウトは少し長めの20秒
+    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlErr = curl_error($ch);
+    curl_close($ch);
+
+    if ($response === false) {
+        throw new Exception("URL解析サービスへの接続に失敗しました（通信エラー: {$curlErr}）。");
+    }
+
+    if ($httpCode !== 200) {
+        throw new Exception("URLからコンテンツを取得できませんでした（解析HTTPコード: {$httpCode}）。対象サイトがクローラーを完全に遮断している可能性があります。");
+    }
+
+    // タイトルの抽出
+    $title = '';
+    if (preg_match('/^Title:\s*(.*?)(?:[\r\n]+|$)/mi', $response, $matches)) {
+        $title = trim($matches[1]);
+    }
+    // タイトルが見つからない場合のフォールバック（ドメイン名）
+    if (empty($title)) {
+        $parsedUrl = parse_url($url);
+        $title = $parsedUrl['host'] ?? 'Web Article';
+    }
+
+    // Jina Readerの出力から不要な先頭のメタ情報行（Source: ...）をクリーンアップ
+    $text = preg_replace('/^Source: .*?[\r\n]+/i', '', $response);
+    $text = trim($text);
+
+    // 最大文字数を制限（Geminiの入力トークン節約のため）
+    if (mb_strlen($text, 'UTF-8') > 12000) {
+        $text = mb_substr($text, 0, 12000, 'UTF-8') . '...';
+    }
+
+    if (empty($text)) {
+        throw new Exception("URLから有効なテキストデータを抽出できませんでした。");
+    }
+
+    return [
+        'text' => $text,
+        'title' => $title
+    ];
 }
 
 $input = json_decode(file_get_contents('php://input'), true);
@@ -241,8 +308,16 @@ function buildSituationOptionsPrompt($situation, array $excludeList = [], $targe
   - 'options': 生成した日本語フレーズの配列（文字列の配列、{$targetCount}個）";
 }
 
-function callGeminiJson($prompt) {
+function callGeminiJson($prompt, $temperature = null) {
     $url = "https://generativelanguage.googleapis.com/v1beta/models/" . GEMINI_MODEL . ":generateContent?key=" . GEMINI_API_KEY;
+    
+    $generationConfig = [
+        'responseMimeType' => 'application/json'
+    ];
+    if ($temperature !== null) {
+        $generationConfig['temperature'] = $temperature;
+    }
+
     $data = [
         'contents' => [
             [
@@ -251,9 +326,7 @@ function callGeminiJson($prompt) {
                 ]
             ]
         ],
-        'generationConfig' => [
-            'responseMimeType' => 'application/json'
-        ]
+        'generationConfig' => $generationConfig
     ];
 
     $ch = curl_init($url);
@@ -267,8 +340,8 @@ function callGeminiJson($prompt) {
     curl_close($ch);
 
     if ($httpCode !== 200) {
-        $errorMsg = 'API Request Failed with HTTP Code: ' . $httpCode;
-        file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\nDetails: " . $response . "\n", FILE_APPEND);
+        $errorMsg = 'API Request Failed with HTTP Code: ' . $httpCode . ' Details: ' . $response;
+        file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Error: " . $errorMsg . "\n", FILE_APPEND);
         throw new Exception($errorMsg);
     }
 
@@ -329,12 +402,44 @@ if ($type === 'new') {
     $situationsFile = __DIR__ . '/../data/situations.json';
     $inputMode = $input['input_mode'] ?? 'translate';
     $japaneseInput = $input['japanese_input'] ?? '';
+    $excludeSituations = $input['exclude_situations'] ?? [];
     
     if (!empty($japaneseInput)) {
         $selectedSituationText = $input['selected_situation'] ?? $japaneseInput;
         if ($inputMode === 'translate') {
             $situationText = "ユーザーの入力した発話内容: " . $japaneseInput;
             $specificInstruction = "ユーザーが入力した『{$japaneseInput}』という内容を、相手（AI）の最初の発話として採用してください。入力された日本語の意味を正確に保ちつつ、文脈に合わせた自然でリアリティのある英語に訳してください。勝手に状況を変えたり、質問に変換したりせず、入力された内容をそのまま伝える表現にしてください。";
+        } elseif ($inputMode === 'url') {
+            // URLから本文テキストを取得
+            try {
+                $urlResult = fetchUrlText($japaneseInput);
+                $extractedText = $urlResult['text'];
+                $urlTitle = $urlResult['title'];
+            } catch (Throwable $e) {
+                http_response_code(400);
+                echo json_encode(['error' => 'URLからコンテンツを取得できませんでした: ' . $e->getMessage()]);
+                exit;
+            }
+
+            $excludeInstruction = "";
+            if (!empty($excludeSituations)) {
+                $validExcludes = array_filter($excludeSituations, function($s) {
+                    $s = trim($s);
+                    $isUrl = preg_match('/^https?:\/\//i', $s) || preg_match('/^[a-z0-9.-]+\.[a-z]{2,6}/i', $s) || filter_var($s, FILTER_VALIDATE_URL);
+                    return !$isUrl && mb_strlen($s, 'UTF-8') > 3;
+                });
+                if (!empty($validExcludes)) {
+                    $excludeInstruction = "\n  - 【絶対に抜き出してはいけない既出の文章リスト】（これらと類似または同一の文章は、今回は絶対に抜き出さないでください）：\n    - " . implode("\n    - ", $validExcludes);
+                }
+            }
+
+            $situationText = "ユーザーが指定したURLから抽出されたWebテキストデータ: \n" . $extractedText;
+            $specificInstruction = "提示されたテキストデータ（URLのコンテンツ）の「メインとなる本文コンテンツ（主要なニュース、ブログ記事、本文など）」から、意味の通る完全に完結した一文（または意味の通る短い一続きのフレーズ）を『一切アレンジせずに、そのまま一字一句違わずに抜き出して』会話の最初のお題（japanese）として採用してください。
+- 重要ルール:
+  1. 要約、アレンジ、言い換え、質問文への書き換え、挨拶の追加、AIとしての返答の創作などは【絶対に禁止】します。必ず本文内に元から存在するテキストをそのまま（コピペのように）正確に抜き出してください。提示された本文データに存在しない内容、あるいは全く無関係な架空の日常会話や接客フレーズ（アパレルの接客、ホテル、カフェなどでのやり取りなど）を勝手に創作することは【厳禁】です。
+  2. **一文が途中で途切れないこと（文頭から文末『。』『！』『？』まで、あるいは句読点でのキリの良い区切りまで正しく抽出すること）を【絶対最優先】**にしてください。文の途中で途切れた不完全な文章（例：「〜であり、」「〜し」「〜が、」で終わるもの）や、文字数制限に合わせるために文頭を削った文章（例：「老後の資金や持ち家など、必要なものは揃っており…」から前半部分をカットして「必要なものは揃っており…」と抽出すること）は**【厳禁】**とします。多少文字数をオーバーまたはアンダーしても、必ず文として完全に自己完結している一文を丸ごと抽出してください。
+  3. 毎回同じ一文ばかりが選ばれないように、テキスト全体（前部、中部、後部など）からランダムに異なる一文を選んで抜き出してください。{$excludeInstruction}
+  4. ヘッダーやフッター、サイドバーなどのノイズテキスト（共有メニューや著作権表示など）は完全に無視し、必ずメインの記事本文から抜き出してください。";
         } else {
             $situationText = "ユーザーの入力した状況・意図: " . $japaneseInput;
             $specificInstruction = "ユーザーが入力した『{$japaneseInput}』という状況・意図を汲み取り、そのシーンで相手（AI）がユーザーに話しかける最初の言葉として最も自然でリアリティのある発話を生成してください。単なる直訳ではなく、その状況を具体化（場所や関係性など）して、会話が弾むような一言にしてください。";
@@ -378,7 +483,33 @@ if ($type === 'new') {
         $specificInstruction = "指定されたシチュエーションをさらに具体的に深掘りし、そのシーンでしかあり得ないような、具体的でリアリティのある発話を生成してください。どこでも言えるような汎用的なフレーズ（例：「こんにちは」「お元気ですか」など）は避け、学習者がそのシーンの語彙を学べるような内容にしてください。また、毎回同じようなフレーズになるのを防ぐため、具体的な曜日、時間、人間関係、あるいはその状況特有の細かな背景やちょっとした出来事（例：忘れ物、時間の遅れ、特別なリクエストなど）をランダムに想定し、オリジナリティとリアリティのある発話にしてください。";
     }
 
-    $prompt = "日常会話のロールプレイシナリオを作成してください。
+    if (isset($inputMode) && $inputMode === 'url') {
+        $prompt = "提示されたテキストデータ（URLのコンテンツ）の「メインとなる本文コンテンツ（主要なニュース、ブログ記事、本文など）」から、意味の通った完全に完結した一文を『一切アレンジせずに、そのまま一字一句違わずに抜き出して』会話の最初のお題（japanese）として採用してください。
+
+【提示されたテキストデータ】
+{$extractedText}
+{$excludeInstruction}
+
+指示:
+- 要約、アレンジ、言い換え、質問文への書き換え、挨拶の追加、AIとしての返答の創作などは【絶対に禁止】します。必ず本文内に元から存在するテキストをそのまま正確に（コピペのように）抜き出してください。提示された本文データにない、無関係な日常会話や接客フレーズなどを勝手に創作して出力してはいけません。
+- **一文全体の完全性を最優先**にしてください。文字数はあくまで大まかな目安であり、厳密に守る必要は一切ありません。目標文字数（{$length}文字）に合わせるために、文の頭を削って途中から抽出したり、文の途中で切り取って不完全な文にすることは【厳禁】です。
+  - 良い例：文頭から文末まで丸ごと一文を抽出する（例：「老後の資金や持ち家など、必要なものは揃っており、将来への未知数な部分がありません。」）
+  - NG例：文字数に合わせるために文頭を削って抽出する（例：「必要なものは揃っており、将来への未知数な部分がありません。」）
+  - たとえ目標文字数（{$length}文字）を大きく上回る（40文字や50文字以上になる）場合であっても、一文を途切れなく完全に抽出することを【絶対最優先】としてください。
+- 毎回同じ一文ばかりが選ばれないように、テキスト全体からランダムに異なる一文を選んで抜き出してください。
+- ヘッダーやフッター、サイドバーなどのノイズテキスト（共有メニューや著作権表示、メニュー項目など）は完全に無視し、必ずメインの記事本文から抜き出してください。
+
+生成する英語について:
+- 抜き出した日本語の一文に対する英訳を生成してください。英訳は、以下の基準に従ってください:
+  **{$currentLevelInst}**
+
+出力形式:
+出力はJSON形式で、以下のキーを含めてください:
+  - 'japanese': 抜き出した日本語の完結した一文（一切のアレンジなし、コピペ）
+  - 'english': その英訳
+  - 'sample_user_answers': その一文に対する会話の返答例のリスト（1〜5個程度）。ポジティブ・ネガティブ・質問など様々な視点で提示してください。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。";
+    } else {
+        $prompt = "日常会話のロールプレイシナリオを作成してください。
     
     【現在の状況】
     {$situationText}
@@ -402,6 +533,7 @@ if ($type === 'new') {
       - 'japanese': 生成した日本語の会話文（相手の発話）
       - 'english': その英訳
       - 'sample_user_answers': ユーザーの返答例のリスト（1〜5個程度）。提案数は固定せず、文脈に応じてできるだけ多くのバリエーションを提示してください。ただし、似たような表現ばかりを並めるのは避け、ポジティブ・ネガティブ・質問など様々な視点で提示してください。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。";
+    }
 } elseif ($type === 'situation_options') {
     $situation = $input['situation'] ?? '';
     
@@ -660,7 +792,8 @@ if ($type === 'new') {
 }
 
 try {
-    $json = callGeminiJson($prompt);
+    $tempParam = (isset($inputMode) && $inputMode === 'url') ? 0.85 : null;
+    $json = callGeminiJson($prompt, $tempParam);
 
     if ($type === 'situation_options') {
         $allCandidates = dedupeSituationOptions($json['options'] ?? [], $excludeList);
@@ -759,12 +892,20 @@ try {
         $json['sample_user_japanese'] = $json['sample_user_answers'][0];
     }
 
+    if (isset($inputMode) && $inputMode === 'url' && !empty($json['japanese'])) {
+        $selectedSituationText = $json['japanese'];
+    }
+
     if (!empty($selectedSituationText)) {
         $json['selected_situation'] = $selectedSituationText;
     }
 
+    if (isset($urlTitle)) {
+        $json['url_title'] = $urlTitle;
+    }
+
     echo json_encode($json);
-} catch (Exception $e) {
+} catch (Throwable $e) {
     $errorMsg = 'An unexpected error occurred: ' . $e->getMessage();
     file_put_contents(__DIR__ . '/../debug_log.txt', date('Y-m-d H:i:s') . " Exception: " . $errorMsg . "\nTrace: " . $e->getTraceAsString() . "\n", FILE_APPEND);
     http_response_code(500);
