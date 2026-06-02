@@ -185,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tab.classList.add('active');
             btnAuthSubmit.textContent = authMode === 'login' ? 'ログイン' : '新規登録';
             authError.classList.add('hidden');
+            if (authEmail) authEmail.focus();
         });
     });
 
@@ -242,7 +243,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showAuth() {
         if (authOverlay) authOverlay.classList.remove('hidden');
-        if (authPanel) authPanel.classList.add('active');
+        if (authPanel) {
+            authPanel.classList.add('active');
+            setTimeout(() => {
+                if (authEmail) {
+                    authEmail.focus();
+                }
+            }, 100);
+        }
     }
 
     function hideAuth() {

@@ -631,11 +631,11 @@
             <form id="auth-form" class="auth-form">
                 <div class="form-group">
                     <label for="auth-email">メールアドレス</label>
-                    <input type="email" id="auth-email" required placeholder="example@mail.com">
+                    <input type="email" id="auth-email" name="email" required placeholder="example@mail.com" autocomplete="email" autofocus>
                 </div>
                 <div class="form-group">
                     <label for="auth-password">パスワード</label>
-                    <input type="password" id="auth-password" required placeholder="">
+                    <input type="password" id="auth-password" name="password" required placeholder="" autocomplete="current-password">
                 </div>
                 <button type="submit" id="btn-auth-submit" class="btn btn-primary btn-block">ログイン</button>
             </form>
