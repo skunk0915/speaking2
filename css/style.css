@@ -188,7 +188,6 @@ body {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 16px;
   width: 100%;
-  animation: slideUpFade 0.3s ease;
 }
 .conversation-item .practice-section.hidden {
   display: none;
@@ -681,7 +680,6 @@ body {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 16px;
   width: 100%;
-  animation: slideUpFade 0.3s ease;
 }
 .conversation-item .variation-section.hidden {
   display: none;
@@ -745,7 +743,6 @@ body {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 16px;
   width: 100%;
-  animation: slideUpFade 0.3s ease;
 }
 .conversation-item .history-section.hidden {
   display: none;
@@ -1152,7 +1149,6 @@ body {
   margin-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 12px;
-  animation: slideUpFade 0.3s ease;
 }
 .feedback-section .suggestions-list li.suggestion-item .variation-section.hidden {
   display: none;

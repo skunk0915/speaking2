@@ -1,4 +1,101 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Slide transition helper functions
+    const slideUp = (target, duration = 300) => {
+        target.style.transitionProperty = 'height, margin, padding, opacity, border-top-width, border-bottom-width';
+        target.style.transitionDuration = duration + 'ms';
+        target.style.boxSizing = 'border-box';
+        target.style.height = target.offsetHeight + 'px';
+        target.offsetHeight; // reflow
+        target.style.overflow = 'hidden';
+        target.style.height = '0';
+        target.style.paddingTop = '0';
+        target.style.paddingBottom = '0';
+        target.style.marginTop = '0';
+        target.style.marginBottom = '0';
+        target.style.opacity = '0';
+        const hasBorder = window.getComputedStyle(target).borderTopWidth !== '0px';
+        if (hasBorder) {
+            target.style.borderTopWidth = '0';
+        }
+        return new Promise(resolve => {
+            window.setTimeout(() => {
+                target.classList.add('hidden');
+                target.style.removeProperty('height');
+                target.style.removeProperty('padding-top');
+                target.style.removeProperty('padding-bottom');
+                target.style.removeProperty('margin-top');
+                target.style.removeProperty('margin-bottom');
+                target.style.removeProperty('overflow');
+                target.style.removeProperty('transition-duration');
+                target.style.removeProperty('transition-property');
+                target.style.removeProperty('opacity');
+                if (hasBorder) {
+                    target.style.removeProperty('border-top-width');
+                }
+                resolve();
+            }, duration);
+        });
+    };
+
+    const slideDown = (target, duration = 300) => {
+        target.classList.remove('hidden');
+        const computed = window.getComputedStyle(target);
+        
+        const targetHeight = target.offsetHeight;
+        const targetPaddingTop = computed.paddingTop;
+        const targetPaddingBottom = computed.paddingBottom;
+        const targetMarginTop = computed.marginTop;
+        const targetMarginBottom = computed.marginBottom;
+        const targetOpacity = computed.opacity || '1';
+        const hasBorder = computed.borderTopWidth !== '0px';
+        const targetBorderTopWidth = computed.borderTopWidth;
+
+        target.style.overflow = 'hidden';
+        target.style.height = '0';
+        target.style.paddingTop = '0';
+        target.style.paddingBottom = '0';
+        target.style.marginTop = '0';
+        target.style.marginBottom = '0';
+        target.style.opacity = '0';
+        if (hasBorder) {
+            target.style.borderTopWidth = '0';
+        }
+        
+        target.offsetHeight; // reflow
+
+        target.style.transitionProperty = 'height, margin, padding, opacity, border-top-width, border-bottom-width';
+        target.style.transitionDuration = duration + 'ms';
+        target.style.boxSizing = 'border-box';
+        
+        target.style.height = targetHeight + 'px';
+        target.style.paddingTop = targetPaddingTop;
+        target.style.paddingBottom = targetPaddingBottom;
+        target.style.marginTop = targetMarginTop;
+        target.style.marginBottom = targetMarginBottom;
+        target.style.opacity = targetOpacity;
+        if (hasBorder) {
+            target.style.borderTopWidth = targetBorderTopWidth;
+        }
+
+        return new Promise(resolve => {
+            window.setTimeout(() => {
+                target.style.removeProperty('height');
+                target.style.removeProperty('padding-top');
+                target.style.removeProperty('padding-bottom');
+                target.style.removeProperty('margin-top');
+                target.style.removeProperty('margin-bottom');
+                target.style.removeProperty('overflow');
+                target.style.removeProperty('transition-duration');
+                target.style.removeProperty('transition-property');
+                target.style.removeProperty('opacity');
+                if (hasBorder) {
+                    target.style.removeProperty('border-top-width');
+                }
+                resolve();
+            }, duration);
+        });
+    };
+
     const container = document.getElementById('conversation-container');
     const btnNew = document.getElementById('btn-new');
     // const btnContinue = document.getElementById('btn-continue'); // Removed
@@ -550,7 +647,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnHint.addEventListener('click', () => {
         const isOpening = hintDisplay.classList.contains('hidden');
-        hintDisplay.classList.toggle('hidden');
         btnHint.classList.toggle('active', isOpening);
 
         if (isOpening) {
@@ -578,6 +674,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 hintList.appendChild(div);
             });
+            slideDown(hintDisplay, 300);
+        } else {
+            slideUp(hintDisplay, 300);
         }
     });
 
@@ -2042,50 +2141,36 @@ document.addEventListener('DOMContentLoaded', () => {
             others.forEach(pair => {
                 if (pair.s && pair.s !== section && !pair.s.classList.contains('hidden')) {
                     pair.b.classList.remove('active');
-                    pair.s.classList.add('hiding');
-                    const p = new Promise(resolve => {
-                        setTimeout(() => {
-                            pair.s.classList.add('hidden');
-                            pair.s.classList.remove('hiding');
-                            resolve();
-                        }, 300);
-                    });
-                    closePromises.push(p);
+                    closePromises.push(slideUp(pair.s, 300));
                 }
             });
 
             if (isOpening) {
-                section.classList.remove('hiding');
-                section.classList.remove('hidden');
                 btn.classList.add('active');
                 
-                if (closePromises.length > 0) {
-                    // 他のセクションが閉じきって高さが縮んだ（hiddenになった）後にスクロールを実行する
-                    Promise.all(closePromises).then(() => {
-                        setTimeout(() => {
-                            scrollToParent();
-                            if (inputToFocus) {
-                                inputToFocus.focus();
-                            }
-                        }, 50);
-                    });
-                } else {
-                    setTimeout(() => {
-                        scrollToParent();
+                const openAndFocus = () => {
+                    slideDown(section, 300).then(() => {
                         if (inputToFocus) {
                             inputToFocus.focus();
                         }
-                    }, 50);
+                    });
+                    scrollToParent();
+                };
+
+                if (closePromises.length > 0) {
+                    // 他のセクションが閉じきって高さが縮んだ後にスクロールを実行して開く
+                    Promise.all(closePromises).then(() => {
+                        setTimeout(openAndFocus, 50);
+                    });
+                } else {
+                    setTimeout(openAndFocus, 50);
                 }
             } else {
                 btn.classList.remove('active');
-                section.classList.add('hiding');
-                setTimeout(() => {
-                    section.classList.add('hidden');
-                    section.classList.remove('hiding');
+                slideUp(section, 300).then(() => {
                     // 完全に非表示になって高さが縮んだ後にスクロール位置を調整する
                     scrollToParent();
-                }, 300);
+                });
             }
             if (typeof saveUIState === 'function') {
                 saveUIState();
