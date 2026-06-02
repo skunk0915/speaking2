@@ -2016,14 +2016,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 { b: btnHistory, s: historySection }
             ];
 
+            const scrollToParent = () => {
+                // conversation-groupだと縦長すぎる場合に入力欄が見えなくなるため、
+                // 操作中の個別メッセージ枠である conversation-item を優先的に上端に合わせる
+                const targetElement = section.closest('.conversation-item') || section.closest('.conversation-group');
+                if (targetElement) {
+                    const rect = targetElement.getBoundingClientRect();
+                    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    const targetY = scrollTop + rect.top - 20; // 20px space at the top
+                    window.scrollTo({ top: targetY, behavior: 'smooth' });
+                }
+            };
+
+            const closePromises = [];
             others.forEach(pair => {
                 if (pair.s && pair.s !== section && !pair.s.classList.contains('hidden')) {
                     pair.b.classList.remove('active');
                     pair.s.classList.add('hiding');
-                    setTimeout(() => {
-                        pair.s.classList.add('hidden');
-                        pair.s.classList.remove('hiding');
-                    }, 300);
+                    const p = new Promise(resolve => {
+                        setTimeout(() => {
+                            pair.s.classList.add('hidden');
+                            pair.s.classList.remove('hiding');
+                            resolve();
+                        }, 300);
+                    });
+                    closePromises.push(p);
                 }
             });
 
@@ -2031,14 +2048,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 section.classList.remove('hiding');
                 section.classList.remove('hidden');
                 btn.classList.add('active');
-                if (inputToFocus) {
-                    setTimeout(() => {
-                        section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                        inputToFocus.focus();
-                    }, 50);
+                
+                if (closePromises.length > 0) {
+                    // 他のセクションが閉じきって高さが縮んだ（hiddenになった）後にスクロールを実行する
+                    Promise.all(closePromises).then(() => {
+                        setTimeout(() => {
+                            scrollToParent();
+                            if (inputToFocus) {
+                                inputToFocus.focus();
+                            }
+                        }, 50);
+                    });
                 } else {
                     setTimeout(() => {
-                        section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        scrollToParent();
+                        if (inputToFocus) {
+                            inputToFocus.focus();
+                        }
                     }, 50);
                 }
             } else {
@@ -2047,6 +2073,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     section.classList.add('hidden');
                     section.classList.remove('hiding');
+                    // 完全に非表示になって高さが縮んだ後にスクロール位置を調整する
+                    scrollToParent();
                 }, 300);
             }
             if (typeof saveUIState === 'function') {
