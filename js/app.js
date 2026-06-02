@@ -1701,7 +1701,7 @@ document.addEventListener('DOMContentLoaded', () => {
             itemElement.dataset.sampleAnswers = JSON.stringify(sampleAnswers);
 
             // Move input to bottom
-            moveInputToBottom();
+            moveInputToBottom(type === 'new');
             if (typeof saveUIState === 'function') {
                 saveUIState();
             }
@@ -1718,7 +1718,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function moveInputToBottom() {
+    function moveInputToBottom(shouldScroll = true) {
         container.appendChild(inputGroup);
         // Ensure input group is visible (it might be hidden by showInitialInputUI)
         inputGroup.classList.remove('hidden');
@@ -1736,7 +1736,9 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSend.disabled = true;
 
         // Scroll to bottom after move
-        scrollToBottom();
+        if (shouldScroll) {
+            scrollToBottom();
+        }
     }
 
     function setupUserMemo(memoTextarea, historyItem, onUpdate) {
