@@ -843,3 +843,118 @@ AI: 発音評価自体は高精度なWAV形式で行い、評価完了後の保�
 - /Users/mizy/Dropbox/speaking2/sw.js
 - /Users/mizy/Dropbox/speaking2/README.md
 - /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-04 07:32:20
+USER: btn-practice押して答え確定までの時間を記録する機能を追加。答えをどれだけ早く言えるかの指標にする
+AI: 練習ボタン（`btn-practice`）をクリックしてから、または「もう一度（Retry）」をクリックして再入力可能になってから、答え（英訳）を確定（送信）するまでの経過時間（秒）を自動で計測・表示・永続保存する機能を追加しました。
+1. `js/app.js` の `addConversationItem` 内でカードごとに練習開始時間（`practiceStartTime`）を保持・管理するようにしました。
+2. 練習ボタンが押されたタイミング、および「再挑戦（Retry）」が押されて入力が有効化されたタイミングで測定を開始（`practiceStartTime = Date.now()`）します。
+3. 英訳が送信される際（答え確定時）に経過時間（秒）を計算して、履歴オブジェクト（`history`）の個別データに `time_taken` として保存します。
+4. 共通の添削関数 `getCorrection` に算出した `timeTaken` を引数として渡し、新規送信時（初期添削および再挑戦）の入力文字列の横に「⏱️ ○.○s」というバッジ形式で解答時間を表示するようにしました。
+5. 過去の練習履歴描画処理 `renderHistory` においても、`time_taken` が存在する場合はその解答時間バッジを表示するようにし、復習モードでも確認できるようにしました。
+6. `css/style.scss` に、解答時間をスタイリッシュに表示する `.time-taken-badge` のスタイルを追記し、Sass コンパイルを行いました。
+7. サービスワーカー（`sw.js`）の `CACHE_NAME` を `'english-training-v6'` にインクリメントしました。
+8. `README.md` に機能概要を追記しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-04 07:33:50
+USER: btn-practice押して答え確定まで答え確定までストップウォッチ的なカウントアップの演出を出してユーザが早く答えなければと思わせるような演出にする
+AI: 練習開始から答えを送信するまでのリアルタイムな「ストップウォッチ（練習タイマー）」表示演出を実装しました。
+1. `index.php` にて、`.practice-section` 内にタイマー用のマークアップ（`.practice-timer-container`）を追加しました。
+2. `js/app.js` にて、タイマーを100ms周期でカウントアップ更新する `startTimer` 関数と、タイマーを停止する `stopTimer` 関数を実装しました。
+3. 練習開始（練習セクション展開時）および再挑戦（Retryクリック時）にタイマーを開始し、解答確定時（送信ボタン押下時）および練習セクションが閉じられた時にタイマーを停止するように制御しました。
+4. カウントアップ秒数に応じて、8秒経過すると警告色（オレンジ）、15秒経過すると危険色（赤）に変更し、さらに赤色になるとタイマーが脈動（pulsing）するアニメーション演出を `css/style.scss` に追加しました。
+5. サービスワーカー（`sw.js`）の `CACHE_NAME` を `'english-training-v7'` にインクリメントしました。
+6. `README.md` にカウントアップタイマーおよび視覚的緊迫感演出についての機能説明を追記しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/index.php
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-04 07:37:30
+USER: 基本的にOK。添付画像のように添削後に添削を1回閉じてまた開くとカウントアップが始まってしまうので、それは無しにして。次にカウントアップするのは、再挑戦ボタンを押した時
+AI: すでに添削結果が表示されている状態の時に練習エリアを一度閉じてから再度開いても、タイマーが再始動しないように制御を改善しました。
+1. `js/app.js` の `btnPractice` のクリックイベントにおいて、練習エリアが開かれる際（`isOpening` が `true` の時）に、解答結果エリア（`practiceFeedback`）が非表示（`hidden` クラスを持っている＝未解答または再挑戦中）である場合のみ `startTimer()` を呼び出すように変更しました。
+2. これにより、一度答えを送信して結果が表示された後は、閉じたり開いたりしてもタイマーは停止したまま（計測された時間の表示）が維持され、タイマーが再始動するのは「再挑戦（Retry）」ボタンを押した時のみになります。
+3. サービスワーカー（`sw.js`）の `CACHE_NAME` を `'english-training-v8'` にインクリメントしました。
+4. `README.md` に挙動改善の説明を追記しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-04 07:38:50
+USER: 返信の時も返信の時もhint-itemをクリックしたときにカウントアップを開始するようにしたい
+AI: メインチャットの返信時において、ヒント項目（`hint-item`）をクリックした際にもリアルタイムカウントアップタイマーが開始される機能を実装しました。
+1. `index.php` にて、メイン会話の入力グループ（`#input-group`）の中にメインタイマー用のマークアップ（`#main-timer-container`）を追加しました。
+2. `js/app.js` にて、メインタイマーを取得・制御するための変数と、タイマーをカウントアップ更新する `startMainTimer`、および非表示にして停止する `hideMainTimer` 関数を実装しました。
+3. ヒントリスト内の `hint-item` がクリックされたタイミングで `startMainTimer()` を呼び出し、タイマーが動き出すように制御しました。
+4. 返信の送信ボタン（`btnSend`）が押されたタイミングで `hideMainTimer()` を呼び出し、タイマーが停止・非表示になるようにしました。
+5. サービスワーカー（`sw.js`）の `CACHE_NAME` を `'english-training-v9'` にインクリメントしました。
+6. `README.md` にメイン返信時のタイマー対応についての記述を追記しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/index.php
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-04 07:45:00
+USER: 返信のuser-messageにもtime-taken-badge表示
+AI: メインチャットでの返信時においても、解答にかかった時間を示す `time-taken-badge`（解答時間バッジ）を表示するようにしました。
+1. `js/app.js` の送信ボタン（`btnSend`）クリックイベントにて、メインタイマーが計測した経過時間 `timeTaken` を算出するようにしました。
+2. 送信された自分の返信メッセージ吹き出し（`.user-text`）の末尾に、計測された秒数バッジ「⏱️ ○.○s」を HTML 経由で動的に追加表示させるようにしました。
+3. 同時に、添削結果（`getCorrection`）の引数にも `timeTaken` を引き渡し、添削エリア上部のユーザー解答テキストの横にも時間バッジを表示させました。
+4. この経過時間は、メイン会話の履歴オブジェクト（`retryHistory`）にも `time_taken` として保存され、MySQL 経由で永続化されて復習モードでも確認できるように連携しました。
+5. サービスワーカー（`sw.js`）の `CACHE_NAME` を `'english-training-v10'` にインクリメントしました。
+6. `README.md` にメイン返信時の解答時間バッジ表示に関する記述を追加しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-04 07:47:30
+USER: 返信の答え確定後のuser-message要素 '/Users/mizy/Desktop/ 2026-06-04 7.43.22.png'不要。.feedback-sectionの.textがそれに相当するので二重になっている。
+AI: メイン会話の返信完了時、チャットの吹き出し（`user-message`）と添削エリア内のユーザー解答（`userInputDisplay`）が重複して表示される現象を改善しました。
+1. `js/app.js` の `getCorrection` 内で、描画しているセクションが英訳練習モード（`.practice-section`）内のものかどうかを判定し、英訳練習モード以外（メイン返信時）では `userInputDisplay` の HTML 要素を非表示（`hidden` クラス付与）にするように制御を変更しました。
+2. これにより、メイン返信時はチャット吹き出し（`.user-text`）のみが表示され、添削結果側での二重 of テキスト表示が解消されました。英訳練習モード時は通常通りテキストと時間バッジが表示されます。
+3. サービスワーカー（`sw.js`）の `CACHE_NAME` を `'english-training-v11'` にインクリメントしました。
+4. `README.md` に二重表示改善に関する記述を追記しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-04 07:50:30
+USER: 違う。返信の答え確定後のuser-message要素 を削除して.feedback-section内の.textを残したかったのに逆になっている
+AI: メイン会話の返信送信完了後、チャット上の吹き出し（`user-message`）を非表示（削除）にし、添削結果内のユーザー解答表示（`userInputDisplay` / `.text`）のみを残すように表示制御を修正・最適化しました。
+1. `js/app.js` の `btnSend` クリック時の処理において、送信されたユーザーメッセージ吹き出しを表示していた処理（`userMsgDiv.classList.remove('hidden')` など）を削除し、チャット上の吹き出しを一切出現させないようにしました。
+2. 同時に、さきほど `getCorrection` 内に設定していた「メイン会話返信時に `userInputDisplay` を非表示にする」処理を取り除き、本来通り添削結果のすぐ上に解答テキストと時間バッジが表示されるように戻しました。
+3. これにより、吹き出しの二重表示が解消され、添削内容の直上のテキスト表示に解答スピードバッジが一元化される形のすっきりしたレイアウトになりました。
+4. サービスワーカー（`sw.js`）の `CACHE_NAME` を `'english-training-v12'` にインクリメントしました。
+5. `README.md` に二重表示改善の最適化（吹き出し削除・添削側解答残し）に関する記述を追記しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
+
+
+
+
+
+

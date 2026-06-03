@@ -198,6 +198,10 @@
                 <p class="label">例えば…</p>
                 <div class="hint-list"></div>
             </div>
+            <div id="main-timer-container" class="practice-timer-container hidden" style="margin-bottom: 8px;">
+                <span class="practice-timer-icon">⏱️</span>
+                <span id="main-timer-val" class="practice-timer-val">0.0</span>s
+            </div>
             <div class="input-row">
                 <div class="input-text-container">
                     <textarea id="user-input-jp" placeholder="言いたい日本語を入力（任意）..." rows="1"></textarea>
@@ -376,6 +380,10 @@
                 </div>
 
                 <div class="practice-section hidden">
+                    <div class="practice-timer-container">
+                        <span class="practice-timer-icon">⏱️</span>
+                        <span class="practice-timer-val">0.0</span>s
+                    </div>
                     <div class="practice-input-area">
                         <textarea class="practice-input" placeholder="この日本語を英語で言ってみよう..." rows="1"></textarea>
                         <button class="btn-icon btn-practice-send" disabled>

@@ -206,6 +206,46 @@ body {
 .conversation-item .practice-section.hidden {
   display: none;
 }
+.conversation-item .practice-section .practice-timer-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 4px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  box-shadow: inset 2px 2px 4px #a3b1c6, inset -2px -2px 4px #f5f5f5;
+  font-size: 14px;
+  font-weight: 600;
+  color: #8d97a5;
+  transition: all 0.3s ease;
+}
+.conversation-item .practice-section .practice-timer-container .practice-timer-icon {
+  font-size: 16px;
+}
+.conversation-item .practice-section .practice-timer-container .practice-timer-val {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: #007AFF;
+  min-width: 48px;
+  text-align: right;
+  display: inline-block;
+  transition: color 0.2s ease;
+}
+.conversation-item .practice-section .practice-timer-container.warning {
+  box-shadow: inset 2px 2px 4px #a3b1c6, inset -2px -2px 4px #f5f5f5, 0 0 8px rgba(243, 156, 18, 0.4);
+}
+.conversation-item .practice-section .practice-timer-container.warning .practice-timer-val {
+  color: #f39c12;
+}
+.conversation-item .practice-section .practice-timer-container.danger {
+  animation: timer-pulse 1s infinite alternate;
+  box-shadow: inset 2px 2px 4px #a3b1c6, inset -2px -2px 4px #f5f5f5, 0 0 12px rgba(231, 76, 60, 0.6);
+}
+.conversation-item .practice-section .practice-timer-container.danger .practice-timer-val {
+  color: #e74c3c;
+}
 .conversation-item .practice-section .practice-input-area {
   display: flex;
   gap: 8px;
@@ -1804,6 +1844,10 @@ body {
   outline: none;
   box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #f5f5f5, 0 0 0 2px rgba(0, 122, 255, 0.1);
 }
+.input-group .input-row textarea::-moz-placeholder {
+  color: #8d97a5;
+  opacity: 0.7;
+}
 .input-group .input-row textarea::placeholder {
   color: #8d97a5;
   opacity: 0.7;
@@ -2035,7 +2079,9 @@ body {
   border: 1px solid #ddd;
 }
 .settings-panel .setting-item select {
-  appearance: none;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
   background: #e0e5ec;
   box-shadow: inset 6px 6px 10px #a3b1c6, inset -6px -6px 10px #f5f5f5;
   border: none;
@@ -2850,6 +2896,21 @@ button .loader {
   max-width: 90%;
 }
 
+.time-taken-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.25);
+  color: inherit;
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin-left: 8px;
+  vertical-align: middle;
+  letter-spacing: 0.5px;
+}
+
 .situation-controls {
   display: flex;
   gap: 12px;
@@ -2890,7 +2951,9 @@ button .loader {
   align-items: center;
   justify-content: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 .situation-tag .tag-label {
   font-size: 13px;
@@ -3059,6 +3122,10 @@ button .loader {
   outline: none;
   border-color: rgba(0, 122, 255, 0.3);
   box-shadow: inset 8px 8px 12px #a3b1c6, inset -8px -8px 12px #f5f5f5;
+}
+.initial-input-container .input-section textarea::-moz-placeholder, .initial-input-container .input-section .url-input-wrapper input[type=url]::-moz-placeholder {
+  color: #8d97a5;
+  opacity: 0.5;
 }
 .initial-input-container .input-section textarea::placeholder,
 .initial-input-container .input-section .url-input-wrapper input[type=url]::placeholder {
@@ -3662,7 +3729,8 @@ button .loader {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 16px 30px rgba(163, 177, 198, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.7);
   outline: none;
-  appearance: none;
+  -moz-appearance: none;
+       appearance: none;
   -webkit-appearance: none;
 }
 .situation-options-wrapper .situation-options-list .situation-option-item .option-num {
@@ -3766,4 +3834,11 @@ button .loader {
   }
 }
 
-/*# sourceMappingURL=style.css.map */
+@keyframes timer-pulse {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.03);
+  }
+}/*# sourceMappingURL=style.css.map */

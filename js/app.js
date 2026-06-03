@@ -447,6 +447,58 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnHint = document.getElementById('btn-hint');
     const btnSend = document.getElementById('btn-send');
 
+    const mainTimerContainer = document.getElementById('main-timer-container');
+    const mainTimerVal = document.getElementById('main-timer-val');
+    let mainTimerIntervalId = null;
+    let mainTimerStartTime = null;
+
+    function startMainTimer() {
+        if (mainTimerIntervalId) {
+            clearInterval(mainTimerIntervalId);
+        }
+        mainTimerStartTime = Date.now();
+        if (mainTimerContainer) {
+            mainTimerContainer.classList.remove('hidden', 'warning', 'danger');
+        }
+        if (mainTimerVal) {
+            mainTimerVal.textContent = '0.0';
+        }
+
+        mainTimerIntervalId = setInterval(() => {
+            if (!mainTimerStartTime) return;
+            const elapsed = (Date.now() - mainTimerStartTime) / 1000;
+            if (mainTimerVal) {
+                mainTimerVal.textContent = elapsed.toFixed(1);
+            }
+
+            if (mainTimerContainer) {
+                if (elapsed >= 15.0) {
+                    mainTimerContainer.classList.remove('warning');
+                    mainTimerContainer.classList.add('danger');
+                } else if (elapsed >= 8.0) {
+                    mainTimerContainer.classList.remove('danger');
+                    mainTimerContainer.classList.add('warning');
+                } else {
+                    mainTimerContainer.classList.remove('warning', 'danger');
+                }
+            }
+        }, 100);
+    }
+
+    function stopMainTimer() {
+        if (mainTimerIntervalId) {
+            clearInterval(mainTimerIntervalId);
+            mainTimerIntervalId = null;
+        }
+    }
+
+    function hideMainTimer() {
+        stopMainTimer();
+        if (mainTimerContainer) {
+            mainTimerContainer.classList.add('hidden');
+        }
+    }
+
     // Review Tab Elements
     const tabPractice = document.getElementById('tab-practice');
     const tabReview = document.getElementById('tab-review');
@@ -554,6 +606,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const textJp = userInputJp.value.trim();
         if (!text) return;
 
+        // 経過時間の計算
+        let timeTaken = null;
+        if (mainTimerStartTime) {
+            timeTaken = parseFloat(((Date.now() - mainTimerStartTime) / 1000).toFixed(1));
+        }
+
+        hideMainTimer();
+
         // Disable input
         userInput.disabled = true;
         userInputJp.disabled = true;
@@ -575,11 +635,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 const retryHistory = JSON.parse(lastGroup.dataset.retryHistory);
 
-                const data = await getCorrection(text, feedbackSection, retryHistory, true, textJp);
+                const data = await getCorrection(text, feedbackSection, retryHistory, true, textJp, null, timeTaken);
  
                 // Update retry history with the latest result
                 if (data && data.correction) {
-                    const historyItemRef = { user_input: text, correction: data.correction, intended_japanese: textJp, memo: '' };
+                    const historyItemRef = { user_input: text, correction: data.correction, intended_japanese: textJp, memo: '', time_taken: timeTaken };
                     retryHistory.push(historyItemRef);
                     lastGroup.dataset.retryHistory = JSON.stringify(retryHistory);
 
@@ -597,14 +657,6 @@ document.addEventListener('DOMContentLoaded', () => {
  
                 // For retry, we don't auto-advance conversation
             } else {
-                // Show User Message
-                const userMsgDiv = lastGroup.querySelector('.user-message');
-                const userTextP = lastGroup.querySelector('.user-text');
-                if (userMsgDiv && userTextP) {
-                    userTextP.textContent = text;
-                    userMsgDiv.classList.remove('hidden');
-                }
- 
                 // Add to history
                 conversationHistory.push({ role: 'user', text: text });
  
@@ -616,11 +668,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 const retryHistory = JSON.parse(lastGroup.dataset.retryHistory);
  
-                const data = await getCorrection(text, feedbackSection, retryHistory, false, textJp);
+                const data = await getCorrection(text, feedbackSection, retryHistory, false, textJp, null, timeTaken);
  
                 // Update retry history with the latest result
                 if (data && data.correction) {
-                    const historyItemRef = { user_input: text, correction: data.correction, intended_japanese: textJp, memo: '' };
+                    const historyItemRef = { user_input: text, correction: data.correction, intended_japanese: textJp, memo: '', time_taken: timeTaken };
                     retryHistory.push(historyItemRef);
                     lastGroup.dataset.retryHistory = JSON.stringify(retryHistory);
 
@@ -671,6 +723,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Focus English input to encourage starting
                     userInput.focus();
+
+                    startMainTimer();
                 });
                 hintList.appendChild(div);
             });
@@ -1184,7 +1238,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 50);
     }
 
-    async function getCorrection(userText, feedbackElement, history = [], isRetry = false, intendedJp = "", onQaUpdate = null) {
+    async function getCorrection(userText, feedbackElement, history = [], isRetry = false, intendedJp = "", onQaUpdate = null, timeTaken = null) {
         const correctionP = feedbackElement.querySelector('.correction');
         const suggestionsList = feedbackElement.querySelector('.suggestions-list');
         const qaSection = feedbackElement.querySelector('.item-qa-section');
@@ -1240,7 +1294,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${intendedJp ? `<div class="intended-jp">${intendedJp}</div>` : ''}
                         <div class="retry-user-text-row">
                             <span class="label">再挑戦:</span>
-                            <span class="retry-user-text">${userText}</span>
+                            <span class="retry-user-text">${userText} ${timeTaken !== null && timeTaken !== undefined ? `<span class="time-taken-badge" title="解答時間">⏱️ ${timeTaken}s</span>` : ''}</span>
                         </div>
                     </div>
                     <div class="retry-correction">${marked.parse(data.correction)}</div>
@@ -1272,7 +1326,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (userInputDisplay) {
                 userInputDisplay.innerHTML = `
                     ${intendedJp ? `<div class="intended-jp">${intendedJp}</div>` : ''}
-                    <div class="text">${userText}</div>
+                    <div class="text">${userText} ${timeTaken !== null && timeTaken !== undefined ? `<span class="time-taken-badge" title="解答時間">⏱️ ${timeTaken}s</span>` : ''}</div>
                 `;
                 userInputDisplay.classList.remove('hidden');
             }
@@ -1923,6 +1977,51 @@ document.addEventListener('DOMContentLoaded', () => {
         const practiceFeedback = clone.querySelector('.feedback-content');
  
         let userAudioUrl = null;
+        let practiceStartTime = null;
+        let timerIntervalId = null;
+
+        const practiceTimerContainer = clone.querySelector('.practice-timer-container');
+        const practiceTimerVal = clone.querySelector('.practice-timer-val');
+
+        const startTimer = () => {
+            if (timerIntervalId) {
+                clearInterval(timerIntervalId);
+            }
+            practiceStartTime = Date.now();
+            if (practiceTimerContainer) {
+                practiceTimerContainer.classList.remove('warning', 'danger');
+            }
+            if (practiceTimerVal) {
+                practiceTimerVal.textContent = '0.0';
+            }
+
+            timerIntervalId = setInterval(() => {
+                if (!practiceStartTime) return;
+                const elapsed = (Date.now() - practiceStartTime) / 1000;
+                if (practiceTimerVal) {
+                    practiceTimerVal.textContent = elapsed.toFixed(1);
+                }
+
+                if (practiceTimerContainer) {
+                    if (elapsed >= 15.0) {
+                        practiceTimerContainer.classList.remove('warning');
+                        practiceTimerContainer.classList.add('danger');
+                    } else if (elapsed >= 8.0) {
+                        practiceTimerContainer.classList.remove('danger');
+                        practiceTimerContainer.classList.add('warning');
+                    } else {
+                        practiceTimerContainer.classList.remove('warning', 'danger');
+                    }
+                }
+            }, 100);
+        };
+
+        const stopTimer = () => {
+            if (timerIntervalId) {
+                clearInterval(timerIntervalId);
+                timerIntervalId = null;
+            }
+        };
 
         japanese.textContent = data.japanese;
         english.textContent = data.english;
@@ -1966,7 +2065,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 hItem.innerHTML = `
                     <div class="user-input-display">
                         ${h.intended_japanese ? `<div class="intended-jp">${h.intended_japanese}</div>` : ''}
-                        <div class="text">${h.user_input}</div>
+                        <div class="text">${h.user_input} ${h.time_taken !== null && h.time_taken !== undefined ? `<span class="time-taken-badge" title="解答時間">⏱️ ${h.time_taken}s</span>` : ''}</div>
                     </div>
                     <div class="reactions-container hidden">
                         <div class="reactions-header">
@@ -2243,6 +2342,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof saveUIState === 'function') {
                         saveUIState();
                     }
+                    if (practiceFeedback && practiceFeedback.classList.contains('hidden')) {
+                        startTimer();
+                    }
+                } else {
+                    stopTimer();
                 }
                 toggleSection(btnPractice, practiceSection, practiceInput);
             });
@@ -2609,9 +2713,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const text = practiceInput.value.trim();
                 if (!text) return;
 
+                stopTimer();
+
                 // Disable input
                 practiceInput.disabled = true;
                 btnPracticeSend.disabled = true;
+
+                // 経過時間の計算
+                let timeTaken = null;
+                if (practiceStartTime) {
+                    timeTaken = parseFloat(((Date.now() - practiceStartTime) / 1000).toFixed(1));
+                }
 
                 const isRetry = item.dataset.isPracticeRetrying === 'true';
 
@@ -2626,7 +2738,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         reactions: [],
                         intended_japanese: null,
                         qa_history: [],
-                        memo: ''
+                        memo: '',
+                        time_taken: timeTaken
                     };
                     practiceRetryHistory.push(historyItemRef);
  
@@ -2636,7 +2749,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (isReviewMode) {
                             renderHistory(practiceRetryHistory, historyContainer);
                         }
-                    });
+                    }, timeTaken);
  
                     if (dataCorr && dataCorr.correction) {
                         historyItemRef.correction = dataCorr.correction;
@@ -2671,7 +2784,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         reactions: [],
                         intended_japanese: null,
                         qa_history: [],
-                        memo: ''
+                        memo: '',
+                        time_taken: timeTaken
                     };
                     practiceRetryHistory.push(historyItemRef);
  
@@ -2681,7 +2795,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (isReviewMode) {
                             renderHistory(practiceRetryHistory, historyContainer);
                         }
-                    });
+                    }, timeTaken);
  
                     if (dataCorr && dataCorr.correction) {
                         historyItemRef.correction = dataCorr.correction;
@@ -2727,6 +2841,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         btnPracticeSend.disabled = true;
                         feedback.classList.add('hidden');
                         practiceInput.focus();
+                        startTimer();
                     } else {
                         // Main conversation retry
                         const group = btnRetry.closest('.conversation-group');
