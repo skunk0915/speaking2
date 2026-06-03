@@ -1445,11 +1445,13 @@ document.addEventListener('DOMContentLoaded', () => {
             iconPlay.classList.add('hidden');
             iconPause.classList.remove('hidden');
             loader.classList.add('hidden');
+            btn.classList.add('active');
         });
 
         currentAudio.addEventListener('pause', () => {
             iconPlay.classList.remove('hidden');
             iconPause.classList.add('hidden');
+            btn.classList.remove('active');
         });
 
         const audioInstance = currentAudio;
@@ -1469,6 +1471,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 iconPlay.classList.remove('hidden');
                 iconPause.classList.add('hidden');
+                btn.classList.remove('active');
             }
         });
 
@@ -1897,11 +1900,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnRepeat = clone.querySelector('.btn-repeat');
         const btnVariationMenu = clone.querySelector('.btn-variation-menu');
         const btnPractice = clone.querySelector('.btn-practice');
+        const btnPronounceToggle = clone.querySelector('.btn-pronounce-toggle');
         const btnQa = clone.querySelector('.btn-qa');
         const btnSave = clone.querySelector('.btn-save');
         const btnHistory = clone.querySelector('.btn-history');
  
         const practiceSection = clone.querySelector('.practice-section');
+        const pronounceSection = clone.querySelector('.pronounce-section');
+        const pronouncePlaybacks = pronounceSection ? pronounceSection.querySelector('.pronounce-playbacks') : null;
+        const btnPronounceModelPlay = pronouncePlaybacks ? pronouncePlaybacks.querySelector('.btn-pronounce-model-play') : null;
+        const btnPronouncePlay = pronouncePlaybacks ? pronouncePlaybacks.querySelector('.btn-pronounce-play') : null;
+        const pronounceLoading = pronounceSection ? pronounceSection.querySelector('.pronounce-loading') : null;
+        const resultArea = pronounceSection ? pronounceSection.querySelector('.pronounce-result-area') : null;
+
         const variationSection = clone.querySelector('.variation-section');
         const mainQa = clone.querySelector('.main-qa');
         const historySection = clone.querySelector('.history-section');
@@ -1911,6 +1922,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnPracticeSend = clone.querySelector('.btn-practice-send');
         const practiceFeedback = clone.querySelector('.feedback-content');
  
+        let userAudioUrl = null;
+
         japanese.textContent = data.japanese;
         english.textContent = data.english;
  
@@ -2106,7 +2119,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     reactions: data.reactions || [], // Include reactions
                     audio_url: audioUrl,
                     last_voice: lastVoice,
-                    last_speed: lastSpeed
+                    last_speed: lastSpeed,
+                    last_pronunciation: group.dataset.lastPronunciation ? JSON.parse(group.dataset.lastPronunciation) : (data.last_pronunciation || null)
                 };
 
                 const mainHistoryStr = group.dataset.retryHistory;
@@ -2162,10 +2176,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Close others in the same item
             const others = [
                 { b: btnPractice, s: practiceSection },
+                { b: btnPronounceToggle, s: pronounceSection },
                 { b: btnVariationMenu, s: variationSection },
                 { b: btnQa, s: mainQa },
                 { b: btnHistory, s: historySection }
             ];
+
 
             const scrollToParent = () => {
                 // conversation-groupだと縦長すぎる場合に入力欄が見えなくなるため、
@@ -2254,6 +2270,266 @@ document.addEventListener('DOMContentLoaded', () => {
                 situation: data.japanese
             }, data.qa_history || [], (newHistory) => updateSavedData('qa_history', newHistory));
         }
+
+        if (btnPronounceToggle && pronounceSection) {
+            btnPronounceToggle.addEventListener('click', () => {
+                const isOpening = pronounceSection.classList.contains('hidden');
+                if (isOpening) {
+                    // 対象テキストを表示
+                    const targetTextEl = pronounceSection.querySelector('.pronounce-target-text');
+                    if (targetTextEl) {
+                        targetTextEl.textContent = data.english;
+                    }
+                } else {
+                    // 閉じる時に録音中であれば停止（キャンセル）
+                    if (activeRecordingBtn === btnPronounceRecord) {
+                        handleStopRecording(true);
+                    }
+                }
+                toggleSection(btnPronounceToggle, pronounceSection);
+            });
+
+            const btnPronounceRecord = pronounceSection.querySelector('.btn-pronounce-record');
+            const recordingStatus = pronounceSection.querySelector('.pronounce-recording-status');
+            const recordText = btnPronounceRecord.querySelector('.record-text');
+
+            const handleStartRecording = async () => {
+                try {
+                    // すでに他で録音中なら停止
+                    if (activeRecordingBtn && activeRecordingBtn !== btnPronounceRecord) {
+                        activeRecordingBtn.click(); // クリックして停止させる
+                    }
+
+                    activeRecordingBtn = btnPronounceRecord;
+                    btnPronounceRecord.classList.add('recording');
+                    recordText.textContent = '録音停止';
+                    recordingStatus.classList.remove('hidden');
+                    resultArea.classList.add('hidden');
+
+                    // WAV録音開始
+                    await startWavRecording();
+
+                    // 最長15秒の制限
+                    recordingTimeoutId = setTimeout(() => {
+                        handleStopRecording();
+                    }, 15000);
+
+                } catch (err) {
+                    console.error('録音開始エラー:', err);
+                    alert('マイクの使用許可がないか、マイクが見つかりません。');
+                    resetRecordingUI();
+                }
+            };
+
+            const handleStopRecording = async (isCancelled = false) => {
+                if (recordingTimeoutId) {
+                    clearTimeout(recordingTimeoutId);
+                    recordingTimeoutId = null;
+                }
+
+                activeRecordingBtn = null;
+                const wavBlob = await stopWavRecording(isCancelled);
+
+                resetRecordingUI();
+
+                if (isCancelled || !wavBlob) return;
+
+                // Create Object URL for playback
+                if (userAudioUrl) {
+                    URL.revokeObjectURL(userAudioUrl);
+                }
+                userAudioUrl = URL.createObjectURL(wavBlob);
+
+                if (pronouncePlaybacks) {
+                    pronouncePlaybacks.classList.remove('hidden');
+                }
+                if (btnPronouncePlay) {
+                    btnPronouncePlay.style.display = '';
+                }
+
+                // APIに送信
+                evaluatePronunciation(wavBlob, data.english);
+            };
+
+            const resetRecordingUI = () => {
+                btnPronounceRecord.classList.remove('recording');
+                recordText.textContent = '';
+                recordingStatus.classList.add('hidden');
+            };
+
+            const evaluatePronunciation = async (blob, targetText) => {
+                // UIをローディング状態に
+                btnPronounceRecord.disabled = true;
+                btnPronounceRecord.style.opacity = '0.6';
+                const loader = btnPronounceToggle.querySelector('.loader') || btnPronounceRecord.querySelector('.loader');
+                if (loader) loader.classList.remove('hidden');
+
+                if (resultArea) resultArea.classList.add('hidden');
+                if (pronounceLoading) pronounceLoading.classList.remove('hidden');
+
+                const formData = new FormData();
+                formData.append('audio', blob, 'recording.wav');
+                formData.append('text', targetText);
+                formData.append('ai_style', aiStyleSelect ? aiStyleSelect.value : 'polite');
+
+                try {
+                    const response = await fetch('api/evaluate_pronunciation.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('発音評価APIエラー: ' + response.statusText);
+                    }
+
+                    const result = await response.json();
+                    renderPronunciationResult(result);
+
+                    // 最新の発音評価結果を保存
+                    data.last_pronunciation = result;
+                    group.dataset.lastPronunciation = JSON.stringify(result);
+
+                    // ブックマークデータへ即時反映
+                    updateSavedData('last_pronunciation', result);
+
+                    if (typeof saveUIState === 'function') {
+                        saveUIState();
+                    }
+
+                } catch (error) {
+                    console.error('発音評価失敗:', error);
+                    alert('発音の評価に失敗しました。');
+                } finally {
+                    btnPronounceRecord.disabled = false;
+                    btnPronounceRecord.style.opacity = '';
+                    if (loader) loader.classList.add('hidden');
+                    if (pronounceLoading) pronounceLoading.classList.add('hidden');
+                }
+            };
+
+            btnPronounceRecord.addEventListener('click', () => {
+                const isRecording = btnPronounceRecord.classList.contains('recording');
+                if (isRecording) {
+                    handleStopRecording();
+                } else {
+                    handleStartRecording();
+                }
+            });
+        }
+
+        function renderPronunciationResult(res) {
+            if (!res || res.RecognitionStatus !== 'Success') {
+                alert('発音が聞き取れませんでした。もう一度お試しください。');
+                return;
+            }
+
+            if (resultArea) {
+                resultArea.classList.remove('hidden');
+                
+                // 各スコアの取得
+                const scores = res.PronunciationAssessment;
+                const totalScore = Math.round(scores.PronScore);
+                const accuracy = Math.round(scores.AccuracyScore);
+                const fluency = Math.round(scores.FluencyScore);
+                const completeness = Math.round(scores.CompletenessScore);
+
+                // 総合スコア（円形アニメーション）
+                const scoreNumEl = resultArea.querySelector('.score-num');
+                if (scoreNumEl) scoreNumEl.textContent = totalScore;
+                
+                const scoreRingBar = resultArea.querySelector('.score-ring-bar');
+                if (scoreRingBar) {
+                    // 円周 2 * PI * r (r=50) = 314
+                    const circumference = 314;
+                    scoreRingBar.style.strokeDasharray = circumference;
+                    // アニメーションのため一旦100%（314）にしてから設定
+                    scoreRingBar.style.strokeDashoffset = circumference;
+                    setTimeout(() => {
+                        const offset = circumference - (circumference * totalScore / 100);
+                        scoreRingBar.style.strokeDashoffset = offset;
+                    }, 50);
+                }
+
+                // 細部指標（プログレスバー）
+                const accuracyBar = resultArea.querySelector('.metric-accuracy');
+                const fluencyBar = resultArea.querySelector('.metric-fluency');
+                const completenessBar = resultArea.querySelector('.metric-completeness');
+
+                if (accuracyBar) accuracyBar.style.width = accuracy + '%';
+                if (fluencyBar) fluencyBar.style.width = fluency + '%';
+                if (completenessBar) completenessBar.style.width = completeness + '%';
+
+                const accValEl = resultArea.querySelector('.accuracy-val');
+                const fluValEl = resultArea.querySelector('.fluency-val');
+                const compValEl = resultArea.querySelector('.completeness-val');
+                if (accValEl) accValEl.textContent = accuracy + '%';
+                if (fluValEl) fluValEl.textContent = fluency + '%';
+                if (compValEl) compValEl.textContent = completeness + '%';
+
+                // 単語ごとのフィードバック
+                const wordsContainer = resultArea.querySelector('.words-container');
+                if (wordsContainer) {
+                    wordsContainer.innerHTML = '';
+
+                    if (res.Words && res.Words.length > 0) {
+                        res.Words.forEach(w => {
+                            const wordSpan = document.createElement('span');
+                            const isGood = w.PronunciationAssessment.ErrorType === 'None';
+                            const score = Math.round(w.PronunciationAssessment.AccuracyScore);
+                            
+                            wordSpan.className = 'word-item ' + (isGood ? 'good' : 'bad');
+                            wordSpan.style.setProperty('--score-percent', score + '%');
+                            
+                            // 単語テキストを追加
+                            const wordText = document.createTextNode(w.Word);
+                            wordSpan.appendChild(wordText);
+
+
+
+                            // ツールチップの追加
+                            const tooltip = document.createElement('span');
+                            tooltip.className = 'word-tooltip';
+                            
+                            const scoreText = `正確さ: ${Math.round(w.PronunciationAssessment.AccuracyScore)}点`;
+                            let errorMsg = '';
+                            if (!isGood) {
+                                if (w.PronunciationAssessment.ErrorType === 'Mispronunciation') {
+                                    errorMsg = ' (発音ミス)';
+                                } else if (w.PronunciationAssessment.ErrorType === 'Omission') {
+                                    errorMsg = ' (発音漏れ)';
+                                } else if (w.PronunciationAssessment.ErrorType === 'Insertion') {
+                                    errorMsg = ' (余計な挿入)';
+                                }
+                            }
+                            tooltip.textContent = scoreText + errorMsg;
+                            
+                            wordSpan.appendChild(tooltip);
+                            wordsContainer.appendChild(wordSpan);
+                        });
+                    } else {
+                        wordsContainer.textContent = '単語データが取得できませんでした。';
+                    }
+                }
+
+                // AI発音アドバイスの描画
+                const feedbackCommentEl = resultArea.querySelector('.feedback-comment');
+                const feedbackWrapper = resultArea.querySelector('.pronounce-feedback-text');
+                if (feedbackCommentEl && feedbackWrapper) {
+                    if (res.advice) {
+                        feedbackCommentEl.textContent = res.advice;
+                        feedbackWrapper.classList.remove('hidden');
+                    } else {
+                        feedbackWrapper.classList.add('hidden');
+                    }
+                }
+            }
+            
+            // アコーディオンの高さ調整のために高さを再計算
+            if (typeof slideDown === 'function' && pronounceSection) {
+                pronounceSection.style.height = 'auto';
+            }
+        };
+
 
         // Japanese Translation Toggle
         let translateJpTimeout;
@@ -2471,11 +2747,26 @@ document.addEventListener('DOMContentLoaded', () => {
         let lastVoice = data.last_voice || null;
         let lastSpeed = data.last_speed || null;
 
-        const playAudio = async () => {
-            const iconPlay = btnSpeak.querySelector('.icon-play');
-            const iconPause = btnSpeak.querySelector('.icon-pause');
-            const loader = btnSpeak.querySelector('.loader');
+        const toggleModelAudioUI = (playing) => {
+            [btnSpeak, btnPronounceModelPlay].forEach(btn => {
+                if (!btn) return;
+                const iconPlay = btn.querySelector('.icon-play');
+                const iconPause = btn.querySelector('.icon-pause');
+                if (playing) {
+                    if (iconPlay) iconPlay.classList.add('hidden');
+                    if (iconPause) iconPause.classList.remove('hidden');
+                    btn.classList.add('active');
+                    btn.classList.add('playing');
+                } else {
+                    if (iconPlay) iconPlay.classList.remove('hidden');
+                    if (iconPause) iconPause.classList.add('hidden');
+                    btn.classList.remove('active');
+                    btn.classList.remove('playing');
+                }
+            });
+        };
 
+        const playAudio = async (btnTrigger = btnSpeak) => {
             const currentVoice = voiceSelect.value;
             const currentSpeed = speedRange.value;
 
@@ -2497,11 +2788,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             stopAudio(); // Stop other audio
 
+            const iconPlay = btnTrigger ? btnTrigger.querySelector('.icon-play') : null;
+            const loader = btnTrigger ? btnTrigger.querySelector('.loader') : null;
+
             // Regenerate audio if no audio exists, or settings have changed
             if (!audioUrl || settingsChanged) {
-                // Generate Speech
-                iconPlay.classList.add('hidden');
-                loader.classList.remove('hidden');
+                if (iconPlay) iconPlay.classList.add('hidden');
+                if (loader) loader.classList.remove('hidden');
 
                 try {
                     console.log(`[Audio] Speech API リクエスト送信: text="${data.english.substring(0, 30)}...", voice="${currentVoice}", speed="${currentSpeed}"`);
@@ -2556,8 +2849,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (e) {
                     console.error('Speech generation failed:', e);
                     alert('音声生成に失敗しました: ' + e.message);
-                    iconPlay.classList.remove('hidden');
-                    loader.classList.add('hidden');
+                    if (iconPlay) iconPlay.classList.remove('hidden');
+                    if (loader) loader.classList.add('hidden');
                     return;
                 }
             } else {
@@ -2566,17 +2859,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Play
             currentAudio = new Audio(audioUrl);
-            currentAudioBtn = btnSpeak;
+            currentAudioBtn = btnTrigger;
 
             currentAudio.addEventListener('play', () => {
-                iconPlay.classList.add('hidden');
-                iconPause.classList.remove('hidden');
-                loader.classList.add('hidden');
+                toggleModelAudioUI(true);
+                if (loader) loader.classList.add('hidden');
             });
 
             currentAudio.addEventListener('pause', () => {
-                iconPlay.classList.remove('hidden');
-                iconPause.classList.add('hidden');
+                toggleModelAudioUI(false);
             });
 
             const audioInstance = currentAudio;
@@ -2589,8 +2880,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }, 500);
                 } else {
-                    iconPlay.classList.remove('hidden');
-                    iconPause.classList.add('hidden');
+                    toggleModelAudioUI(false);
                 }
             });
 
@@ -2602,7 +2892,74 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        btnSpeak.addEventListener('click', () => playAudio());
+        btnSpeak.addEventListener('click', () => playAudio(btnSpeak));
+        if (btnPronounceModelPlay) {
+            btnPronounceModelPlay.addEventListener('click', () => playAudio(btnPronounceModelPlay));
+        }
+
+        const toggleUserAudioUI = (playing) => {
+            if (!btnPronouncePlay) return;
+            const iconPlay = btnPronouncePlay.querySelector('.icon-play');
+            const iconPause = btnPronouncePlay.querySelector('.icon-pause');
+            if (playing) {
+                if (iconPlay) iconPlay.classList.add('hidden');
+                if (iconPause) iconPause.classList.remove('hidden');
+                btnPronouncePlay.classList.add('active');
+                btnPronouncePlay.classList.add('playing');
+            } else {
+                if (iconPlay) iconPlay.classList.remove('hidden');
+                if (iconPause) iconPause.classList.add('hidden');
+                btnPronouncePlay.classList.remove('active');
+                btnPronouncePlay.classList.remove('playing');
+            }
+        };
+
+        const playUserAudio = (btn) => {
+            if (!userAudioUrl) return;
+
+            if (currentAudio && currentAudio.src === userAudioUrl) {
+                if (currentAudio.paused) {
+                    currentAudio.play();
+                } else {
+                    currentAudio.pause();
+                }
+                return;
+            }
+
+            stopAudio();
+
+            currentAudio = new Audio(userAudioUrl);
+            currentAudioBtn = btn;
+
+            currentAudio.addEventListener('play', () => {
+                toggleUserAudioUI(true);
+            });
+
+            currentAudio.addEventListener('pause', () => {
+                toggleUserAudioUI(false);
+                if (currentAudioBtn === btn) {
+                    currentAudioBtn = null;
+                }
+            });
+
+            currentAudio.addEventListener('ended', () => {
+                toggleUserAudioUI(false);
+                if (currentAudioBtn === btn) {
+                    currentAudioBtn = null;
+                }
+            });
+
+            const playPromise = currentAudio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log('Playback interrupted or prevented:', error);
+                });
+            }
+        };
+
+        if (btnPronouncePlay) {
+            btnPronouncePlay.addEventListener('click', () => playUserAudio(btnPronouncePlay));
+        }
 
         btnRepeat.addEventListener('click', () => {
             btnRepeat.classList.toggle('active');
@@ -2614,6 +2971,28 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             const targetContainer = isReviewMode ? reviewContainer : container;
             targetContainer.appendChild(clone);
+        }
+
+        // 過去の発音添削結果があれば復元
+        if (data.last_pronunciation) {
+            group.dataset.lastPronunciation = JSON.stringify(data.last_pronunciation);
+            
+            // 再生ボタンコンテナを表示
+            if (pronouncePlaybacks) {
+                pronouncePlaybacks.classList.remove('hidden');
+            }
+            
+            // 自分の録音データはリロードで消えるため、再生ボタンを隠す
+            if (btnPronouncePlay) {
+                btnPronouncePlay.style.display = 'none';
+            }
+            
+            // お手本再生ボタンは表示しておく
+            if (btnPronounceModelPlay) {
+                btnPronounceModelPlay.style.display = '';
+            }
+
+            renderPronunciationResult(data.last_pronunciation);
         }
 
         // Note: We don't scroll here because moveInputToBottom will handle scrolling
@@ -2633,6 +3012,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 iconPlay.classList.remove('hidden');
                 iconPause.classList.add('hidden');
             }
+            currentAudioBtn.classList.remove('active');
+            currentAudioBtn.classList.remove('playing');
             currentAudioBtn = null;
         }
     }
@@ -3156,7 +3537,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     japanese_hidden: jpEl?.classList.contains('hidden'),
                     audio_url: group.dataset.audioUrl || '',
                     last_voice: group.dataset.lastVoice || '',
-                    last_speed: group.dataset.lastSpeed || ''
+                    last_speed: group.dataset.lastSpeed || '',
+                    last_pronunciation: group.dataset.lastPronunciation ? JSON.parse(group.dataset.lastPronunciation) : null
                 },
                 user_msg: {
                     visible: userMsgVisible,
@@ -3228,7 +3610,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     history: gData.retry_history || [],
                     audio_url: gData.prompt.audio_url || '',
                     last_voice: gData.prompt.last_voice || '',
-                    last_speed: gData.prompt.last_speed || ''
+                    last_speed: gData.prompt.last_speed || '',
+                    last_pronunciation: gData.prompt.last_pronunciation || null
                 };
                 
                 const groupEl = addConversationItem(promptData);
@@ -3549,5 +3932,156 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         saveUIState();
     }
+
+    let currentAudioContext = null;
+    let currentMediaStream = null;
+    let currentRecNode = null;
+    let audioChunks = [];
+    let activeRecordingBtn = null;
+    let recordingTimeoutId = null;
+
+    async function startWavRecording(onProcess) {
+        if (currentAudioContext) {
+            stopWavRecording(true);
+        }
+
+        currentMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        // Use native sample rate to avoid silent recording issues on some devices/browsers
+        currentAudioContext = new AudioContextClass();
+        
+        // Explicitly resume to avoid Autoplay restrictions
+        if (currentAudioContext.state === 'suspended') {
+            await currentAudioContext.resume();
+        }
+
+        const source = currentAudioContext.createMediaStreamSource(currentMediaStream);
+        currentRecNode = currentAudioContext.createScriptProcessor(4096, 1, 1);
+        audioChunks = [];
+        
+        currentRecNode.onaudioprocess = (e) => {
+            const inputData = e.inputBuffer.getChannelData(0);
+            audioChunks.push(new Float32Array(inputData));
+            
+            // Clear output buffer to prevent howling but keep processing alive in the browser
+            const outputData = e.outputBuffer.getChannelData(0);
+            outputData.fill(0);
+
+            if (typeof onProcess === 'function') {
+                onProcess(inputData);
+            }
+        };
+        
+        source.connect(currentRecNode);
+        currentRecNode.connect(currentAudioContext.destination);
+    }
+
+
+    function stopWavRecording(isCancelled = false) {
+        if (recordingTimeoutId) {
+            clearTimeout(recordingTimeoutId);
+            recordingTimeoutId = null;
+        }
+
+        const nativeSampleRate = currentAudioContext ? currentAudioContext.sampleRate : 44100;
+
+        if (currentRecNode) {
+            currentRecNode.disconnect();
+            currentRecNode.onaudioprocess = null;
+            currentRecNode = null;
+        }
+        
+        if (currentMediaStream) {
+            currentMediaStream.getTracks().forEach(track => track.stop());
+            currentMediaStream = null;
+        }
+        
+        if (currentAudioContext) {
+            currentAudioContext.close();
+            currentAudioContext = null;
+        }
+
+        if (isCancelled || audioChunks.length === 0) {
+            audioChunks = [];
+            return null;
+        }
+
+        const mergedBuffer = mergeAudioBuffers(audioChunks);
+        audioChunks = [];
+        
+        // Downsample native recording (e.g. 48kHz or 44.1kHz) to 16kHz for Azure Speech Assessment
+        const downsampled = downsampleBuffer(mergedBuffer, nativeSampleRate, 16000);
+        return encodeWavPCM(downsampled, 16000);
+    }
+
+    function mergeAudioBuffers(chunks) {
+        let totalLength = 0;
+        chunks.forEach(chunk => totalLength += chunk.length);
+        const result = new Float32Array(totalLength);
+        let offset = 0;
+        chunks.forEach(chunk => {
+            result.set(chunk, offset);
+            offset += chunk.length;
+        });
+        return result;
+    }
+
+    function downsampleBuffer(buffer, inputSampleRate, outputSampleRate) {
+        if (inputSampleRate === outputSampleRate) {
+            return buffer;
+        }
+        const sampleRateRatio = inputSampleRate / outputSampleRate;
+        const newLength = Math.round(buffer.length / sampleRateRatio);
+        const result = new Float32Array(newLength);
+        let offsetResult = 0;
+        let offsetBuffer = 0;
+        while (offsetResult < result.length) {
+            const nextOffsetBuffer = Math.round((offsetResult + 1) * sampleRateRatio);
+            let accum = 0, count = 0;
+            for (let i = offsetBuffer; i < nextOffsetBuffer && i < buffer.length; i++) {
+                accum += buffer[i];
+                count++;
+            }
+            result[offsetResult] = count > 0 ? accum / count : 0;
+            offsetResult++;
+            offsetBuffer = nextOffsetBuffer;
+        }
+        return result;
+    }
+
+    function encodeWavPCM(samples, sampleRate) {
+        const buffer = new ArrayBuffer(44 + samples.length * 2);
+        const view = new DataView(buffer);
+        
+        writeString(view, 0, 'RIFF');
+        view.setUint32(4, 36 + samples.length * 2, true);
+        writeString(view, 8, 'WAVE');
+        writeString(view, 12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true);
+        view.setUint16(22, 1, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * 2, true);
+        view.setUint16(32, 2, true);
+        view.setUint16(34, 16, true);
+        writeString(view, 36, 'data');
+        view.setUint32(40, samples.length * 2, true);
+        
+        let offset = 44;
+        for (let i = 0; i < samples.length; i++, offset += 2) {
+            let s = Math.max(-1, Math.min(1, samples[i]));
+            view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+        }
+        
+        return new Blob([view], { type: 'audio/wav' });
+    }
+
+    function writeString(view, offset, string) {
+        for (let i = 0; i < string.length; i++) {
+            view.setUint8(offset + i, string.charCodeAt(i));
+        }
+    }
 });
+
 

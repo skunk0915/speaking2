@@ -178,6 +178,20 @@ body {
 .conversation-item .actions button.btn-save.active svg {
   fill: currentColor;
 }
+.conversation-item .actions button.btn-user-speak {
+  color: #34C759;
+}
+.conversation-item .actions button.btn-user-speak svg {
+  color: #34C759;
+}
+.conversation-item .actions button.btn-user-speak:active, .conversation-item .actions button.btn-user-speak.active, .conversation-item .actions button.btn-user-speak.playing {
+  color: white;
+  background: #34C759;
+  box-shadow: inset 4px 4px 8px rgb(36.1513944223, 138.3486055777, 61.874501992), inset -4px -4px 8px rgb(110.3087649402, 217.1912350598, 137.2111553785);
+}
+.conversation-item .actions button.btn-user-speak:active svg, .conversation-item .actions button.btn-user-speak.active svg, .conversation-item .actions button.btn-user-speak.playing svg {
+  color: white;
+}
 .conversation-item .actions button:disabled {
   opacity: 0.5;
   box-shadow: none;
@@ -251,6 +265,517 @@ body {
   opacity: 0.5;
   box-shadow: none;
   cursor: not-allowed;
+}
+.conversation-item .pronounce-section {
+  margin-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 16px;
+  width: 100%;
+}
+.conversation-item .pronounce-section.hidden {
+  display: none;
+}
+.conversation-item .pronounce-section h3 {
+  font-size: 14px;
+  color: #4a4a4a;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.conversation-item .pronounce-section .pronounce-container {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.conversation-item .pronounce-section .pronounce-instruction p {
+  font-size: 12px;
+  color: #8d97a5;
+  margin: 0 0 8px 0;
+}
+.conversation-item .pronounce-section .pronounce-instruction .pronounce-target-text {
+  font-size: 18px;
+  font-weight: bold;
+  color: #007AFF;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border-left: 4px solid #007AFF;
+}
+.conversation-item .pronounce-section .pronounce-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.conversation-item .pronounce-section .pronounce-controls .btn-pronounce-record {
+  background: #e0e5ec;
+  box-shadow: 9px 9px 16px #a3b1c6, -9px -9px 16px #f5f5f5;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 10px;
+  border-radius: 50%;
+  color: #4a4a4a;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2));
+}
+.conversation-item .pronounce-section .pronounce-controls .btn-pronounce-record .record-text {
+  display: none;
+}
+.conversation-item .pronounce-section .pronounce-controls .btn-pronounce-record svg {
+  color: #e74c3c;
+  transition: transform 0.2s ease;
+}
+.conversation-item .pronounce-section .pronounce-controls .btn-pronounce-record:hover {
+  box-shadow: inset 1px 1px 2px #a3b1c6, inset -1px -1px 2px #f5f5f5;
+}
+.conversation-item .pronounce-section .pronounce-controls .btn-pronounce-record:hover svg {
+  transform: scale(1.1);
+}
+.conversation-item .pronounce-section .pronounce-controls .btn-pronounce-record.recording {
+  background: #e74c3c;
+  color: white;
+  box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+  width: auto;
+  height: auto;
+  padding: 10px 20px;
+  border-radius: 20px;
+  gap: 8px;
+}
+.conversation-item .pronounce-section .pronounce-controls .btn-pronounce-record.recording .record-text {
+  display: inline;
+}
+.conversation-item .pronounce-section .pronounce-controls .btn-pronounce-record.recording svg {
+  color: white;
+  animation: pulse 1.5s infinite;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-recording-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-recording-status .time-limit {
+  font-size: 12px;
+  color: #e74c3c;
+  font-weight: bold;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-recording-status {
+  /* 脈動する波形インジケーター */
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-recording-status .audio-wave {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-recording-status .audio-wave span {
+  display: block;
+  width: 3px;
+  height: 5px;
+  background: #e74c3c;
+  border-radius: 2px;
+  animation: wave 1.2s infinite ease-in-out;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-recording-status .audio-wave span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-recording-status .audio-wave span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-recording-status .audio-wave span:nth-child(4) {
+  animation-delay: 0.45s;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-recording-status .audio-wave span:nth-child(5) {
+  animation-delay: 0.6s;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  animation: fadeIn 0.3s ease;
+  margin-top: 16px;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-loading.hidden {
+  display: none;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-loading .loading-spinner-wrapper {
+  position: relative;
+  width: 50px;
+  height: 50px;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-loading .loading-spinner {
+  width: 100%;
+  height: 100%;
+  border: 3px solid rgba(0, 122, 255, 0.1);
+  border-top: 3px solid #007AFF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-loading .loading-pulse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 122, 255, 0.2);
+  border-radius: 50%;
+  animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  z-index: -1;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-loading .loading-text {
+  font-size: 13px;
+  color: #8d97a5;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks.hidden {
+  display: none;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e0e5ec;
+  box-shadow: 7px 7px 14px #a3b1c6, -7px -7px 14px #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4a4a4a;
+  transition: all 0.3s ease;
+  border: 1px solid #ddd;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button:active, .conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.active {
+  box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #f5f5f5;
+  color: #007AFF;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button:hover {
+  color: #007AFF;
+  transform: translateY(-1px);
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button {
+  border: none;
+  cursor: pointer;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2px;
+  transition: transform 0.2s ease;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button:hover svg {
+  transform: scale(1.1);
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-model-play {
+  color: #4a4a4a;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-model-play svg {
+  color: #4a4a4a;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-model-play:hover {
+  color: #007AFF;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-model-play:hover svg {
+  color: #007AFF;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-model-play.playing, .conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-model-play.active {
+  color: white;
+  background: #007AFF;
+  box-shadow: inset 4px 4px 8px rgb(0, 85.4, 178.5), inset -4px -4px 8px rgb(76.5, 161.9, 255);
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-model-play.playing svg, .conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-model-play.active svg {
+  color: white;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-play {
+  color: #4a4a4a;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-play svg {
+  color: #4a4a4a;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-play:hover {
+  color: #34C759;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-play:hover svg {
+  color: #34C759;
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-play.playing, .conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-play.active {
+  color: white;
+  background: #34C759;
+  box-shadow: inset 4px 4px 8px rgb(36.1513944223, 138.3486055777, 61.874501992), inset -4px -4px 8px rgb(110.3087649402, 217.1912350598, 137.2111553785);
+}
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-play.playing svg, .conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-play.active svg {
+  color: white;
+}
+.conversation-item .pronounce-section .pronounce-result-area {
+  border-top: 1px dashed rgba(255, 255, 255, 0.2);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeIn 0.4s ease;
+}
+.conversation-item .pronounce-section .pronounce-result-area.hidden {
+  display: none;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-score-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.conversation-item .pronounce-section .pronounce-result-area {
+  /* 円形スコアサークル */
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-score-circle {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-score-circle .score-ring {
+  transform: rotate(-90deg);
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-score-circle .score-ring circle {
+  fill: transparent;
+  stroke-width: 8;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-score-circle .score-ring .score-ring-bg {
+  stroke: rgba(255, 255, 255, 0.15);
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-score-circle .score-ring .score-ring-bar {
+  stroke: #007AFF;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s ease-in-out;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-score-circle .score-number-container {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-score-circle .score-number-container .score-num {
+  font-size: 28px;
+  font-weight: bold;
+  color: #4a4a4a;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-score-circle .score-number-container .score-label {
+  font-size: 10px;
+  color: #8d97a5;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-metrics {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 180px;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-metrics .metric-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-metrics .metric-item .metric-label {
+  width: 50px;
+  font-size: 12px;
+  color: #8d97a5;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-metrics .metric-item .metric-progress-bg {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-metrics .metric-item .metric-progress-bg .metric-progress-bar {
+  height: 100%;
+  border-radius: 4px;
+  width: 0%;
+  transition: width 0.6s ease-in-out;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-metrics .metric-item .metric-progress-bg .metric-progress-bar.metric-accuracy {
+  background: #2ecc71;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-metrics .metric-item .metric-progress-bg .metric-progress-bar.metric-fluency {
+  background: #3498db;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-metrics .metric-item .metric-progress-bg .metric-progress-bar.metric-completeness {
+  background: #9b59b6;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-metrics .metric-item .metric-val {
+  font-size: 12px;
+  font-weight: bold;
+  color: #4a4a4a;
+  width: 35px;
+  text-align: right;
+}
+.conversation-item .pronounce-section .pronounce-result-area {
+  /* 単語フィードバックエリア */
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-words-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-words-feedback h4 {
+  font-size: 13px;
+  color: #8d97a5;
+  margin: 0;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-words-feedback .words-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-words-feedback .words-container .word-item {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: relative;
+  cursor: pointer;
+  --score-percent: 0%;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-words-feedback .words-container .word-item.good {
+  background: linear-gradient(to right, rgba(46, 204, 113, 0.28) 0%, rgba(46, 204, 113, 0.28) var(--score-percent), rgba(46, 204, 113, 0.12) var(--score-percent), rgba(46, 204, 113, 0.12) 100%);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.3);
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-words-feedback .words-container .word-item.bad {
+  background: linear-gradient(to right, rgba(231, 76, 60, 0.28) 0%, rgba(231, 76, 60, 0.28) var(--score-percent), rgba(231, 76, 60, 0.12) var(--score-percent), rgba(231, 76, 60, 0.12) 100%);
+  color: #e74c3c;
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  text-decoration: line-through;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-words-feedback .words-container .word-item .word-tooltip {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin-bottom: 6px;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-words-feedback .words-container .word-item .word-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-words-feedback .words-container .word-item:hover .word-tooltip {
+  display: block;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-words-feedback .words-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 11px;
+  color: #8d97a5;
+  margin-top: 4px;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-words-feedback .words-legend .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-words-feedback .words-legend .legend-item .color-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-words-feedback .words-legend .legend-good .color-dot {
+  background: #2ecc71;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-words-feedback .words-legend .legend-bad .color-dot {
+  background: #e74c3c;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-feedback-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.15);
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-feedback-text h4 {
+  font-size: 13px;
+  color: #8d97a5;
+  margin: 0;
+}
+.conversation-item .pronounce-section .pronounce-result-area .pronounce-feedback-text .feedback-comment {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #4a4a4a;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 12px;
+  border-radius: 8px;
+  white-space: pre-wrap;
+}
+.conversation-item {
+  /* アニメーションの定義 */
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.8);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes wave {
+  0%, 100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(3);
+  }
 }
 .conversation-item .feedback-content {
   background-color: rgba(255, 255, 255, 0.2);
@@ -2506,7 +3031,8 @@ button .loader {
 .initial-input-container .input-section .info-badge svg {
   color: #007AFF;
 }
-.initial-input-container .input-section textarea, .initial-input-container .input-section .url-input-wrapper input[type=url] {
+.initial-input-container .input-section textarea,
+.initial-input-container .input-section .url-input-wrapper input[type=url] {
   width: 100%;
   padding: 24px;
   border-radius: 20px;
@@ -2522,12 +3048,14 @@ button .loader {
   transition: all 0.3s ease;
   box-sizing: border-box;
 }
-.initial-input-container .input-section textarea:focus, .initial-input-container .input-section .url-input-wrapper input[type=url]:focus {
+.initial-input-container .input-section textarea:focus,
+.initial-input-container .input-section .url-input-wrapper input[type=url]:focus {
   outline: none;
   border-color: rgba(0, 122, 255, 0.3);
   box-shadow: inset 8px 8px 12px #a3b1c6, inset -8px -8px 12px #f5f5f5;
 }
-.initial-input-container .input-section textarea::placeholder, .initial-input-container .input-section .url-input-wrapper input[type=url]::placeholder {
+.initial-input-container .input-section textarea::placeholder,
+.initial-input-container .input-section .url-input-wrapper input[type=url]::placeholder {
   color: #8d97a5;
   opacity: 0.5;
 }

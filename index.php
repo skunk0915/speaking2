@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
     <title>English Training</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<?php echo time(); ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -278,7 +278,16 @@
                             <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                         </svg>
                     </button>
+                    <button class="btn-pronounce-toggle" title="発音練習">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                            <line x1="12" y1="19" x2="12" y2="23"></line>
+                            <line x1="8" y1="23" x2="16" y2="23"></line>
+                        </svg>
+                    </button>
                     <button class="btn-variation-menu" title="バリエーション生成">
+
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="16 3 21 3 21 8"></polyline>
                             <line x1="4" y1="20" x2="21" y2="3"></line>
@@ -430,68 +439,172 @@
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="user-message hidden">
-                <p class="user-text"></p>
-            </div>
-
-            <div class="feedback-section hidden">
-                <div class="feedback-content">
-                    <div class="user-input-display hidden"></div>
-                    <div class="reactions-container hidden">
-                        <div class="reactions-header">
-                            <h3>伝わりやすさの反応</h3>
-                            <button class="btn-persona-help" title="ペルソナの詳細">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                <div class="pronounce-section hidden">
+                    <h3>発音練習</h3>
+                    <div class="pronounce-container">
+                        <div class="pronounce-instruction">
+                            <p>「発声開始」ボタンを押し、マイクに向かって以下の英文を発音してください。</p>
+                            <div class="pronounce-target-text"></div>
+                        </div>
+                        <div class="pronounce-controls">
+                            <button class="btn-pronounce-record">
+                                <svg class="icon-record-mic" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                                    <line x1="8" y1="23" x2="16" y2="23"></line>
                                 </svg>
+                                <span class="record-text"></span>
+                            </button>
+                            <div class="pronounce-recording-status hidden">
+                                <div class="audio-wave">
+                                    <span></span><span></span><span></span><span></span><span></span>
+                                </div>
+                                <span class="time-limit">録音中 (最長15秒)...</span>
+                            </div>
+                            <div class="pronounce-playbacks hidden">
+                                <button class="btn-pronounce-play" title="自分の発音を再生">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect>
+                                        <circle cx="12" cy="12" r="3.5" fill="currentColor"></circle>
+                                    </svg>
+                                </button>
+                                <button class="btn-pronounce-model-play" title="お手本の音声を再生">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect>
+                                        <rect x="3" y="5" width="8" height="7" fill="currentColor" stroke="none"></rect>
+                                        <line x1="11" y1="8.5" x2="21" y2="8.5"></line>
+                                        <line x1="11" y1="12" x2="21" y2="12"></line>
+                                        <line x1="3" y1="15.5" x2="21" y2="15.5"></line>
+                                    </svg>
+                                    <div class="loader hidden"></div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="pronounce-loading hidden">
+                            <div class="loading-spinner-wrapper">
+                                <div class="loading-spinner"></div>
+                                <div class="loading-pulse"></div>
+                            </div>
+                            <span class="loading-text">発音を分析中...</span>
+                        </div>
+
+                        <div class="pronounce-result-area hidden">
+                            <div class="pronounce-score-wrapper">
+                                <div class="pronounce-score-circle">
+                                    <svg class="score-ring" width="120" height="120">
+                                        <circle class="score-ring-bg" cx="60" cy="60" r="50"></circle>
+                                        <circle class="score-ring-bar" cx="60" cy="60" r="50"></circle>
+                                    </svg>
+                                    <div class="score-number-container">
+                                        <span class="score-num">0</span>
+                                        <span class="score-label">総合スコア</span>
+                                    </div>
+                                </div>
+                                <div class="pronounce-metrics">
+                                    <div class="metric-item">
+                                        <span class="metric-label">正確性</span>
+                                        <div class="metric-progress-bg">
+                                            <div class="metric-progress-bar metric-accuracy" style="width: 0%"></div>
+                                        </div>
+                                        <span class="metric-val accuracy-val">0%</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">流暢さ</span>
+                                        <div class="metric-progress-bg">
+                                            <div class="metric-progress-bar metric-fluency" style="width: 0%"></div>
+                                        </div>
+                                        <span class="metric-val fluency-val">0%</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">完全性</span>
+                                        <div class="metric-progress-bg">
+                                            <div class="metric-progress-bar metric-completeness" style="width: 0%"></div>
+                                        </div>
+                                        <span class="metric-val completeness-val">0%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pronounce-words-feedback">
+                                <h4>単語ごとの発音詳細</h4>
+                                <div class="words-container"></div>
+                                <div class="words-legend">
+                                    <span class="legend-item legend-good"><span class="color-dot"></span>正しく発音できています</span>
+                                    <span class="legend-item legend-bad"><span class="color-dot"></span>発音が不正確または漏れています</span>
+                                </div>
+                                <div class="pronounce-feedback-text">
+                                    <h4>発音改善のアドバイス</h4>
+                                    <div class="feedback-comment"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <div class="user-message hidden">
+                    <p class="user-text"></p>
+                </div>
+
+                <div class="feedback-section hidden">
+                    <div class="feedback-content">
+                        <div class="user-input-display hidden"></div>
+                        <div class="reactions-container hidden">
+                            <div class="reactions-header">
+                                <h3>伝わりやすさの反応</h3>
+                                <button class="btn-persona-help" title="ペルソナの詳細">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="reactions-list"></div>
+                        </div>
+                        <h3>添削</h3>
+                        <p class="correction"></p>
+                        <h3>提案</h3>
+                        <ul class="suggestions-list"></ul>
+
+                        <div class="retry-results"></div>
+
+                        <div class="user-memo-section">
+                            <h3>自分用メモ</h3>
+                            <textarea class="user-memo-input" placeholder="自分用のメモ（復習時のポイントなど）を入力..." rows="2"></textarea>
+                        </div>
+
+                        <div class="item-qa-section">
+                            <h3>質問</h3>
+                            <div class="item-qa-container">
+                                <!-- Q&A history for this item -->
+                            </div>
+                            <div class="item-qa-input-area">
+                                <textarea class="item-qa-input" placeholder="この添削について質問..." rows="1"></textarea>
+                                <button class="btn-icon btn-item-qa-send" disabled>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="retry-section hidden">
+                            <button class="btn btn-secondary btn-retry">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M23 4v6h-6"></path>
+                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                </svg>
+                                再挑戦
                             </button>
                         </div>
-                        <div class="reactions-list"></div>
-                    </div>
-                    <h3>添削</h3>
-                    <p class="correction"></p>
-                    <h3>提案</h3>
-                    <ul class="suggestions-list"></ul>
-
-                    <div class="retry-results"></div>
-
-                    <div class="user-memo-section">
-                        <h3>自分用メモ</h3>
-                        <textarea class="user-memo-input" placeholder="自分用のメモ（復習時のポイントなど）を入力..." rows="2"></textarea>
-                    </div>
-
-                    <div class="item-qa-section">
-                        <h3>質問</h3>
-                        <div class="item-qa-container">
-                            <!-- Q&A history for this item -->
-                        </div>
-                        <div class="item-qa-input-area">
-                            <textarea class="item-qa-input" placeholder="この添削について質問..." rows="1"></textarea>
-                            <button class="btn-icon btn-item-qa-send" disabled>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="retry-section hidden">
-                        <button class="btn btn-secondary btn-retry">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M23 4v6h-6"></path>
-                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                            </svg>
-                            再挑戦
-                        </button>
                     </div>
                 </div>
             </div>
-        </div>
     </template>
 
     <template id="tmpl-loading">
