@@ -534,6 +534,12 @@ body {
 .conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-play.playing svg, .conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-play.active svg {
   color: white;
 }
+.conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-play:disabled, .conversation-item .pronounce-section .pronounce-controls .pronounce-playbacks button.btn-pronounce-play.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: inset 1px 1px 2px #a3b1c6, inset -1px -1px 2px #f5f5f5;
+}
 .conversation-item .pronounce-section .pronounce-result-area {
   border-top: 1px dashed rgba(255, 255, 255, 0.2);
   padding-top: 16px;

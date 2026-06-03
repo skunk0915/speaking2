@@ -2345,6 +2345,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 if (btnPronouncePlay) {
                     btnPronouncePlay.style.display = '';
+                    btnPronouncePlay.disabled = false;
+                    btnPronouncePlay.classList.remove('disabled');
+                    btnPronouncePlay.title = '自分の発音を再生';
                 }
 
                 // APIに送信
@@ -2384,6 +2387,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const result = await response.json();
                     renderPronunciationResult(result);
+
+                    // ローカルのBlob URLを解放し、サーバー上の永続URLに差し替える
+                    if (result.user_audio_url) {
+                        if (userAudioUrl && userAudioUrl.startsWith('blob:')) {
+                            URL.revokeObjectURL(userAudioUrl);
+                        }
+                        userAudioUrl = result.user_audio_url;
+                    }
 
                     // 最新の発音評価結果を保存
                     data.last_pronunciation = result;
@@ -2982,9 +2993,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 pronouncePlaybacks.classList.remove('hidden');
             }
             
-            // 自分の録音データはリロードで消えるため、再生ボタンを隠す
+            // サーバー上の録音音声があれば復元して再生可能にする
             if (btnPronouncePlay) {
-                btnPronouncePlay.style.display = 'none';
+                if (data.last_pronunciation.user_audio_url) {
+                    userAudioUrl = data.last_pronunciation.user_audio_url;
+                    btnPronouncePlay.disabled = false;
+                    btnPronouncePlay.classList.remove('disabled');
+                    btnPronouncePlay.title = '自分の発音を再生';
+                } else {
+                    btnPronouncePlay.disabled = true;
+                    btnPronouncePlay.classList.add('disabled');
+                    btnPronouncePlay.title = '録音データが見つかりません。もう一度発音練習を行うと再生できます。';
+                }
             }
             
             // お手本再生ボタンは表示しておく

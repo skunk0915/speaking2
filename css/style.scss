@@ -735,6 +735,14 @@ body {
                                 color: white;
                             }
                         }
+
+                        &:disabled,
+                        &.disabled {
+                            opacity: 0.4;
+                            cursor: not-allowed;
+                            pointer-events: none;
+                            box-shadow: inset 1px 1px 2px $shadow-dark, inset -1px -1px 2px $shadow-light;
+                        }
                     }
                 }
             }
