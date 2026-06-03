@@ -1891,6 +1891,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const item = clone.querySelector('.conversation-item');
         const japanese = clone.querySelector('.japanese');
         const english = clone.querySelector('.english');
+        const btnTranslateJp = clone.querySelector('.btn-translate-jp');
         const btnTranslate = clone.querySelector('.btn-translate');
         const btnSpeak = clone.querySelector('.btn-speak');
         const btnRepeat = clone.querySelector('.btn-repeat');
@@ -2200,7 +2201,16 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         if (btnPractice) {
-            btnPractice.addEventListener('click', () => toggleSection(btnPractice, practiceSection, practiceInput));
+            btnPractice.addEventListener('click', () => {
+                const isOpening = practiceSection.classList.contains('hidden');
+                if (isOpening) {
+                    japanese.classList.remove('hidden');
+                    if (typeof saveUIState === 'function') {
+                        saveUIState();
+                    }
+                }
+                toggleSection(btnPractice, practiceSection, practiceInput);
+            });
         }
 
         let practiceRetryHistory = data.history || [];
@@ -2224,6 +2234,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 english: data.english,
                 situation: data.japanese
             }, data.qa_history || [], (newHistory) => updateSavedData('qa_history', newHistory));
+        }
+
+        // Japanese Translation Toggle
+        let translateJpTimeout;
+        if (btnTranslateJp) {
+            btnTranslateJp.addEventListener('click', () => {
+                japanese.classList.toggle('hidden');
+
+                if (!japanese.classList.contains('hidden')) {
+                    clearTimeout(translateJpTimeout);
+                    translateJpTimeout = setTimeout(() => {
+                        japanese.classList.add('hidden');
+                        if (typeof saveUIState === 'function') {
+                            saveUIState();
+                        }
+                    }, 60000); // Hide after 1 min
+                }
+
+                if (typeof saveUIState === 'function') {
+                    saveUIState();
+                }
+            });
         }
 
         // Translation Toggle
@@ -3083,7 +3115,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     japanese: jpEl?.textContent || '',
                     english: enEl?.textContent || '',
                     sample_user_answers: sampleAnswers,
-                    english_hidden: enEl?.classList.contains('hidden')
+                    english_hidden: enEl?.classList.contains('hidden'),
+                    japanese_hidden: jpEl?.classList.contains('hidden')
                 },
                 user_msg: {
                     visible: userMsgVisible,
@@ -3166,6 +3199,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     englishEl.classList.add('hidden');
                 } else {
                     englishEl.classList.remove('hidden');
+                }
+
+                // Japanese visibility
+                const japaneseEl = groupEl.querySelector('.japanese');
+                if (gData.prompt.japanese_hidden !== false) {
+                    japaneseEl.classList.add('hidden');
+                } else {
+                    japaneseEl.classList.remove('hidden');
                 }
                 
                 if (gData.retry_history) {

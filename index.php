@@ -235,7 +235,7 @@
         <div class="conversation-group">
             <div class="conversation-item system-message">
                 <div class="text-content">
-                    <p class="japanese"></p>
+                    <p class="japanese hidden"></p>
                     <p class="english hidden"></p>
                 </div>
                 <div class="actions">
@@ -249,14 +249,19 @@
                         </svg>
                         <div class="loader hidden"></div>
                     </button>
+                    <button class="btn-translate-jp" title="日本語訳を表示/非表示">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect>
+                            <circle cx="12" cy="12" r="3.5" fill="currentColor"></circle>
+                        </svg>
+                    </button>
                     <button class="btn-translate" title="英訳を表示/非表示">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M5 8l6 6" />
-                            <path d="M4 14l6-6 2-3" />
-                            <path d="M2 5h12" />
-                            <path d="M7 2h1" />
-                            <path d="M22 22l-5-10-5 10" />
-                            <path d="M14 18h6" />
+                            <rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect>
+                            <rect x="3" y="5" width="8" height="7" fill="currentColor" stroke="none"></rect>
+                            <line x1="11" y1="8.5" x2="21" y2="8.5"></line>
+                            <line x1="11" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="15.5" x2="21" y2="15.5"></line>
                         </svg>
                     </button>
                     <button class="btn-repeat" title="リピート再生">
