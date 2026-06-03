@@ -538,3 +538,13 @@ AI: 音声キャッシュテーブル（`audio_cache`）の `speed` カラムが
 - db/schema.sql
 - apply_schema.php
 - chat.txt
+
+2026-06-03 21:36:55
+USER: 音声合計データが1GBまで保存し続ける。合計１GBを超えたら古いファイルから削除。
+AI: 音声キャッシュデータの合計サイズが1GBを超えた場合に、古いファイル（作成日時が古い順）から自動的に削除するクリーンアップ機能を実装しました。`audio_cache`テーブルに`file_size`カラムを追加し、ディスクスキャンを行わずにクエリ上で高速に合計容量を計算・制限できる設計としました。また、スキーマ更新用の自動マイグレーションを追加しました。
+編集ファイル:
+- db/schema.sql
+- apply_schema.php
+- api/generate_speech.php
+- README.md
+- chat.txt

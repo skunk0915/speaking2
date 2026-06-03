@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS `audio_cache` (
   `voice_name` varchar(50) NOT NULL,
   `speed` decimal(3,2) NOT NULL,
   `file_path` varchar(255) NOT NULL,
+  `file_size` int(11) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_audio` (`text_hash`,`voice_name`,`speed`)

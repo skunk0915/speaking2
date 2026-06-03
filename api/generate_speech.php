@@ -9,6 +9,63 @@ function log_debug($message)
     file_put_contents($logFile, "[$timestamp] [SPEECH] $message\n", FILE_APPEND);
 }
 
+function cleanup_old_audio_files($pdo)
+{
+    $maxLimit = 1 * 1024 * 1024 * 1024; // 1GB
+    $audioDir = defined('AUDIO_DIR') ? AUDIO_DIR : __DIR__ . '/../audio/';
+    
+    try {
+        $stmt = $pdo->query("SELECT SUM(file_size) as total_size FROM audio_cache");
+        $row = $stmt->fetch();
+        $totalSize = (int)($row['total_size'] ?? 0);
+        
+        log_debug("Current total audio cache size: $totalSize bytes (Limit: $maxLimit bytes)");
+        
+        if ($totalSize > $maxLimit) {
+            $bytesToDelete = $totalSize - $maxLimit;
+            log_debug("Need to delete at least $bytesToDelete bytes");
+            
+            $deletedBytes = 0;
+            
+            while ($deletedBytes < $bytesToDelete) {
+                $stmt = $pdo->query("SELECT id, file_path, file_size FROM audio_cache ORDER BY created_at ASC, id ASC LIMIT 100");
+                $records = $stmt->fetchAll();
+                
+                if (empty($records)) {
+                    break;
+                }
+                
+                foreach ($records as $record) {
+                    $filePath = $audioDir . $record['file_path'];
+                    $fileSize = (int)$record['file_size'];
+                    
+                    if (file_exists($filePath)) {
+                        if (unlink($filePath)) {
+                            log_debug("Deleted old audio file: " . $record['file_path'] . " (Size: $fileSize bytes)");
+                        } else {
+                            log_debug("Failed to delete old audio file: " . $record['file_path']);
+                        }
+                    } else {
+                        log_debug("Old audio file not found on disk, removing from DB: " . $record['file_path']);
+                    }
+                    
+                    $deleteStmt = $pdo->prepare("DELETE FROM audio_cache WHERE id = ?");
+                    $deleteStmt->execute([$record['id']]);
+                    
+                    $deletedBytes += $fileSize;
+                    
+                    if ($deletedBytes >= $bytesToDelete) {
+                        break;
+                    }
+                }
+            }
+            log_debug("Audio cleanup finished. Deleted $deletedBytes bytes.");
+        }
+    } catch (Exception $e) {
+        log_debug("Cleanup error: " . $e->getMessage());
+    }
+}
+
 try {
     require_once __DIR__ . '/../config.php';
     require_once __DIR__ . '/../db/db.php';
@@ -110,8 +167,12 @@ try {
         if (file_put_contents($filePath, $audioData)) {
             // Save to DB
             try {
-                $stmt = $pdo->prepare("INSERT INTO audio_cache (text_hash, text_content, voice_name, speed, file_path) VALUES (?, ?, ?, ?, ?)");
-                $stmt->execute([$textHash, $text, $voice, $speed, $fileName]);
+                $fileSize = strlen($audioData);
+                $stmt = $pdo->prepare("INSERT INTO audio_cache (text_hash, text_content, voice_name, speed, file_path, file_size) VALUES (?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$textHash, $text, $voice, $speed, $fileName, $fileSize]);
+
+                // Cleanup if over limit
+                cleanup_old_audio_files($pdo);
             } catch (PDOException $e) {
                 log_debug("DB Save error: " . $e->getMessage());
             }
