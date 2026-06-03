@@ -83,6 +83,13 @@ try {
     $voice = $input['voice'] ?? 'en-US-Journey-F'; // Default voice
     $speed = $input['speed'] ?? 1.0;
 
+    // Clean and normalize text
+    $text = str_replace("\r\n", "\n", $text);
+    $text = trim(stripslashes($text));
+
+    // Normalize speed to 2 decimal places to prevent float/string representation issues
+    $speed = number_format((float)$speed, 2, '.', '');
+
     log_debug("Request received. Text length: " . strlen($text) . ", Voice: $voice, Speed: $speed");
 
     if (empty($text)) {

@@ -2032,21 +2032,37 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        const updateSavedData = async (key, value) => {
+        const updateSavedData = async (keyOrObj, value) => {
             const reviewIdx = reviews.findIndex(r => r.japanese === data.japanese);
             if (reviewIdx !== -1) {
-                reviews[reviewIdx][key] = value;
-                
-                // Sync the top-level memo when history is updated
-                if (key === 'history' && Array.isArray(value)) {
-                    let latestMemo = "";
-                    if (value.length > 0) {
-                        const lastItem = value[value.length - 1];
-                        if (lastItem && typeof lastItem === 'object') {
-                            latestMemo = lastItem.memo || "";
+                if (typeof keyOrObj === 'object' && keyOrObj !== null) {
+                    Object.assign(reviews[reviewIdx], keyOrObj);
+                    
+                    // Sync the top-level memo when history is updated
+                    if (keyOrObj.hasOwnProperty('history') && Array.isArray(keyOrObj.history)) {
+                        let latestMemo = "";
+                        if (keyOrObj.history.length > 0) {
+                            const lastItem = keyOrObj.history[keyOrObj.history.length - 1];
+                            if (lastItem && typeof lastItem === 'object') {
+                                latestMemo = lastItem.memo || "";
+                            }
                         }
+                        reviews[reviewIdx].memo = latestMemo;
                     }
-                    reviews[reviewIdx].memo = latestMemo;
+                } else {
+                    reviews[reviewIdx][keyOrObj] = value;
+                    
+                    // Sync the top-level memo when history is updated
+                    if (keyOrObj === 'history' && Array.isArray(value)) {
+                        let latestMemo = "";
+                        if (value.length > 0) {
+                            const lastItem = value[value.length - 1];
+                            if (lastItem && typeof lastItem === 'object') {
+                                latestMemo = lastItem.memo || "";
+                            }
+                        }
+                        reviews[reviewIdx].memo = latestMemo;
+                    }
                 }
                 
                 // Persist to server
@@ -2087,7 +2103,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     sample_user_answers: data.sample_user_answers,
                     history: [],
                     qa_history: (mainQa && mainQa.itemQaHistory) ? mainQa.itemQaHistory : [],
-                    reactions: data.reactions || [] // Include reactions
+                    reactions: data.reactions || [], // Include reactions
+                    audio_url: audioUrl,
+                    last_voice: lastVoice,
+                    last_speed: lastSpeed
                 };
 
                 const mainHistoryStr = group.dataset.retryHistory;
@@ -2448,9 +2467,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Speech
-        let audioUrl = null;
-        let lastVoice = null;
-        let lastSpeed = null;
+        let audioUrl = data.audio_url || null;
+        let lastVoice = data.last_voice || null;
+        let lastSpeed = data.last_speed || null;
 
         const playAudio = async () => {
             const iconPlay = btnSpeak.querySelector('.icon-play');
@@ -2485,6 +2504,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 loader.classList.remove('hidden');
 
                 try {
+                    console.log(`[Audio] Speech API リクエスト送信: text="${data.english.substring(0, 30)}...", voice="${currentVoice}", speed="${currentSpeed}"`);
                     const res = await fetch('api/generate_speech.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -2516,6 +2536,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Save current settings
                     lastVoice = currentVoice;
                     lastSpeed = currentSpeed;
+
+                    // Save to data and group element for persistence
+                    data.audio_url = audioUrl;
+                    data.last_voice = lastVoice;
+                    data.last_speed = lastSpeed;
+                    group.dataset.audioUrl = audioUrl;
+                    group.dataset.lastVoice = lastVoice;
+                    group.dataset.lastSpeed = lastSpeed;
+
+                    updateSavedData({
+                        audio_url: audioUrl,
+                        last_voice: lastVoice,
+                        last_speed: lastSpeed
+                    });
+                    if (typeof saveUIState === 'function') {
+                        saveUIState();
+                    }
                 } catch (e) {
                     console.error('Speech generation failed:', e);
                     alert('音声生成に失敗しました: ' + e.message);
@@ -3116,7 +3153,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     english: enEl?.textContent || '',
                     sample_user_answers: sampleAnswers,
                     english_hidden: enEl?.classList.contains('hidden'),
-                    japanese_hidden: jpEl?.classList.contains('hidden')
+                    japanese_hidden: jpEl?.classList.contains('hidden'),
+                    audio_url: group.dataset.audioUrl || '',
+                    last_voice: group.dataset.lastVoice || '',
+                    last_speed: group.dataset.lastSpeed || ''
                 },
                 user_msg: {
                     visible: userMsgVisible,
@@ -3185,13 +3225,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     japanese: gData.prompt.japanese,
                     english: gData.prompt.english,
                     sample_user_answers: gData.prompt.sample_user_answers,
-                    history: gData.retry_history || []
+                    history: gData.retry_history || [],
+                    audio_url: gData.prompt.audio_url || '',
+                    last_voice: gData.prompt.last_voice || '',
+                    last_speed: gData.prompt.last_speed || ''
                 };
                 
                 const groupEl = addConversationItem(promptData);
                 
                 // Set datasets
                 groupEl.dataset.sampleAnswers = JSON.stringify(gData.prompt.sample_user_answers);
+                if (gData.prompt.audio_url) groupEl.dataset.audioUrl = gData.prompt.audio_url;
+                if (gData.prompt.last_voice) groupEl.dataset.lastVoice = gData.prompt.last_voice;
+                if (gData.prompt.last_speed) groupEl.dataset.lastSpeed = gData.prompt.last_speed;
                 
                 // English visibility
                 const englishEl = groupEl.querySelector('.english');
