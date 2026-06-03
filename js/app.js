@@ -1382,8 +1382,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // If audio exists and is the current playing audio, toggle play/pause
         if (audioUrl && currentAudio && currentAudio.src.includes(audioUrl) && !settingsChanged) {
             if (currentAudio.paused) {
+                console.log(`[Audio] 既存の音声（メモリ内キャッシュ）を再生します。URL: ${audioUrl}`);
                 currentAudio.play();
             } else {
+                console.log(`[Audio] 音声を一時停止します。`);
                 currentAudio.pause();
             }
             return;
@@ -1411,6 +1413,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const resData = await res.json();
                 audioUrl = resData.audio_url;
 
+                if (resData.cached) {
+                    console.log(`[Audio] サーバーの既存のキャッシュ音声データを使用します。URL: ${audioUrl}`);
+                } else {
+                    console.log(`[Audio] Google Text-to-Speechで新しい音声データを生成しました。URL: ${audioUrl}`);
+                }
+
                 // Save current settings to button's dataset
                 btn.dataset.audioUrl = audioUrl;
                 btn.dataset.lastVoice = currentVoice;
@@ -1422,6 +1430,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 loader.classList.add('hidden');
                 return;
             }
+        } else {
+            console.log(`[Audio] ボタンに保持されている既存の音声URLを再生します。URL: ${audioUrl}`);
         }
 
         // Play
@@ -2425,8 +2435,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // If audio exists and is the current playing audio, toggle play/pause
             if (audioUrl && currentAudio && currentAudio.src.includes(audioUrl) && !settingsChanged) {
                 if (currentAudio.paused) {
+                    console.log(`[Audio] 既存の音声（メモリ内キャッシュ）を再生します。URL: ${audioUrl}`);
                     currentAudio.play();
                 } else {
+                    console.log(`[Audio] 音声を一時停止します。`);
                     currentAudio.pause();
                 }
                 return;
@@ -2463,6 +2475,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     audioUrl = resData.audio_url;
 
+                    if (resData.cached) {
+                        console.log(`[Audio] サーバーの既存のキャッシュ音声データを使用します。URL: ${audioUrl}`);
+                    } else {
+                        console.log(`[Audio] Google Text-to-Speechで新しい音声データを生成しました。URL: ${audioUrl}`);
+                    }
+
                     // Save current settings
                     lastVoice = currentVoice;
                     lastSpeed = currentSpeed;
@@ -2473,6 +2491,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     loader.classList.add('hidden');
                     return;
                 }
+            } else {
+                console.log(`[Audio] ローカルで保持されている既存の音声URLを再生します。URL: ${audioUrl}`);
             }
 
             // Play

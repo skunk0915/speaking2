@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS `audio_cache` (
   `text_hash` varchar(64) NOT NULL,
   `text_content` text NOT NULL,
   `voice_name` varchar(50) NOT NULL,
-  `speed` float NOT NULL,
+  `speed` decimal(3,2) NOT NULL,
   `file_path` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

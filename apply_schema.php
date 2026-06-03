@@ -19,6 +19,13 @@ try {
         $pdo->exec("ALTER TABLE `reviews` ADD COLUMN `memo` TEXT DEFAULT NULL");
         echo "Added column 'memo' to 'reviews' table.\n";
     }
+    // Check if audio_cache.speed is float, if so modify it to decimal(3,2)
+    $result = $pdo->query("SHOW COLUMNS FROM `audio_cache` LIKE 'speed'");
+    $column = $result->fetch();
+    if ($column && strpos(strtolower($column['Type']), 'float') !== false) {
+        $pdo->exec("ALTER TABLE `audio_cache` MODIFY COLUMN `speed` DECIMAL(3,2) NOT NULL");
+        echo "Modified column 'speed' in 'audio_cache' to DECIMAL(3,2).\n";
+    }
     echo "Schema updated successfully.\n";
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage() . "\n";
