@@ -113,6 +113,7 @@ try {
             'CompletenessScore' => (float)$completeness
         ];
 
+        $userAudioUrl = $hasAudio ? save_user_recording($audioFile['tmp_name']) : null;
         $advice = get_pronunciation_advice($text, $scores, $wordsResult, null, $aiStyle);
 
         $response = [
@@ -120,7 +121,8 @@ try {
             'RecognitionStatus' => 'Success',
             'PronunciationAssessment' => $scores,
             'Words' => $wordsResult,
-            'advice' => $advice
+            'advice' => $advice,
+            'user_audio_url' => $userAudioUrl
         ];
 
         echo json_encode($response);
@@ -226,6 +228,7 @@ try {
             'CompletenessScore' => (float)($bestResult['CompletenessScore'] ?? 0)
         ];
 
+        $userAudioUrl = save_user_recording($audioPath);
         $advice = get_pronunciation_advice($text, $scores, $wordsResult, $audioPath, $aiStyle);
 
         $response = [
@@ -233,7 +236,8 @@ try {
             'RecognitionStatus' => 'Success',
             'PronunciationAssessment' => $scores,
             'Words' => $wordsResult,
-            'advice' => $advice
+            'advice' => $advice,
+            'user_audio_url' => $userAudioUrl
         ];
 
         echo json_encode($response);
@@ -342,3 +346,90 @@ Azure Speech Serviceによる客観的な評価指標（参考データ）:
     $advice = $result['candidates'][0]['content']['parts'][0]['text'] ?? '';
     return trim($advice);
 }
+
+function save_user_recording($tmpPath)
+{
+    if (empty($tmpPath) || !file_exists($tmpPath)) {
+        return null;
+    }
+
+    $targetDir = __DIR__ . '/../audio/user_recordings/';
+    if (!is_dir($targetDir)) {
+        mkdir($targetDir, 0755, true);
+    }
+
+    // クリーンアップの実行 (上限 500MB)
+    cleanup_user_recordings($targetDir, 524288000);
+
+    // 一意のファイル名生成 (user_rec_[ユニークID]_[タイムスタンプ].mp3)
+    $fileName = 'user_rec_' . uniqid() . '_' . time() . '.mp3';
+    $destPath = $targetDir . $fileName;
+
+    $lameBin = __DIR__ . '/../bin/lame';
+    if (file_exists($lameBin) && is_executable($lameBin)) {
+        // LAMEを使用してWAVをMP3に変換 (モノラル、48kbps、高品質)
+        $cmd = escapeshellcmd($lameBin) . " -m m -b 48 " . escapeshellarg($tmpPath) . " " . escapeshellarg($destPath) . " 2>&1";
+        $output = shell_exec($cmd);
+        log_debug("LAME conversion output: " . $output);
+
+        if (file_exists($destPath) && filesize($destPath) > 0) {
+            log_debug("Saved user recording as MP3 to: $destPath");
+            return 'audio/user_recordings/' . $fileName;
+        }
+        log_debug("LAME conversion failed, falling back to WAV copy.");
+    } else {
+        log_debug("LAME binary not found or not executable. Falling back to WAV copy.");
+    }
+
+    // フォールバック: WAV形式で保存
+    $wavFileName = 'user_rec_' . uniqid() . '_' . time() . '.wav';
+    $wavDestPath = $targetDir . $wavFileName;
+    if (copy($tmpPath, $wavDestPath)) {
+        log_debug("Saved user recording as WAV (fallback) to: $wavDestPath");
+        return 'audio/user_recordings/' . $wavFileName;
+    }
+
+    log_debug("Failed to save user recording to: $wavDestPath");
+    return null;
+}
+
+function cleanup_user_recordings($dir, $maxSize)
+{
+    if (!is_dir($dir)) {
+        return;
+    }
+
+    $files = [];
+    $totalSize = 0;
+
+    $iterator = new DirectoryIterator($dir);
+    foreach ($iterator as $fileinfo) {
+        if ($fileinfo->isFile() && in_array(strtolower($fileinfo->getExtension()), ['wav', 'mp3'])) {
+            $files[] = [
+                'path' => $fileinfo->getPathname(),
+                'mtime' => $fileinfo->getMTime(),
+                'size' => $fileinfo->getSize()
+            ];
+            $totalSize += $fileinfo->getSize();
+        }
+    }
+
+    // 容量上限を超えている場合、古いファイルから削除
+    if ($totalSize > $maxSize) {
+        // 更新日時で昇順ソート（古い順）
+        usort($files, function ($a, $b) {
+            return $a['mtime'] <=> $b['mtime'];
+        });
+
+        foreach ($files as $file) {
+            if ($totalSize <= $maxSize) {
+                break;
+            }
+            if (unlink($file['path'])) {
+                $totalSize -= $file['size'];
+                log_debug("Deleted old user recording due to storage limit: " . $file['path']);
+            }
+        }
+    }
+}
+
