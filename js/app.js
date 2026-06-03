@@ -816,6 +816,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 100);
     }
 
+    function scrollToElementTop(element, offset = 15) {
+        if (!element) return;
+        setTimeout(() => {
+            const rect = element.getBoundingClientRect();
+            const y = rect.top + window.scrollY - offset;
+            window.scrollTo({
+                top: y,
+                behavior: 'smooth'
+            });
+        }, 50);
+    }
+
     async function getCorrection(userText, feedbackElement, history = [], isRetry = false, intendedJp = "", onQaUpdate = null) {
         const correctionP = feedbackElement.querySelector('.correction');
         const suggestionsList = feedbackElement.querySelector('.suggestions-list');
@@ -1460,17 +1472,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.classList.add('active');
                 if (inputToFocus) {
                     setTimeout(() => {
-                        section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                        inputToFocus.focus();
+                        scrollToElementTop(item, 15);
+                        inputToFocus.focus({ preventScroll: true });
                     }, 50);
                 } else {
                     setTimeout(() => {
-                        section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        scrollToElementTop(item, 15);
                     }, 50);
                 }
             } else {
                 btn.classList.remove('active');
                 section.classList.add('hiding');
+                scrollToElementTop(item, 15);
                 setTimeout(() => {
                     section.classList.add('hidden');
                     section.classList.remove('hiding');
@@ -2069,9 +2082,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 variationSection.classList.remove('hiding');
                 variationSection.classList.remove('hidden');
                 btnVariation.classList.add('active');
+                setTimeout(() => {
+                    scrollToElementTop(li, 15);
+                }, 50);
             } else {
                 btnVariation.classList.remove('active');
                 variationSection.classList.add('hiding');
+                scrollToElementTop(li, 15);
                 setTimeout(() => {
                     variationSection.classList.add('hidden');
                     variationSection.classList.remove('hiding');
