@@ -1,4 +1,101 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Slide transition helper functions
+    const slideUp = (target, duration = 300) => {
+        target.style.transitionProperty = 'height, margin, padding, opacity, border-top-width, border-bottom-width';
+        target.style.transitionDuration = duration + 'ms';
+        target.style.boxSizing = 'border-box';
+        target.style.height = target.offsetHeight + 'px';
+        target.offsetHeight; // reflow
+        target.style.overflow = 'hidden';
+        target.style.height = '0';
+        target.style.paddingTop = '0';
+        target.style.paddingBottom = '0';
+        target.style.marginTop = '0';
+        target.style.marginBottom = '0';
+        target.style.opacity = '0';
+        const hasBorder = window.getComputedStyle(target).borderTopWidth !== '0px';
+        if (hasBorder) {
+            target.style.borderTopWidth = '0';
+        }
+        return new Promise(resolve => {
+            window.setTimeout(() => {
+                target.classList.add('hidden');
+                target.style.removeProperty('height');
+                target.style.removeProperty('padding-top');
+                target.style.removeProperty('padding-bottom');
+                target.style.removeProperty('margin-top');
+                target.style.removeProperty('margin-bottom');
+                target.style.removeProperty('overflow');
+                target.style.removeProperty('transition-duration');
+                target.style.removeProperty('transition-property');
+                target.style.removeProperty('opacity');
+                if (hasBorder) {
+                    target.style.removeProperty('border-top-width');
+                }
+                resolve();
+            }, duration);
+        });
+    };
+
+    const slideDown = (target, duration = 300) => {
+        target.classList.remove('hidden');
+        const computed = window.getComputedStyle(target);
+        
+        const targetHeight = target.offsetHeight;
+        const targetPaddingTop = computed.paddingTop;
+        const targetPaddingBottom = computed.paddingBottom;
+        const targetMarginTop = computed.marginTop;
+        const targetMarginBottom = computed.marginBottom;
+        const targetOpacity = computed.opacity || '1';
+        const hasBorder = computed.borderTopWidth !== '0px';
+        const targetBorderTopWidth = computed.borderTopWidth;
+
+        target.style.overflow = 'hidden';
+        target.style.height = '0';
+        target.style.paddingTop = '0';
+        target.style.paddingBottom = '0';
+        target.style.marginTop = '0';
+        target.style.marginBottom = '0';
+        target.style.opacity = '0';
+        if (hasBorder) {
+            target.style.borderTopWidth = '0';
+        }
+        
+        target.offsetHeight; // reflow
+
+        target.style.transitionProperty = 'height, margin, padding, opacity, border-top-width, border-bottom-width';
+        target.style.transitionDuration = duration + 'ms';
+        target.style.boxSizing = 'border-box';
+        
+        target.style.height = targetHeight + 'px';
+        target.style.paddingTop = targetPaddingTop;
+        target.style.paddingBottom = targetPaddingBottom;
+        target.style.marginTop = targetMarginTop;
+        target.style.marginBottom = targetMarginBottom;
+        target.style.opacity = targetOpacity;
+        if (hasBorder) {
+            target.style.borderTopWidth = targetBorderTopWidth;
+        }
+
+        return new Promise(resolve => {
+            window.setTimeout(() => {
+                target.style.removeProperty('height');
+                target.style.removeProperty('padding-top');
+                target.style.removeProperty('padding-bottom');
+                target.style.removeProperty('margin-top');
+                target.style.removeProperty('margin-bottom');
+                target.style.removeProperty('overflow');
+                target.style.removeProperty('transition-duration');
+                target.style.removeProperty('transition-property');
+                target.style.removeProperty('opacity');
+                if (hasBorder) {
+                    target.style.removeProperty('border-top-width');
+                }
+                resolve();
+            }, duration);
+        });
+    };
+
     const container = document.getElementById('conversation-container');
     const btnNew = document.getElementById('btn-new');
     // const btnContinue = document.getElementById('btn-continue'); // Removed
@@ -185,6 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tab.classList.add('active');
             btnAuthSubmit.textContent = authMode === 'login' ? 'ログイン' : '新規登録';
             authError.classList.add('hidden');
+            if (authEmail) authEmail.focus();
         });
     });
 
@@ -242,7 +340,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showAuth() {
         if (authOverlay) authOverlay.classList.remove('hidden');
-        if (authPanel) authPanel.classList.add('active');
+        if (authPanel) {
+            authPanel.classList.add('active');
+            setTimeout(() => {
+                if (authEmail) {
+                    authEmail.focus();
+                }
+            }, 100);
+        }
     }
 
     function hideAuth() {
@@ -471,13 +576,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 const retryHistory = JSON.parse(lastGroup.dataset.retryHistory);
 
                 const data = await getCorrection(text, feedbackSection, retryHistory, true, textJp);
-
+ 
                 // Update retry history with the latest result
                 if (data && data.correction) {
-                    retryHistory.push({ user_input: text, correction: data.correction, intended_japanese: textJp });
+                    const historyItemRef = { user_input: text, correction: data.correction, intended_japanese: textJp, memo: '' };
+                    retryHistory.push(historyItemRef);
                     lastGroup.dataset.retryHistory = JSON.stringify(retryHistory);
-                }
 
+                    // Bind user memo for retry item
+                    const retryItems = feedbackSection.querySelectorAll('.retry-result-item');
+                    const lastRetryItem = retryItems[retryItems.length - 1];
+                    if (lastRetryItem) {
+                        const memoInput = lastRetryItem.querySelector('.user-memo-input');
+                        setupUserMemo(memoInput, historyItemRef, () => {
+                            lastGroup.dataset.retryHistory = JSON.stringify(retryHistory);
+                            updateSavedData('history', retryHistory);
+                        });
+                    }
+                }
+ 
                 // For retry, we don't auto-advance conversation
             } else {
                 // Show User Message
@@ -487,24 +604,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     userTextP.textContent = text;
                     userMsgDiv.classList.remove('hidden');
                 }
-
+ 
                 // Add to history
                 conversationHistory.push({ role: 'user', text: text });
-
+ 
                 const feedbackSection = lastGroup.querySelector('.feedback-section');
-
+ 
                 // Initialize or get retry history for this specific message
                 if (!lastGroup.dataset.retryHistory) {
                     lastGroup.dataset.retryHistory = JSON.stringify([]);
                 }
                 const retryHistory = JSON.parse(lastGroup.dataset.retryHistory);
-
+ 
                 const data = await getCorrection(text, feedbackSection, retryHistory, false, textJp);
-
+ 
                 // Update retry history with the latest result
                 if (data && data.correction) {
-                    retryHistory.push({ user_input: text, correction: data.correction, intended_japanese: textJp });
+                    const historyItemRef = { user_input: text, correction: data.correction, intended_japanese: textJp, memo: '' };
+                    retryHistory.push(historyItemRef);
                     lastGroup.dataset.retryHistory = JSON.stringify(retryHistory);
+
+                    // Bind user memo for initial feedback item
+                    const memoInput = feedbackSection.querySelector('.user-memo-input');
+                    setupUserMemo(memoInput, historyItemRef, () => {
+                        lastGroup.dataset.retryHistory = JSON.stringify(retryHistory);
+                        updateSavedData('history', retryHistory);
+                    });
                 }
 
                 // Auto-advance conversation
@@ -522,7 +647,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnHint.addEventListener('click', () => {
         const isOpening = hintDisplay.classList.contains('hidden');
-        hintDisplay.classList.toggle('hidden');
         btnHint.classList.toggle('active', isOpening);
 
         if (isOpening) {
@@ -550,6 +674,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 hintList.appendChild(div);
             });
+            slideDown(hintDisplay, 300);
+        } else {
+            slideUp(hintDisplay, 300);
         }
     });
 
@@ -566,16 +693,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const tabs = clone.querySelectorAll('.mode-tab');
         const sectionTranslate = clone.querySelector('#section-translate');
         const sectionCreative = clone.querySelector('#section-creative');
+        const sectionUrl = clone.querySelector('#section-url');
         const inputTranslate = clone.querySelector('#initial-japanese-input-translate');
         const inputCreative = clone.querySelector('#initial-japanese-input-creative');
+        const inputUrl = clone.querySelector('#initial-url-input');
         const btnStart = clone.querySelector('#btn-start-conversation');
         const btnSwitchAuto = clone.querySelector('#btn-switch-auto');
 
         let currentMode = 'translate';
 
         const updateBtnState = () => {
-            const currentInput = currentMode === 'translate' ? inputTranslate : inputCreative;
-            btnStart.disabled = currentInput.value.trim() === '';
+            let currentInput;
+            if (currentMode === 'translate') {
+                currentInput = inputTranslate;
+            } else if (currentMode === 'creative') {
+                currentInput = inputCreative;
+            } else {
+                currentInput = inputUrl;
+            }
+            let isValid = currentInput.value.trim() !== '';
+            
+            // 簡易URLバリデーション（http:// か https:// で始まっていることをチェック）
+            if (currentMode === 'url' && isValid) {
+                const urlVal = currentInput.value.trim();
+                isValid = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(urlVal);
+            }
+            btnStart.disabled = !isValid;
         };
 
         tabs.forEach(tab => {
@@ -584,14 +727,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 tab.classList.add('active');
                 currentMode = tab.dataset.mode;
 
+                [sectionTranslate, sectionCreative, sectionUrl].forEach(sec => {
+                    if (sec) sec.classList.add('hidden');
+                });
+
                 if (currentMode === 'translate') {
-                    sectionTranslate.classList.remove('hidden');
-                    sectionCreative.classList.add('hidden');
-                    inputTranslate.focus();
-                } else {
-                    sectionTranslate.classList.add('hidden');
-                    sectionCreative.classList.remove('hidden');
-                    inputCreative.focus();
+                    if (sectionTranslate) sectionTranslate.classList.remove('hidden');
+                    if (inputTranslate) inputTranslate.focus();
+                } else if (currentMode === 'creative') {
+                    if (sectionCreative) sectionCreative.classList.remove('hidden');
+                    if (inputCreative) inputCreative.focus();
+                } else if (currentMode === 'url') {
+                    if (sectionUrl) sectionUrl.classList.remove('hidden');
+                    if (inputUrl) inputUrl.focus();
                 }
                 updateBtnState();
             });
@@ -605,11 +753,219 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
+        if (inputUrl) {
+            // 最後の入力URLを復元
+            const savedUrl = localStorage.getItem('last_input_url');
+            if (savedUrl) {
+                inputUrl.value = savedUrl;
+            }
+
+            // xボタンの要素を取得
+            const btnClearUrl = clone.querySelector('#btn-clear-url');
+            const updateClearButtonVisibility = () => {
+                if (btnClearUrl) {
+                    btnClearUrl.style.display = inputUrl.value ? 'flex' : 'none';
+                }
+            };
+
+            // 初期状態でのクリアボタンの表示制御
+            updateClearButtonVisibility();
+
+            inputUrl.addEventListener('input', () => {
+                localStorage.setItem('last_input_url', inputUrl.value);
+                updateClearButtonVisibility();
+                updateBtnState();
+            });
+
+            if (btnClearUrl) {
+                btnClearUrl.addEventListener('click', () => {
+                    inputUrl.value = '';
+                    localStorage.removeItem('last_input_url');
+                    updateClearButtonVisibility();
+                    updateBtnState();
+                    inputUrl.focus();
+                });
+            }
+
+            // 履歴リストの描画
+            const historySection = clone.querySelector('#url-history-section');
+            const historyList = clone.querySelector('#url-history-list');
+            const btnToggleHistory = clone.querySelector('#btn-toggle-history');
+
+            let isHistoryExpanded = false;
+
+            const renderUrlHistory = async () => {
+                let history = [];
+                if (typeof currentUser !== 'undefined' && currentUser) {
+                    try {
+                        const res = await fetch('api/url_history.php');
+                        const data = await res.json();
+                        if (data.status === 'success') {
+                            history = data.history;
+                        }
+                    } catch (e) {
+                        console.error('Failed to fetch URL history from server:', e);
+                    }
+                } else {
+                    try {
+                        const saved = localStorage.getItem('url_history');
+                        if (saved) history = JSON.parse(saved);
+                    } catch (e) {}
+                }
+                if (!Array.isArray(history)) history = [];
+
+                if (history.length > 0 && historyList && historySection) {
+                    historyList.innerHTML = '';
+                    
+                    // 表示件数の決定（展開時は全件、それ以外は3件）
+                    const displayLimit = isHistoryExpanded ? history.length : 3;
+                    const itemsToShow = history.slice(0, displayLimit);
+
+                    itemsToShow.forEach(item => {
+                        // 後方互換性対応: item がオブジェクトでなく文字列の場合もある
+                        const isObject = (typeof item === 'object' && item !== null);
+                        const url = isObject ? item.url : item;
+                        const title = isObject ? item.title : '';
+
+                        // アイテム全体のコンテナ (div)
+                        const containerDiv = document.createElement('div');
+                        containerDiv.className = 'url-history-item';
+
+                        // 左側のリンクボタン
+                        const linkBtn = document.createElement('button');
+                        linkBtn.type = 'button';
+                        linkBtn.className = 'url-history-link';
+                        
+                        const iconSvg = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 8V12L15 15"></path>
+                                <circle cx="12" cy="12" r="10"></circle>
+                            </svg>
+                        `;
+                        linkBtn.innerHTML = iconSvg;
+
+                        const contentDiv = document.createElement('div');
+                        contentDiv.className = 'url-history-content';
+
+                        const titleSpan = document.createElement('span');
+                        titleSpan.className = 'url-title';
+                        titleSpan.textContent = title ? title : url;
+                        contentDiv.appendChild(titleSpan);
+
+                        if (title) {
+                            const urlSpan = document.createElement('span');
+                            urlSpan.className = 'url-subtitle';
+                            urlSpan.textContent = url;
+                            contentDiv.appendChild(urlSpan);
+                        }
+
+                        linkBtn.appendChild(contentDiv);
+
+                        linkBtn.addEventListener('click', () => {
+                            inputUrl.value = url;
+                            localStorage.setItem('last_input_url', url);
+                            updateClearButtonVisibility();
+                            updateBtnState();
+                            inputUrl.focus();
+                        });
+
+                        // 右側の削除ボタン (ゴミ箱アイコン)
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.type = 'button';
+                        deleteBtn.className = 'btn-delete-history';
+                        deleteBtn.ariaLabel = '履歴を削除';
+                        
+                        const trashSvg = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                <line x1="10" y1="11" x2="10" y2="17"></line>
+                                <line x1="14" y1="11" x2="14" y2="17"></line>
+                            </svg>
+                        `;
+                        deleteBtn.innerHTML = trashSvg;
+
+                        deleteBtn.addEventListener('click', async (e) => {
+                            e.stopPropagation();
+                            
+                            if (typeof currentUser !== 'undefined' && currentUser) {
+                                try {
+                                    const res = await fetch(`api/url_history.php?url=${encodeURIComponent(url)}`, {
+                                        method: 'DELETE'
+                                    });
+                                    const delData = await res.json();
+                                    if (delData.status === 'success') {
+                                        renderUrlHistory();
+                                    } else {
+                                        alert('履歴の削除に失敗しました: ' + delData.message);
+                                    }
+                                } catch (err) {
+                                    console.error('Failed to delete URL history on server:', err);
+                                    alert('履歴の削除に失敗しました。');
+                                }
+                            } else {
+                                let currentHistory = [];
+                                try {
+                                    const saved = localStorage.getItem('url_history');
+                                    if (saved) currentHistory = JSON.parse(saved);
+                                } catch (err) {}
+                                if (!Array.isArray(currentHistory)) currentHistory = [];
+
+                                currentHistory = currentHistory.filter(h => {
+                                    const hUrl = (typeof h === 'object' && h !== null) ? h.url : h;
+                                    return hUrl !== url;
+                                });
+
+                                localStorage.setItem('url_history', JSON.stringify(currentHistory));
+                                renderUrlHistory();
+                            }
+                        });
+
+                        containerDiv.appendChild(linkBtn);
+                        containerDiv.appendChild(deleteBtn);
+                        historyList.appendChild(containerDiv);
+                    });
+
+                    // 「もっと見る」ボタンの表示制御
+                    if (btnToggleHistory) {
+                        if (history.length > 3) {
+                            btnToggleHistory.style.display = 'block';
+                            btnToggleHistory.textContent = isHistoryExpanded ? '閉じる' : 'もっと見る';
+                        } else {
+                            btnToggleHistory.style.display = 'none';
+                        }
+                    }
+
+                    historySection.style.display = 'block';
+                } else if (historySection) {
+                    historySection.style.display = 'none';
+                }
+            };
+
+            if (btnToggleHistory) {
+                btnToggleHistory.addEventListener('click', () => {
+                    isHistoryExpanded = !isHistoryExpanded;
+                    renderUrlHistory();
+                });
+            }
+
+            renderUrlHistory();
+        }
+
         btnStart.addEventListener('click', () => {
-            const input = currentMode === 'translate' ? inputTranslate : inputCreative;
-            const jpText = input.value.trim();
-            if (!jpText) return;
-            generateText('new', jpText, currentMode);
+            let input;
+            if (currentMode === 'translate') input = inputTranslate;
+            else if (currentMode === 'creative') input = inputCreative;
+            else input = inputUrl;
+
+            const valText = input.value.trim();
+            if (!valText) return;
+
+            if (currentMode === 'url') {
+                localStorage.setItem('last_input_url', valText);
+            }
+
+            generateText('new', valText, currentMode);
         });
 
         btnSwitchAuto.addEventListener('click', () => {
@@ -888,6 +1244,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                     <div class="retry-correction">${marked.parse(data.correction)}</div>
+                    <div class="user-memo-section">
+                        <h3>自分用メモ</h3>
+                        <textarea class="user-memo-input" placeholder="自分用のメモ（復習時のポイントなど）を入力..." rows="2"></textarea>
+                    </div>
                 `;
                 loadingItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
@@ -1110,8 +1470,225 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function generateText(type, initialJp = null, inputMode = 'translate') {
-        console.log('generateText called with type:', type, 'initialJp:', initialJp, 'mode:', inputMode);
+    async function startSituationOptionsFlow(initialJp, inputMode) {
+        setLoading(true);
+        const targetLength = lengthRange ? Number(lengthRange.value) : 20;
+        
+        let excludeList = [];
+        try {
+            const savedExclude = localStorage.getItem('speaking2_recent_situations');
+            if (savedExclude) {
+                excludeList = JSON.parse(savedExclude);
+            }
+            // Clean up URLs and invalid items from the exclude list
+            if (Array.isArray(excludeList)) {
+                excludeList = excludeList.filter(item => {
+                    if (!item || typeof item !== 'string') return false;
+                    const trimmed = item.trim();
+                    const isUrl = trimmed.startsWith('http://') || trimmed.startsWith('https://') || /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})/i.test(trimmed);
+                    return !isUrl && trimmed.length > 3;
+                });
+            } else {
+                excludeList = [];
+            }
+        } catch (e) {
+            console.error('Failed to parse recent situations:', e);
+        }
+
+        try {
+            const response = await fetch('api/generate_text.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'situation_options',
+                    situation: initialJp || '',
+                    length: targetLength,
+                    situations: Array.from(document.querySelectorAll('.situation-tag.active')).map(t => t.dataset.category),
+                    exclude_situations: excludeList
+                })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error('API Error: ' + response.status + ' ' + errorText);
+            }
+
+            const data = await response.json();
+            setLoading(false);
+            
+            renderSituationOptionsUI(data.situation, data.options, inputMode, targetLength);
+        } catch (error) {
+            console.error('startSituationOptionsFlow Error:', error);
+            alert('日本語訳バリエーションの生成に失敗しました: ' + error.message);
+            setLoading(false);
+            
+            if (initialModeSelect && initialModeSelect.value === 'manual') {
+                showInitialInputUI();
+            }
+        }
+    }
+
+    function renderSituationOptionsUI(situation, options, inputMode, targetLength) {
+        container.innerHTML = '';
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'situation-options-wrapper';
+        
+        const header = document.createElement('div');
+        header.className = 'situation-options-header';
+        header.innerHTML = `
+            <div class="situation-badge">シチュエーション</div>
+            <h3 class="situation-title">${situation}</h3>
+            <p class="situation-desc">まずは日本語候補を10個出しています。会話の第一声にしたいものを選んでください。</p>
+        `;
+        wrapper.appendChild(header);
+        
+        const optionsList = document.createElement('div');
+        optionsList.className = 'situation-options-list';
+
+        const optionsMeta = document.createElement('div');
+        optionsMeta.className = 'situation-options-meta';
+
+        const optionsStatus = document.createElement('p');
+        optionsStatus.className = 'situation-options-pill';
+
+        const optionsLength = document.createElement('p');
+        optionsLength.className = 'situation-options-pill';
+        optionsLength.textContent = `目安 ${targetLength}文字`;
+
+        function updateOptionsStatus() {
+            optionsStatus.textContent = `表示中の候補: ${optionsList.children.length}件`;
+        }
+        
+        function addOptions(items) {
+            let addedCount = 0;
+            items.forEach((optText, index) => {
+                const alreadyExists = Array.from(optionsList.querySelectorAll('.situation-option-item'))
+                    .some(button => button.dataset.optionText === optText);
+                if (alreadyExists) return;
+                
+                const btn = document.createElement('button');
+                btn.className = 'situation-option-item';
+                btn.dataset.optionText = optText;
+                btn.innerHTML = `
+                    <span class="option-num">${optionsList.children.length + 1}</span>
+                    <span class="option-text">${optText}</span>
+                `;
+                
+                btn.addEventListener('click', () => {
+                    generateText('new', optText, 'translate', situation);
+                });
+                
+                optionsList.appendChild(btn);
+                addedCount += 1;
+            });
+
+            updateOptionsStatus();
+            return addedCount;
+        }
+        
+        addOptions(options);
+        optionsMeta.appendChild(optionsStatus);
+        optionsMeta.appendChild(optionsLength);
+        wrapper.appendChild(optionsMeta);
+        wrapper.appendChild(optionsList);
+        
+        const actionsRow = document.createElement('div');
+        actionsRow.className = 'situation-options-actions';
+        
+        const btnMore = document.createElement('button');
+        btnMore.className = 'btn btn-secondary btn-more-options';
+        btnMore.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                <path d="M21 3v5h-5"></path>
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                <path d="M3 21v-5h5"></path>
+            </svg>
+            <span>もっと出す</span>
+        `;
+        
+        btnMore.addEventListener('click', async () => {
+            btnMore.disabled = true;
+            const originalText = btnMore.querySelector('span').textContent;
+            btnMore.querySelector('span').textContent = '読み込み中...';
+            
+            const currentOptions = Array.from(optionsList.querySelectorAll('.situation-option-item')).map(btn => btn.dataset.optionText);
+            
+            let excludeList = [];
+            try {
+                const savedExclude = localStorage.getItem('speaking2_recent_situations');
+                if (savedExclude) {
+                    excludeList = JSON.parse(savedExclude);
+                }
+                // Clean up URLs and invalid items from the exclude list
+                if (Array.isArray(excludeList)) {
+                    excludeList = excludeList.filter(item => {
+                        if (!item || typeof item !== 'string') return false;
+                        const trimmed = item.trim();
+                        const isUrl = trimmed.startsWith('http://') || trimmed.startsWith('https://') || /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})/i.test(trimmed);
+                        return !isUrl && trimmed.length > 3;
+                    });
+                } else {
+                    excludeList = [];
+                }
+            } catch (e) {}
+
+            try {
+                const response = await fetch('api/generate_text.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'situation_options',
+                        situation: situation,
+                        length: targetLength,
+                        exclude: currentOptions,
+                        situations: Array.from(document.querySelectorAll('.situation-tag.active')).map(t => t.dataset.category),
+                        exclude_situations: excludeList
+                    })
+                });
+                
+                if (!response.ok) throw new Error('API Error');
+                const data = await response.json();
+                
+                const addedCount = addOptions(data.options);
+                if (addedCount === 0) {
+                    alert('既出と異なる候補をこれ以上追加できませんでした。時間をおいてもう一度試してください。');
+                    return;
+                }
+                
+                setTimeout(() => {
+                    const lastChild = optionsList.lastChild;
+                    if (lastChild) {
+                        lastChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                }, 100);
+            } catch (e) {
+                console.error(e);
+                alert('追加のバリエーション生成に失敗しました。');
+            } finally {
+                btnMore.disabled = false;
+                btnMore.querySelector('span').textContent = originalText;
+            }
+        });
+        
+        actionsRow.appendChild(btnMore);
+        wrapper.appendChild(actionsRow);
+        
+        container.appendChild(wrapper);
+        
+        inputGroup.classList.add('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function generateText(type, initialJp = null, inputMode = 'translate', selectedSituation = null) {
+        console.log('generateText called with type:', type, 'initialJp:', initialJp, 'mode:', inputMode, 'selectedSituation:', selectedSituation);
+
+        if (type === 'new' && inputMode !== 'translate' && inputMode !== 'url') {
+            await startSituationOptionsFlow(initialJp, inputMode);
+            return;
+        }
+
         setLoading(true);
 
         // Show loading display
@@ -1136,6 +1713,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (savedExclude) {
                     excludeList = JSON.parse(savedExclude);
                 }
+                // Clean up URLs and invalid items from the exclude list
+                if (Array.isArray(excludeList)) {
+                    excludeList = excludeList.filter(item => {
+                        if (!item || typeof item !== 'string') return false;
+                        const trimmed = item.trim();
+                        const isUrl = trimmed.startsWith('http://') || trimmed.startsWith('https://') || /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})/i.test(trimmed);
+                        return !isUrl && trimmed.length > 3;
+                    });
+                } else {
+                    excludeList = [];
+                }
             } catch (e) {
                 console.error('Failed to parse recent situations:', e);
             }
@@ -1153,7 +1741,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     situations: Array.from(document.querySelectorAll('.situation-tag.active')).map(t => t.dataset.category),
                     exclude_situations: excludeList,
                     japanese_input: initialJp,
-                    input_mode: inputMode
+                    input_mode: inputMode,
+                    selected_situation: selectedSituation
                 })
             });
 
@@ -1169,13 +1758,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('Invalid data format');
             }
 
+            // URLモードで成功した場合、履歴に保存する
+            if (inputMode === 'url' && initialJp) {
+                const url = initialJp.trim();
+                const title = data.url_title || '';
+
+                if (typeof currentUser !== 'undefined' && currentUser) {
+                    try {
+                        await fetch('api/url_history.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url: url, title: title })
+                        });
+                    } catch (e) {
+                        console.error('Failed to save URL history to server:', e);
+                    }
+                } else {
+                    let history = [];
+                    try {
+                        const saved = localStorage.getItem('url_history');
+                        if (saved) history = JSON.parse(saved);
+                    } catch (e) {}
+                    if (!Array.isArray(history)) history = [];
+
+                    // 既存の同じURLがあれば削除
+                    history = history.filter(item => {
+                        const itemUrl = (typeof item === 'object' && item !== null) ? item.url : item;
+                        return itemUrl !== url;
+                    });
+
+                    // 先頭に追加
+                    history.unshift({ url: url, title: title });
+
+                    // 最大15件
+                    if (history.length > 15) history = history.slice(0, 15);
+
+                    localStorage.setItem('url_history', JSON.stringify(history));
+                }
+                localStorage.setItem('last_input_url', url);
+            }
+
             // Save selected situation to recent list to prevent immediate repeats
             if (data && data.selected_situation) {
-                excludeList.push(data.selected_situation);
-                if (excludeList.length > 20) {
-                    excludeList.shift();
+                const val = data.selected_situation.trim();
+                const isUrl = val.startsWith('http://') || val.startsWith('https://') || /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})/i.test(val);
+                if (!isUrl && val.length > 3) {
+                    excludeList.push(val);
+                    if (excludeList.length > 20) {
+                        excludeList.shift();
+                    }
+                    localStorage.setItem('speaking2_recent_situations', JSON.stringify(excludeList));
                 }
-                localStorage.setItem('speaking2_recent_situations', JSON.stringify(excludeList));
             }
 
             const itemElement = addConversationItem(data);
@@ -1187,7 +1820,7 @@ document.addEventListener('DOMContentLoaded', () => {
             itemElement.dataset.sampleAnswers = JSON.stringify(sampleAnswers);
 
             // Move input to bottom
-            moveInputToBottom();
+            moveInputToBottom(type === 'new');
             if (typeof saveUIState === 'function') {
                 saveUIState();
             }
@@ -1204,7 +1837,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function moveInputToBottom() {
+    function moveInputToBottom(shouldScroll = true) {
         container.appendChild(inputGroup);
         // Ensure input group is visible (it might be hidden by showInitialInputUI)
         inputGroup.classList.remove('hidden');
@@ -1222,7 +1855,24 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSend.disabled = true;
 
         // Scroll to bottom after move
-        scrollToBottom();
+        if (shouldScroll) {
+            scrollToBottom();
+        }
+    }
+
+    function setupUserMemo(memoTextarea, historyItem, onUpdate) {
+        if (!memoTextarea) return;
+        memoTextarea.value = historyItem.memo || '';
+        
+        memoTextarea.oninput = () => {
+            historyItem.memo = memoTextarea.value;
+            if (typeof onUpdate === 'function') {
+                onUpdate(historyItem);
+            }
+            if (typeof saveUIState === 'function') {
+                saveUIState();
+            }
+        };
     }
 
     function addConversationItem(data, insertAfterGroup = null, isReviewMode = false) {
@@ -1239,20 +1889,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnQa = clone.querySelector('.btn-qa');
         const btnSave = clone.querySelector('.btn-save');
         const btnHistory = clone.querySelector('.btn-history');
-
+ 
         const practiceSection = clone.querySelector('.practice-section');
         const variationSection = clone.querySelector('.variation-section');
         const mainQa = clone.querySelector('.main-qa');
         const historySection = clone.querySelector('.history-section');
         const historyContainer = clone.querySelector('.history-container');
-
+ 
         const practiceInput = clone.querySelector('.practice-input');
         const btnPracticeSend = clone.querySelector('.btn-practice-send');
         const practiceFeedback = clone.querySelector('.feedback-content');
-
+ 
         japanese.textContent = data.japanese;
         english.textContent = data.english;
-
+ 
         if (isReviewMode) {
             english.classList.add('hidden');
             if (data.history && data.history.length > 0) {
@@ -1267,28 +1917,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-
+ 
         // History Toggle
         if (btnHistory) {
             btnHistory.addEventListener('click', () => toggleSection(btnHistory, historySection));
         }
-
+ 
         function renderHistory(history, container) {
             container.innerHTML = '';
             history.forEach(h => {
                 const hItem = document.createElement('div');
                 hItem.className = 'history-item feedback-content';
-
+ 
                 const suggestionsContainer = document.createElement('ul');
                 suggestionsContainer.className = 'suggestions-list';
-
+ 
                 if (h.suggestions && h.suggestions.length > 0) {
                     h.suggestions.forEach(s => {
                         const sEl = createSuggestionElement(s, suggestionsContainer);
                         suggestionsContainer.appendChild(sEl);
                     });
                 }
-
+ 
                 hItem.innerHTML = `
                     <div class="user-input-display">
                         ${h.intended_japanese ? `<div class="intended-jp">${h.intended_japanese}</div>` : ''}
@@ -1303,11 +1953,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h3>添削</h3>
                     <div class="correction">${marked.parse(h.correction)}</div>
                     ${h.suggestions && h.suggestions.length > 0 ? `<h3>提案</h3>` : ''}
+                    <div class="user-memo-section">
+                        <h3>自分用メモ</h3>
+                        <textarea class="user-memo-input" placeholder="自分用のメモ（復習時のポイントなど）を入力..." rows="2"></textarea>
+                    </div>
                 `;
                 if (h.suggestions && h.suggestions.length > 0) {
                     hItem.appendChild(suggestionsContainer);
                 }
-
+ 
                 // Add Q&A section to history item
                 const qaSection = document.createElement('div');
                 qaSection.className = 'item-qa-section history-item-qa';
@@ -1325,12 +1979,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
                 hItem.appendChild(qaSection);
-
+ 
                 // Initialize reactions if present in history item
                 if (h.reactions && h.reactions.length > 0) {
                     renderReactions(h.reactions, hItem);
                 }
-
+ 
                 // Initialize Q&A for history item
                 setupItemQa(hItem, {
                     situation: data.japanese,
@@ -1341,6 +1995,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateSavedData('history', history);
                 });
 
+                // Initialize Memo for history item
+                const memoInput = hItem.querySelector('.user-memo-input');
+                setupUserMemo(memoInput, h, () => {
+                    updateSavedData('history', history);
+                });
+ 
                 container.appendChild(hItem);
             });
         }
@@ -1365,6 +2025,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const reviewIdx = reviews.findIndex(r => r.japanese === data.japanese);
             if (reviewIdx !== -1) {
                 reviews[reviewIdx][key] = value;
+                
+                // Sync the top-level memo when history is updated
+                if (key === 'history' && Array.isArray(value)) {
+                    let latestMemo = "";
+                    if (value.length > 0) {
+                        const lastItem = value[value.length - 1];
+                        if (lastItem && typeof lastItem === 'object') {
+                            latestMemo = lastItem.memo || "";
+                        }
+                    }
+                    reviews[reviewIdx].memo = latestMemo;
+                }
                 
                 // Persist to server
                 try {
@@ -1415,6 +2087,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     ...(practiceRetryHistory || [])
                 ];
 
+                // Sync the latest memo to the top-level
+                let latestMemo = "";
+                if (reviewData.history && reviewData.history.length > 0) {
+                    const lastHistoryItem = reviewData.history[reviewData.history.length - 1];
+                    if (lastHistoryItem && typeof lastHistoryItem === 'object') {
+                        latestMemo = lastHistoryItem.memo || "";
+                    }
+                }
+                reviewData.memo = latestMemo;
+
                 try {
                     const res = await fetch('api/reviews.php', {
                         method: 'POST',
@@ -1455,39 +2137,52 @@ document.addEventListener('DOMContentLoaded', () => {
                 { b: btnHistory, s: historySection }
             ];
 
+            const scrollToParent = () => {
+                // conversation-groupだと縦長すぎる場合に入力欄が見えなくなるため、
+                // 操作中の個別メッセージ枠である conversation-item を優先的に上端に合わせる
+                const targetElement = section.closest('.conversation-item') || section.closest('.conversation-group');
+                if (targetElement) {
+                    const rect = targetElement.getBoundingClientRect();
+                    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    const targetY = scrollTop + rect.top - 20; // 20px space at the top
+                    window.scrollTo({ top: targetY, behavior: 'smooth' });
+                }
+            };
+
+            const closePromises = [];
             others.forEach(pair => {
                 if (pair.s && pair.s !== section && !pair.s.classList.contains('hidden')) {
                     pair.b.classList.remove('active');
-                    pair.s.classList.add('hiding');
-                    setTimeout(() => {
-                        pair.s.classList.add('hidden');
-                        pair.s.classList.remove('hiding');
-                    }, 300);
+                    closePromises.push(slideUp(pair.s, 300));
                 }
             });
 
             if (isOpening) {
-                section.classList.remove('hiding');
-                section.classList.remove('hidden');
                 btn.classList.add('active');
-                if (inputToFocus) {
-                    setTimeout(() => {
-                        scrollToElementTop(item, 15);
-                        inputToFocus.focus({ preventScroll: true });
-                    }, 50);
+                
+                const openAndFocus = () => {
+                    slideDown(section, 300).then(() => {
+                        if (inputToFocus) {
+                            inputToFocus.focus({ preventScroll: true });
+                        }
+                    });
+                    scrollToParent();
+                };
+
+                if (closePromises.length > 0) {
+                    // 他のセクションが閉じきって高さが縮んだ後にスクロールを実行して開く
+                    Promise.all(closePromises).then(() => {
+                        setTimeout(openAndFocus, 50);
+                    });
                 } else {
-                    setTimeout(() => {
-                        scrollToElementTop(item, 15);
-                    }, 50);
+                    setTimeout(openAndFocus, 50);
                 }
             } else {
                 btn.classList.remove('active');
-                section.classList.add('hiding');
-                scrollToElementTop(item, 15);
-                setTimeout(() => {
-                    section.classList.add('hidden');
-                    section.classList.remove('hiding');
-                }, 300);
+                slideUp(section, 300).then(() => {
+                    // 完全に非表示になって高さが縮んだ後にスクロール位置を調整する
+                    scrollToParent();
+                });
             }
             if (typeof saveUIState === 'function') {
                 saveUIState();
@@ -1498,7 +2193,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btnPractice.addEventListener('click', () => toggleSection(btnPractice, practiceSection, practiceInput));
         }
 
-        let practiceRetryHistory = isReviewMode ? (data.history || []) : [];
+        let practiceRetryHistory = data.history || [];
 
         if (btnVariationMenu) {
             btnVariationMenu.addEventListener('click', () => toggleSection(btnVariationMenu, variationSection));
@@ -1582,10 +2277,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         suggestions: [],
                         reactions: [],
                         intended_japanese: null,
-                        qa_history: []
+                        qa_history: [],
+                        memo: ''
                     };
                     practiceRetryHistory.push(historyItemRef);
-
+ 
                     const dataCorr = await getCorrection(text, practiceFeedback, practiceRetryHistory.slice(0, -1), true, "", (newQaHistory) => {
                         historyItemRef.qa_history = newQaHistory;
                         updateSavedData('history', practiceRetryHistory);
@@ -1593,20 +2289,30 @@ document.addEventListener('DOMContentLoaded', () => {
                             renderHistory(practiceRetryHistory, historyContainer);
                         }
                     });
-
+ 
                     if (dataCorr && dataCorr.correction) {
                         historyItemRef.correction = dataCorr.correction;
                         historyItemRef.suggestions = dataCorr.suggestions || [];
                         historyItemRef.reactions = dataCorr.reactions || [];
                         historyItemRef.intended_japanese = dataCorr.intended_japanese || null;
                         
+                        // Bind user memo for retry item
+                        const retryItems = practiceFeedback.querySelectorAll('.retry-result-item');
+                        const lastRetryItem = retryItems[retryItems.length - 1];
+                        if (lastRetryItem) {
+                            const memoInput = lastRetryItem.querySelector('.user-memo-input');
+                            setupUserMemo(memoInput, historyItemRef, () => {
+                                updateSavedData('history', practiceRetryHistory);
+                            });
+                        }
+
                         updateSavedData('history', practiceRetryHistory);
                         if (isReviewMode) {
                             btnHistory.classList.remove('hidden');
                             renderHistory(practiceRetryHistory, historyContainer);
                         }
                     }
-
+ 
                     practiceInput.value = '';
                 } else {
                     // Initial correction
@@ -1616,10 +2322,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         suggestions: [],
                         reactions: [],
                         intended_japanese: null,
-                        qa_history: []
+                        qa_history: [],
+                        memo: ''
                     };
                     practiceRetryHistory.push(historyItemRef);
-
+ 
                     const dataCorr = await getCorrection(text, practiceFeedback, practiceRetryHistory.slice(0, -1), false, "", (newQaHistory) => {
                         historyItemRef.qa_history = newQaHistory;
                         updateSavedData('history', practiceRetryHistory);
@@ -1627,20 +2334,26 @@ document.addEventListener('DOMContentLoaded', () => {
                             renderHistory(practiceRetryHistory, historyContainer);
                         }
                     });
-
+ 
                     if (dataCorr && dataCorr.correction) {
                         historyItemRef.correction = dataCorr.correction;
                         historyItemRef.suggestions = dataCorr.suggestions || [];
                         historyItemRef.reactions = dataCorr.reactions || [];
                         historyItemRef.intended_japanese = dataCorr.intended_japanese || null;
                         
+                        // Bind user memo for initial feedback item
+                        const memoInput = practiceFeedback.querySelector('.user-memo-input');
+                        setupUserMemo(memoInput, historyItemRef, () => {
+                            updateSavedData('history', practiceRetryHistory);
+                        });
+
                         updateSavedData('history', practiceRetryHistory);
                         if (isReviewMode) {
                             btnHistory.classList.remove('hidden');
                             renderHistory(practiceRetryHistory, historyContainer);
                         }
                     }
-
+ 
                     practiceInput.value = '';
                 }
 
@@ -2223,6 +2936,9 @@ document.addEventListener('DOMContentLoaded', () => {
             let feedbackData = null;
             if (feedbackVisible) {
                 const correctionHtml = feedbackSection.querySelector('.correction')?.innerHTML || '';
+                const userInputDisplayEl = feedbackSection.querySelector('.user-input-display');
+                const userInputDisplayHtml = userInputDisplayEl?.innerHTML || '';
+                const userInputDisplayVisible = userInputDisplayEl && !userInputDisplayEl.classList.contains('hidden');
                 
                 // Suggestions
                 const suggestions = [];
@@ -2256,7 +2972,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     correction_html: correctionHtml,
                     suggestions: suggestions,
                     reactions: reactions,
-                    qa_history: qaHistory
+                    qa_history: qaHistory,
+                    user_input_display_html: userInputDisplayHtml,
+                    user_input_display_visible: userInputDisplayVisible,
+                    memo: feedbackSection.querySelector('.user-memo-input')?.value || ''
                 };
             }
             
@@ -2277,6 +2996,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 let practiceFeedbackData = null;
                 if (practiceFeedbackVisible) {
                     const practiceCorrection = practiceFeedback.querySelector('.correction')?.innerHTML || '';
+                    const practiceUserInputDisplayEl = practiceFeedback.querySelector('.user-input-display');
+                    const practiceUserInputDisplayHtml = practiceUserInputDisplayEl?.innerHTML || '';
+                    const practiceUserInputDisplayVisible = practiceUserInputDisplayEl && !practiceUserInputDisplayEl.classList.contains('hidden');
                     
                     const practiceSuggestions = [];
                     practiceFeedback.querySelectorAll('.suggestions-list .suggestion-item').forEach(sEl => {
@@ -2308,7 +3030,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         correction_html: practiceCorrection,
                         suggestions: practiceSuggestions,
                         reactions: practiceReactions,
-                        qa_history: practiceQaHistory
+                        qa_history: practiceQaHistory,
+                        user_input_display_html: practiceUserInputDisplayHtml,
+                        user_input_display_visible: practiceUserInputDisplayVisible,
+                        memo: practiceFeedback.querySelector('.user-memo-input')?.value || ''
                     };
                 }
                 
@@ -2406,7 +3131,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const promptData = {
                     japanese: gData.prompt.japanese,
                     english: gData.prompt.english,
-                    sample_user_answers: gData.prompt.sample_user_answers
+                    sample_user_answers: gData.prompt.sample_user_answers,
+                    history: gData.retry_history || []
                 };
                 
                 const groupEl = addConversationItem(promptData);
@@ -2526,6 +3252,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Restore practice correction HTML
                         practiceFeedback.querySelector('.correction').innerHTML = gData.practice.feedback.correction_html;
                         
+                        // Restore user input display if available
+                        const userInputDisplay = practiceFeedback.querySelector('.user-input-display');
+                        if (userInputDisplay && gData.practice.feedback.user_input_display_html) {
+                            userInputDisplay.innerHTML = gData.practice.feedback.user_input_display_html;
+                            if (gData.practice.feedback.user_input_display_visible) {
+                                userInputDisplay.classList.remove('hidden');
+                            } else {
+                                userInputDisplay.classList.add('hidden');
+                            }
+                        } else if (userInputDisplay) {
+                            userInputDisplay.classList.add('hidden');
+                        }
+                        
                         // Suggestions
                         const suggestionsList = practiceFeedback.querySelector('.suggestions-list');
                         suggestionsList.innerHTML = '';
@@ -2578,6 +3317,19 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                             updateSavedDataExternal(groupEl, 'history', practiceRetryHistory);
                         });
+
+                        // Restore user memo for Practice
+                        const practiceMemoInput = practiceFeedback.querySelector('.user-memo-input');
+                        if (practiceMemoInput) {
+                            const practiceRetryHistory = gData.retry_history || [];
+                            const firstItem = practiceRetryHistory[0] || {};
+                            firstItem.memo = gData.practice.feedback.memo || '';
+                            practiceMemoInput.value = firstItem.memo;
+                            
+                            setupUserMemo(practiceMemoInput, firstItem, () => {
+                                updateSavedDataExternal(groupEl, 'history', practiceRetryHistory);
+                            });
+                        }
                     }
                 }
                 
@@ -2588,6 +3340,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     // Set correction HTML
                     feedbackSection.querySelector('.correction').innerHTML = gData.feedback.correction_html;
+                    
+                    // Restore user input display if available
+                    const userInputDisplay = feedbackSection.querySelector('.user-input-display');
+                    if (userInputDisplay && gData.feedback.user_input_display_html) {
+                        userInputDisplay.innerHTML = gData.feedback.user_input_display_html;
+                        if (gData.feedback.user_input_display_visible) {
+                            userInputDisplay.classList.remove('hidden');
+                        } else {
+                            userInputDisplay.classList.add('hidden');
+                        }
+                    } else if (userInputDisplay) {
+                        userInputDisplay.classList.add('hidden');
+                    }
                     
                     // Suggestions
                     const suggestionsList = feedbackSection.querySelector('.suggestions-list');
@@ -2638,6 +3403,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         gData.feedback.qa_history = newHistory;
                         saveUIState();
                     });
+
+                    // Restore user memo for Conversation Feedback
+                    const memoInput = feedbackSection.querySelector('.user-memo-input');
+                    if (memoInput) {
+                        const retryHistory = gData.retry_history || [];
+                        const firstItem = retryHistory[0] || {};
+                        firstItem.memo = gData.feedback.memo || '';
+                        memoInput.value = firstItem.memo;
+                        
+                        setupUserMemo(memoInput, firstItem, () => {
+                            groupEl.dataset.retryHistory = JSON.stringify(retryHistory);
+                            updateSavedDataExternal(groupEl, 'history', retryHistory);
+                        });
+                    }
                 }
             }
             
