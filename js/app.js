@@ -3005,21 +3005,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         // Japanese Translation Toggle
-        let translateJpTimeout;
         if (btnTranslateJp) {
             btnTranslateJp.addEventListener('click', () => {
                 japanese.classList.toggle('hidden');
-
-                if (!japanese.classList.contains('hidden')) {
-                    clearTimeout(translateJpTimeout);
-                    translateJpTimeout = setTimeout(() => {
-                        japanese.classList.add('hidden');
-                        updateInitialActions();
-                        if (typeof saveUIState === 'function') {
-                            saveUIState();
-                        }
-                    }, 60000); // Hide after 1 min
-                }
 
                 updateInitialActions();
 
@@ -3030,7 +3018,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Translation Toggle
-        let translateTimeout;
         btnTranslate.addEventListener('click', () => {
             // Close active sections if any
             const activeBtn = [btnPractice, btnVariationMenu, btnQa].find(b => b && b.classList.contains('active'));
@@ -3051,14 +3038,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 // Normal toggle
                 english.classList.toggle('hidden');
-            }
-
-            if (!english.classList.contains('hidden')) {
-                clearTimeout(translateTimeout);
-                translateTimeout = setTimeout(() => {
-                    english.classList.add('hidden');
-                    updateInitialActions();
-                }, 60000); // Hide after 1 min
             }
 
             updateInitialActions();

@@ -1093,3 +1093,12 @@ AI: 日本語から英訳する「内容を指定（忠実な英訳）」モー�
 編集ファイル:
 - /Users/mizy/Dropbox/speaking2/api/generate_text.php
 - /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-05 04:55:38
+USER: 日本語訳、英文訳を一定時間表示した後に非表示にする設定をなくす
+AI: 日本語訳および英文訳を表示した際、一定時間（60秒）経過した後に自動的に非表示にするタイマー処理を削除し、手動で非表示にするトグル操作を行うまで表示状態が維持されるように修正しました。また、PWAのキャッシュを更新するためにサービスワーカー（sw.js）のキャッシュバージョンを v24 に更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
