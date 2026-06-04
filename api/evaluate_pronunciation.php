@@ -44,7 +44,7 @@ try {
     // 例文テキストの取得
     $text = $_POST['text'] ?? '';
     $text = trim($text);
-    $aiStyle = $_POST['ai_style'] ?? 'polite';
+    $aiStyle = $_POST['ai_style'] ?? 'jk';
 
     // AzureおよびGemini向けにテキストを正規化 (記号・数字のスペルアウト)
     $normalizedText = normalize_text_for_azure($text);

@@ -168,7 +168,7 @@ $type = $input['type'] ?? 'new'; // 'new' or 'continue'
 $context = $input['context'] ?? []; // Array of previous messages
 $length = $input['length'] ?? 20; // Target length
 $englishLevel = $input['english_level'] ?? 'simple';
-$aiStyle = $input['ai_style'] ?? 'polite';
+$aiStyle = $input['ai_style'] ?? 'jk';
 
 $styleInstructions = [
     'polite' => "標準的な「ですます調」で回答・解説してください。",

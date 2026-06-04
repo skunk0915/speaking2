@@ -1019,4 +1019,17 @@ AI: 初期アクションボタン（または通常のアクションボタン�
 - /Users/mizy/Dropbox/speaking2/sw.js
 - /Users/mizy/Dropbox/speaking2/README.md
 
-
+2026-06-05 04:28:30
+USER: AIの話し方はJKをデフォルトにする
+AI: AIのデフォルトの話し方を「ですます調（polite）」から「JK（jk）」に変更しました。
+設定パネルの「AIの話し方」の初期選択を「JK」にし、ブラウザの localStorage に設定が無い場合にも「JK」が選択されるようにしました。
+また、APIリクエストおよびバックエンド側（generate_text.php, correct_text.php, evaluate_pronunciation.php）でのデフォルト値もすべて「jk」に変更しています。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/index.php
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/api/generate_text.php
+- /Users/mizy/Dropbox/speaking2/api/correct_text.php
+- /Users/mizy/Dropbox/speaking2/api/evaluate_pronunciation.php
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt

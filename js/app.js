@@ -142,8 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedLength) {
             lengthRange.value = savedLength;
         }
-        if (savedAiStyle && aiStyleSelect) {
-            aiStyleSelect.value = savedAiStyle;
+        if (aiStyleSelect) {
+            aiStyleSelect.value = savedAiStyle || 'jk';
         }
         if (savedEnglishLevel && englishLevelSelect) {
             englishLevelSelect.value = savedEnglishLevel;
@@ -1174,7 +1174,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         history: history
                     },
                     text: text,
-                    ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite'
+                    ai_style: aiStyleSelect ? aiStyleSelect.value : 'jk'
                 })
             });
 
@@ -1275,7 +1275,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         user_input: userText,
                         context: feedbackElement.closest('.practice-section') ? feedbackElement.closest('.conversation-item').querySelector('.japanese').textContent : currentContext,
                         mode: feedbackElement.closest('.practice-section') ? 'translation' : 'conversation',
-                        ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite',
+                        ai_style: aiStyleSelect ? aiStyleSelect.value : 'jk',
                         english_level: englishLevelSelect ? englishLevelSelect.value : 'native',
                         retry_history: history,
                         suggested_sentences: getSuggestedSentences(feedbackElement.closest('.conversation-group')),
@@ -1339,7 +1339,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         user_input: userText,
                         context: feedbackElement.closest('.practice-section') ? feedbackElement.closest('.conversation-item').querySelector('.japanese').textContent : currentContext,
                         mode: feedbackElement.closest('.practice-section') ? 'translation' : 'conversation',
-                        ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite',
+                        ai_style: aiStyleSelect ? aiStyleSelect.value : 'jk',
                         english_level: englishLevelSelect ? englishLevelSelect.value : 'native',
                         retry_history: history,
                         suggested_sentences: getSuggestedSentences(feedbackElement.closest('.conversation-group')),
@@ -1804,7 +1804,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     context: conversationHistory,
                     length: length,
                     english_level: englishLevelSelect ? englishLevelSelect.value : 'native',
-                    ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite',
+                    ai_style: aiStyleSelect ? aiStyleSelect.value : 'jk',
                     situations: Array.from(document.querySelectorAll('.situation-tag.active')).map(t => t.dataset.category),
                     exclude_situations: excludeList,
                     japanese_input: initialJp,
@@ -2483,7 +2483,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const formData = new FormData();
                 formData.append('audio', blob, 'recording.wav');
                 formData.append('text', targetText);
-                formData.append('ai_style', aiStyleSelect ? aiStyleSelect.value : 'polite');
+                formData.append('ai_style', aiStyleSelect ? aiStyleSelect.value : 'jk');
 
                 try {
                     const response = await fetch('api/evaluate_pronunciation.php', {
@@ -3454,7 +3454,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         english: originalData.english,
                         exclude: existingVariations
                     },
-                    ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite'
+                    ai_style: aiStyleSelect ? aiStyleSelect.value : 'jk'
                 })
             });
 
@@ -3539,7 +3539,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         english: originalData.english,
                         exclude: existingVariations
                     },
-                    ai_style: aiStyleSelect ? aiStyleSelect.value : 'polite'
+                    ai_style: aiStyleSelect ? aiStyleSelect.value : 'jk'
                 })
             });
 

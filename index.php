@@ -84,7 +84,7 @@
                 <select id="ai-style-select">
                     <option value="polite">ですます調</option>
                     <option value="friendly">フレンドリー</option>
-                    <option value="jk">JK</option>
+                    <option value="jk" selected>JK</option>
                 </select>
             </div>
             <div class="setting-item">
