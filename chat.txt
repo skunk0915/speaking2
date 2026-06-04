@@ -1128,3 +1128,38 @@ AI: ABリピート再生時に、プログラム的な一時停止（audio.pause
 - /Users/mizy/Dropbox/speaking2/js/app.js
 - /Users/mizy/Dropbox/speaking2/sw.js
 - /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-05 05:25:00
+USER: 英語を表示した状態で、音声を再生したときに、今どこを読み上げているかがわかるようにすることはできるか、視覚的に
+AI: 音声再生中に読み上げている単語をリアルタイムでハイライトする「カラオケ風ハイライト」機能を実装しました。テキストを単語・記号・スペースに分解し、カンマやピリオド等の句読点での「一時停止（ウェイト）」を考慮して単語ごとの発音タイミングを予測するロジックを js/app.js に実装。音声再生時にグローバルプレイヤーの表示テキストおよび再生対象の吹き出し内の英文テキストの両方において、再生進捗（currentTime）に同期して該当単語が青色強調＋薄いハイライト背景で視覚的に強調され、再生終了・停止時にはプレーンテキストへ自動的に安全復元されます。sw.js のキャッシュバージョンを english-training-v27 に更新。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-05 05:29:00
+USER: 1回目再生時は正しく機能しているが、2回目再生したときに機能していない
+AI: 1回目の再生終了時にハイライト用HTMLがプレーンテキストにクリーンアップされた後、2回目に同じ音声を再生する際（メモリキャッシュの再生時）にハイライト処理が再適用されない不具合を修正しました。オーディオオブジェクトの `play` イベントリスナー内でハイライトの生成と適用を実行するように変更し、二重登録防止チェックを入れることで、2回目以降の再生や一時停止からの再開時、ループ再生時にも正常かつスムーズにハイライトが機能するよう最適化しました。sw.js のキャッシュバージョンを english-training-v28 に更新。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-05 05:32:00
+USER: 音声を再生開始した後に英文を表示したときでも機能させたい
+AI: 音声がすでに再生開始されている状態で、英文の表示トグルボタン（btn-translate）をクリックして英文を表示（非表示解除）した際にも、リアルタイムハイライトがその時点で同期・適用されるように修正しました。トグルクリックイベント内で表示状態を判定し、この会話アイテムの音声が再生中であれば即座に applyAudioHighlight を実行し、逆に非表示にした場合は安全ためハイライト適用前のプレーンなHTML表示に書き戻す制御を追加しました。sw.js のキャッシュバージョンを english-training-v29 に更新。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-05 05:41:00
+USER: 復習モードでも同じようにカラオケ表示対応して。また、復習モードで音声再生時にアイコンが一時停止アイコンに変わってない
+AI: 復習モードにおける英文非表示からの表示切り替え時のリアルタイムハイライトの同期不具合、および復習アイテム再生時（特に他モードからのタブ切り替えや再描画時）にスピーカーボタンのアイコン状態が一時停止に同期しない問題を解決しました。グローバルプレイヤーの再生・一時停止・終了イベントから、現在再生中のボタン（currentAudioBtn）のアイコン状態を直接同期・制御する syncAudioBtnUI 関数を導入。また、タブ切り替え等で新規に会話アイテム（復習アイテムを含む）がDOM生成された際にも、現在再生中の音声と一致していれば即座に再生ボタンアイコンの同期と英文カラオケハイライトの適用を走らせる初期同期ロジックを addConversationItem の末尾に追加しました。sw.js のキャッシュバージョンを english-training-v30 に更新。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/chat.txt
