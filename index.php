@@ -772,6 +772,38 @@
         </div>
     </div>
 
+    <!-- Global Audio Player -->
+    <div id="global-audio-player" class="global-audio-player hidden">
+        <div class="player-container">
+            <div class="player-info">
+                <span class="player-title">音声再生中</span>
+                <span class="player-text" id="player-audio-text">...</span>
+            </div>
+            <div class="player-controls">
+                <button id="player-btn-play-pause" class="player-btn" title="再生/一時停止">
+                    <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    <svg class="icon-pause hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="6" y="4" width="4" height="16"></rect>
+                        <rect x="14" y="4" width="4" height="16"></rect>
+                    </svg>
+                </button>
+                <div class="player-progress-container">
+                    <span class="player-time" id="player-current-time">0:00</span>
+                    <input type="range" id="player-seekbar" min="0" max="100" value="0" step="0.1">
+                    <span class="player-time" id="player-duration">0:00</span>
+                </div>
+                <button id="player-btn-close" class="player-btn btn-close" title="閉じる">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/app.js?v=<?php echo time(); ?>"></script>
 </body>
 

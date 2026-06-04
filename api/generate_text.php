@@ -12,7 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-function fetchUrlText($url) {
+function fetchUrlText($url)
+{
     if (empty($url)) {
         return ['text' => '', 'title' => ''];
     }
@@ -78,7 +79,8 @@ function fetchUrlText($url) {
     ];
 }
 
-function getRandomSegment($text, $excludeSituations) {
+function getRandomSegment($text, $excludeSituations)
+{
     if (empty($text)) {
         return '';
     }
@@ -86,11 +88,11 @@ function getRandomSegment($text, $excludeSituations) {
     // 改行で分割
     $lines = preg_split('/\R+/', $text);
     $validParagraphs = [];
-    
+
     // 除外リストのクリーンアップ（URLなどは除外）
     $validExcludes = [];
     if (!empty($excludeSituations)) {
-        $validExcludes = array_filter($excludeSituations, function($s) {
+        $validExcludes = array_filter($excludeSituations, function ($s) {
             $s = trim($s);
             $isUrl = preg_match('/^https?:\/\//i', $s) || preg_match('/^[a-z0-9.-]+\.[a-z]{2,6}/i', $s) || filter_var($s, FILTER_VALIDATE_URL);
             return !$isUrl && mb_strlen($s, 'UTF-8') > 3;
@@ -100,18 +102,18 @@ function getRandomSegment($text, $excludeSituations) {
     foreach ($lines as $line) {
         $line = trim($line);
         if (empty($line)) continue;
-        
+
         // メタデータ行の除外
         if (preg_match('/^(Title:|URL Source:|Source:|Published:|Author:)/i', $line)) continue;
-        
+
         // マークダウンの飾りや画像の除外
         if (preg_match('/^!\[.*?\]\(.*?\)/', $line)) continue; // 画像のみの行
         if (preg_match('/^\[.*?\]\(.*?\)$/', $line)) continue; // リンクのみの行
         if (preg_match('/^[-*_]{3,}$/', $line)) continue; // 水平線
-        
+
         // 短すぎる行の除外（15文字未満は本文としては短すぎる）
         if (mb_strlen($line, 'UTF-8') < 15) continue;
-        
+
         // 除外リストに含まれるテキストがこの行に含まれている場合はスキップ
         $containsExclude = false;
         foreach ($validExcludes as $exclude) {
@@ -121,24 +123,24 @@ function getRandomSegment($text, $excludeSituations) {
             }
         }
         if ($containsExclude) continue;
-        
+
         $validParagraphs[] = $line;
     }
-    
+
     // 有効な段落が少なすぎる場合は、元のテキストをそのまま返す
     if (count($validParagraphs) < 3) {
         return $text;
     }
-    
+
     // ランダムに開始位置を決定
     $totalCount = count($validParagraphs);
     $startIndex = rand(0, $totalCount - 1);
-    
+
     // 開始位置から、300〜600文字程度になるように段落を結合
     $segment = "";
     $segmentLen = 0;
     $targetLen = rand(350, 650); // ターゲットサイズ
-    
+
     for ($i = $startIndex; $i < $totalCount; $i++) {
         $paragraph = $validParagraphs[$i];
         $segment .= $paragraph . "\n\n";
@@ -147,7 +149,7 @@ function getRandomSegment($text, $excludeSituations) {
             break;
         }
     }
-    
+
     // もし末尾に達したのに文字数が足りない場合は、startIndexの前の段落も遡って結合する
     if ($segmentLen < 200 && $startIndex > 0) {
         for ($i = $startIndex - 1; $i >= 0; $i--) {
@@ -159,7 +161,7 @@ function getRandomSegment($text, $excludeSituations) {
             }
         }
     }
-    
+
     return trim($segment);
 }
 
@@ -186,7 +188,8 @@ $levelInstructions = [
 $currentStyleInst = $styleInstructions[$aiStyle] ?? $styleInstructions['polite'];
 $currentLevelInst = $levelInstructions[$englishLevel] ?? $levelInstructions['native'];
 
-function normalizeSituationOption($text) {
+function normalizeSituationOption($text)
+{
     $text = trim((string)$text);
     $text = preg_replace('/^[「『"\']+|[」』"\']+$/u', '', $text);
     $text = preg_replace('/^(いらっしゃいませ|ようこそ|こんにちは|こんばんは)[。！!？?、,\s]*/u', '', $text);
@@ -196,13 +199,15 @@ function normalizeSituationOption($text) {
     return mb_strtolower($text, 'UTF-8');
 }
 
-function situationOptionSimilarityBase($text) {
+function situationOptionSimilarityBase($text)
+{
     $text = normalizeSituationOption($text);
     $text = preg_replace('/(を)?(お願いできますか|お願いします|いただけますか|伺えますか|ございますか|でしょうか|ですか|ますか|ください)$/u', '', $text);
     return $text;
 }
 
-function areSituationOptionsSimilar($left, $right) {
+function areSituationOptionsSimilar($left, $right)
+{
     $leftNormalized = normalizeSituationOption($left);
     $rightNormalized = normalizeSituationOption($right);
 
@@ -239,7 +244,8 @@ function areSituationOptionsSimilar($left, $right) {
     return false;
 }
 
-function dedupeSituationOptions(array $candidates, array $excludeList = []) {
+function dedupeSituationOptions(array $candidates, array $excludeList = [])
+{
     $unique = [];
     foreach ($candidates as $candidate) {
         $candidate = trim((string)$candidate);
@@ -274,7 +280,8 @@ function dedupeSituationOptions(array $candidates, array $excludeList = []) {
     return array_values($unique);
 }
 
-function getSituationOptionLengthBounds($targetLength, $attempt = 1) {
+function getSituationOptionLengthBounds($targetLength, $attempt = 1)
+{
     $targetLength = max(10, (int)$targetLength);
     $baseMargin = max(6, (int)round($targetLength * 0.08));
     $attemptMargin = max(0, $attempt - 1) * 4;
@@ -286,12 +293,14 @@ function getSituationOptionLengthBounds($targetLength, $attempt = 1) {
     ];
 }
 
-function countSituationOptionChars($text) {
+function countSituationOptionChars($text)
+{
     $text = preg_replace('/\s+/u', '', trim((string)$text));
     return mb_strlen($text, 'UTF-8');
 }
 
-function filterSituationOptionsByLength(array $candidates, $targetLength, $attempt = 1) {
+function filterSituationOptionsByLength(array $candidates, $targetLength, $attempt = 1)
+{
     [$minLength, $maxLength] = getSituationOptionLengthBounds($targetLength, $attempt);
     $filtered = [];
 
@@ -315,7 +324,8 @@ function filterSituationOptionsByLength(array $candidates, $targetLength, $attem
     return array_values($filtered);
 }
 
-function sortSituationOptionsByLengthCloseness(array $candidates, $targetLength) {
+function sortSituationOptionsByLengthCloseness(array $candidates, $targetLength)
+{
     $sorted = array_values(array_filter(array_map(function ($candidate) {
         return trim((string)$candidate);
     }, $candidates), function ($candidate) {
@@ -334,7 +344,8 @@ function sortSituationOptionsByLengthCloseness(array $candidates, $targetLength)
     return $sorted;
 }
 
-function buildSituationOptionsRewritePrompt($situation, array $seedOptions, array $excludeList = [], $targetCount = 10, $attempt = 1, $length = 20) {
+function buildSituationOptionsRewritePrompt($situation, array $seedOptions, array $excludeList = [], $targetCount = 10, $attempt = 1, $length = 20)
+{
     [$minLength, $maxLength] = getSituationOptionLengthBounds($length, $attempt);
 
     $seedInstruction = !empty($seedOptions)
@@ -363,7 +374,8 @@ function buildSituationOptionsRewritePrompt($situation, array $seedOptions, arra
   - 'options': 調整後の日本語フレーズの配列（文字列の配列、{$targetCount}個）";
 }
 
-function buildSituationOptionsPrompt($situation, array $excludeList = [], $targetCount = 10, $attempt = 1, $length = 20) {
+function buildSituationOptionsPrompt($situation, array $excludeList = [], $targetCount = 10, $attempt = 1, $length = 20)
+{
     $excludeInstruction = '';
     if (!empty($excludeList)) {
         $excludeInstruction = "\n【除外する既出候補】\n- " . implode("\n- ", $excludeList);
@@ -395,9 +407,10 @@ function buildSituationOptionsPrompt($situation, array $excludeList = [], $targe
   - 'options': 生成した日本語フレーズの配列（文字列の配列、{$targetCount}個）";
 }
 
-function callGeminiJson($prompt, $temperature = null) {
+function callGeminiJson($prompt, $temperature = null)
+{
     $url = "https://generativelanguage.googleapis.com/v1beta/models/" . GEMINI_MODEL . ":generateContent?key=" . GEMINI_API_KEY;
-    
+
     $generationConfig = [
         'responseMimeType' => 'application/json'
     ];
@@ -490,7 +503,7 @@ if ($type === 'new') {
     $inputMode = $input['input_mode'] ?? 'translate';
     $japaneseInput = $input['japanese_input'] ?? '';
     $excludeSituations = $input['exclude_situations'] ?? [];
-    
+
     if (!empty($japaneseInput)) {
         $selectedSituationText = $input['selected_situation'] ?? $japaneseInput;
         if ($inputMode === 'translate') {
@@ -502,7 +515,7 @@ if ($type === 'new') {
                 $urlResult = fetchUrlText($japaneseInput);
                 $fullText = $urlResult['text'];
                 $urlTitle = $urlResult['title'];
-                
+
                 // 全文からランダムなセグメント（数段落）を切り出す
                 $extractedText = getRandomSegment($fullText, $excludeSituations);
             } catch (Throwable $e) {
@@ -513,7 +526,7 @@ if ($type === 'new') {
 
             $excludeInstruction = "";
             if (!empty($excludeSituations)) {
-                $validExcludes = array_filter($excludeSituations, function($s) {
+                $validExcludes = array_filter($excludeSituations, function ($s) {
                     $s = trim($s);
                     $isUrl = preg_match('/^https?:\/\//i', $s) || preg_match('/^[a-z0-9.-]+\.[a-z]{2,6}/i', $s) || filter_var($s, FILTER_VALIDATE_URL);
                     return !$isUrl && mb_strlen($s, 'UTF-8') > 3;
@@ -625,7 +638,7 @@ if ($type === 'new') {
     }
 } elseif ($type === 'situation_options') {
     $situation = $input['situation'] ?? '';
-    
+
     if (empty($situation)) {
         $situationsFile = __DIR__ . '/../data/situations.json';
         if (file_exists($situationsFile)) {

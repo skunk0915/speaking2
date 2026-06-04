@@ -518,6 +518,220 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentContext = ""; // Store the last Japanese prompt
     let currentSampleAnswers = []; // Store current sample answers
 
+    // Global Audio Player Elements
+    const playerEl = document.getElementById('global-audio-player');
+    const playerPlayPauseBtn = document.getElementById('player-btn-play-pause');
+    const playerSeekbar = document.getElementById('player-seekbar');
+    const playerCurrentTimeEl = document.getElementById('player-current-time');
+    const playerDurationEl = document.getElementById('player-duration');
+    const playerTextEl = document.getElementById('player-audio-text');
+    const playerCloseBtn = document.getElementById('player-btn-close');
+
+    // Global Audio Player Variables
+    let isUserDraggingSeekbar = false;
+    let playerHideTimeoutId = null;
+    let isHoveringPlayer = false;
+
+    // Format seconds to M:SS
+    function formatAudioTime(secs) {
+        if (isNaN(secs) || !isFinite(secs)) return '0:00';
+        const m = Math.floor(secs / 60);
+        const s = Math.floor(secs % 60);
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    // Reset and start player hide timer (hides player after delay if inactive and paused)
+    function resetAndStartHideTimer(delay = 5000) {
+        if (playerHideTimeoutId) {
+            clearTimeout(playerHideTimeoutId);
+            playerHideTimeoutId = null;
+        }
+
+        // If audio is playing, do not hide
+        if (currentAudio && !currentAudio.paused && !currentAudio.ended) {
+            return;
+        }
+        // If user is interacting, do not hide
+        if (isHoveringPlayer || isUserDraggingSeekbar) {
+            return;
+        }
+
+        playerHideTimeoutId = setTimeout(() => {
+            if ((!currentAudio || currentAudio.paused || currentAudio.ended) && 
+                !isHoveringPlayer && !isUserDraggingSeekbar) {
+                if (playerEl) {
+                    playerEl.classList.add('hidden');
+                }
+            }
+        }, delay);
+    }
+
+    // Initialize Global Audio Player Event Listeners (Run once)
+    function initGlobalAudioPlayer() {
+        if (!playerEl || !playerPlayPauseBtn || !playerSeekbar) return;
+
+        playerPlayPauseBtn.addEventListener('click', () => {
+            if (!currentAudio) return;
+            if (currentAudio.paused) {
+                currentAudio.play().catch(e => console.log('Playback error:', e));
+            } else {
+                currentAudio.pause();
+            }
+            resetAndStartHideTimer(5000);
+        });
+
+        playerSeekbar.addEventListener('input', () => {
+            isUserDraggingSeekbar = true;
+            if (playerHideTimeoutId) {
+                clearTimeout(playerHideTimeoutId);
+                playerHideTimeoutId = null;
+            }
+            if (currentAudio && currentAudio.duration) {
+                const newTime = (playerSeekbar.value / 100) * currentAudio.duration;
+                playerCurrentTimeEl.textContent = formatAudioTime(newTime);
+            }
+        });
+
+        playerSeekbar.addEventListener('change', () => {
+            isUserDraggingSeekbar = false;
+            if (currentAudio && currentAudio.duration) {
+                currentAudio.currentTime = (playerSeekbar.value / 100) * currentAudio.duration;
+            }
+            resetAndStartHideTimer(5000);
+        });
+
+        if (playerCloseBtn) {
+            playerCloseBtn.addEventListener('click', () => {
+                stopAudio();
+                if (playerHideTimeoutId) {
+                    clearTimeout(playerHideTimeoutId);
+                    playerHideTimeoutId = null;
+                }
+                playerEl.classList.add('hidden');
+            });
+        }
+
+        // Listen for player hover/pointer interactions
+        playerEl.addEventListener('pointerenter', () => {
+            isHoveringPlayer = true;
+            if (playerHideTimeoutId) {
+                clearTimeout(playerHideTimeoutId);
+                playerHideTimeoutId = null;
+            }
+        });
+
+        playerEl.addEventListener('pointerleave', () => {
+            isHoveringPlayer = false;
+            resetAndStartHideTimer(5000);
+        });
+
+        playerEl.addEventListener('pointermove', () => {
+            if (isHoveringPlayer && playerHideTimeoutId) {
+                clearTimeout(playerHideTimeoutId);
+                playerHideTimeoutId = null;
+            }
+        });
+
+        // Touch events fallback for mobile
+        playerEl.addEventListener('touchstart', () => {
+            isHoveringPlayer = true;
+            if (playerHideTimeoutId) {
+                clearTimeout(playerHideTimeoutId);
+                playerHideTimeoutId = null;
+            }
+        }, { passive: true });
+
+        playerEl.addEventListener('touchend', () => {
+            setTimeout(() => {
+                isHoveringPlayer = false;
+                resetAndStartHideTimer(5000);
+            }, 100);
+        }, { passive: true });
+    }
+
+    // Call initGlobalAudioPlayer during startup
+    initGlobalAudioPlayer();
+
+    function syncGlobalAudioPlayer(audio, text) {
+        if (!playerEl || !playerSeekbar) return;
+
+        // Cancel any pending player hide timeout
+        if (playerHideTimeoutId) {
+            clearTimeout(playerHideTimeoutId);
+            playerHideTimeoutId = null;
+        }
+
+        // Display player
+        playerEl.classList.remove('hidden');
+        if (text) {
+            playerTextEl.textContent = text;
+        }
+
+        const updatePlayerUI = () => {
+            const iconPlay = playerPlayPauseBtn.querySelector('.icon-play');
+            const iconPause = playerPlayPauseBtn.querySelector('.icon-pause');
+            if (audio.paused) {
+                if (iconPlay) iconPlay.classList.remove('hidden');
+                if (iconPause) iconPause.classList.add('hidden');
+            } else {
+                if (iconPlay) iconPlay.classList.add('hidden');
+                if (iconPause) iconPause.classList.remove('hidden');
+            }
+        };
+
+        const updateProgress = () => {
+            if (isUserDraggingSeekbar) return;
+            if (audio.duration) {
+                const val = (audio.currentTime / audio.duration) * 100;
+                playerSeekbar.value = val;
+                playerSeekbar.style.setProperty('--value', `${val}%`);
+                playerCurrentTimeEl.textContent = formatAudioTime(audio.currentTime);
+            }
+        };
+
+        const onDurationChange = () => {
+            playerDurationEl.textContent = formatAudioTime(audio.duration);
+        };
+
+        // Reset UI first
+        playerSeekbar.value = 0;
+        playerSeekbar.style.setProperty('--value', '0%');
+        playerCurrentTimeEl.textContent = '0:00';
+        playerDurationEl.textContent = formatAudioTime(audio.duration || 0);
+        updatePlayerUI();
+
+        // Register events
+        audio.addEventListener('play', () => {
+            if (playerHideTimeoutId) {
+                clearTimeout(playerHideTimeoutId);
+                playerHideTimeoutId = null;
+            }
+            playerEl.classList.remove('hidden');
+            if (text) {
+                playerTextEl.textContent = text;
+            }
+            updatePlayerUI();
+        });
+
+        audio.addEventListener('pause', () => {
+            updatePlayerUI();
+            resetAndStartHideTimer(5000);
+        });
+
+        audio.addEventListener('timeupdate', updateProgress);
+        audio.addEventListener('durationchange', onDurationChange);
+
+        audio.addEventListener('ended', () => {
+            updatePlayerUI();
+            
+            const repeatBtn = document.querySelector('.btn-repeat.active') || (currentAudioBtn ? currentAudioBtn.parentNode.querySelector('.btn-repeat.active') : null);
+            if (!repeatBtn) {
+                resetAndStartHideTimer(5000);
+            }
+        });
+    }
+
+
     // Tab Switching
     function switchMode(mode) {
         currentMode = mode;
@@ -1491,6 +1705,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Play
         currentAudio = new Audio(audioUrl);
         currentAudioBtn = btn;
+        syncGlobalAudioPlayer(currentAudio, text);
 
         // Set initial loop state based on repeat button
         // currentAudio.loop = btnRepeat.classList.contains('active'); // Removed for manual delay
@@ -1521,7 +1736,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             });
                         }
                     }
-                }, 500);
+                }, 1000);
             } else {
                 iconPlay.classList.remove('hidden');
                 iconPause.classList.add('hidden');
@@ -2593,6 +2808,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             currentAudio = new Audio(audioUrl);
             currentAudioBtn = btn;
+            syncGlobalAudioPlayer(currentAudio, `単語のお手本発音: ${word}`);
 
             currentAudio.addEventListener('play', () => {
                 btn.classList.add('playing');
@@ -3169,6 +3385,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Play
             currentAudio = new Audio(audioUrl);
             currentAudioBtn = btnTrigger;
+            syncGlobalAudioPlayer(currentAudio, data.english);
 
             currentAudio.addEventListener('play', () => {
                 toggleModelAudioUI(true);
@@ -3187,7 +3404,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             audioInstance.currentTime = 0;
                             audioInstance.play();
                         }
-                    }, 500);
+                    }, 1000);
                 } else {
                     toggleModelAudioUI(false);
                 }
@@ -3239,6 +3456,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             currentAudio = new Audio(userAudioUrl);
             currentAudioBtn = btn;
+            syncGlobalAudioPlayer(currentAudio, `自分の発音: ${data.english}`);
 
             currentAudio.addEventListener('play', () => {
                 toggleUserAudioUI(true);
@@ -3415,6 +3633,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentAudio.pause();
             currentAudio = null;
         }
+        resetAndStartHideTimer(5000);
         if (currentAudioBtn) {
             const iconPlay = currentAudioBtn.querySelector('.icon-play');
             const iconPause = currentAudioBtn.querySelector('.icon-pause');

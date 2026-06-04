@@ -1928,10 +1928,6 @@ body {
   outline: none;
   box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #f5f5f5, 0 0 0 2px rgba(0, 122, 255, 0.1);
 }
-.input-group .input-row textarea::-moz-placeholder {
-  color: #8d97a5;
-  opacity: 0.7;
-}
 .input-group .input-row textarea::placeholder {
   color: #8d97a5;
   opacity: 0.7;
@@ -2163,9 +2159,7 @@ body {
   border: 1px solid #ddd;
 }
 .settings-panel .setting-item select {
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
+  appearance: none;
   background: #e0e5ec;
   box-shadow: inset 6px 6px 10px #a3b1c6, inset -6px -6px 10px #f5f5f5;
   border: none;
@@ -3035,9 +3029,7 @@ button .loader {
   align-items: center;
   justify-content: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
 }
 .situation-tag .tag-label {
   font-size: 13px;
@@ -3206,10 +3198,6 @@ button .loader {
   outline: none;
   border-color: rgba(0, 122, 255, 0.3);
   box-shadow: inset 8px 8px 12px #a3b1c6, inset -8px -8px 12px #f5f5f5;
-}
-.initial-input-container .input-section textarea::-moz-placeholder, .initial-input-container .input-section .url-input-wrapper input[type=url]::-moz-placeholder {
-  color: #8d97a5;
-  opacity: 0.5;
 }
 .initial-input-container .input-section textarea::placeholder,
 .initial-input-container .input-section .url-input-wrapper input[type=url]::placeholder {
@@ -3813,8 +3801,7 @@ button .loader {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 16px 30px rgba(163, 177, 198, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.7);
   outline: none;
-  -moz-appearance: none;
-       appearance: none;
+  appearance: none;
   -webkit-appearance: none;
 }
 .situation-options-wrapper .situation-options-list .situation-option-item .option-num {
@@ -3956,4 +3943,170 @@ button .loader {
   background: #e0e5ec;
   box-shadow: inset 6px 6px 10px #a3b1c6, inset -6px -6px 10px #f5f5f5;
   border: none;
-}/*# sourceMappingURL=style.css.map */
+}
+.global-audio-player {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  z-index: 9999;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(0);
+  opacity: 1;
+}
+.global-audio-player.hidden {
+  display: flex !important;
+  transform: translateY(calc(100% + 40px));
+  opacity: 0;
+  pointer-events: none;
+}
+.global-audio-player .player-container {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px 20px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+@media (min-width: 640px) {
+  .global-audio-player .player-container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 12px 24px;
+  }
+}
+.global-audio-player .player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.global-audio-player .player-info .player-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #007AFF;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.global-audio-player .player-info .player-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4a4a4a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.global-audio-player .player-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+@media (min-width: 640px) {
+  .global-audio-player .player-controls {
+    width: auto;
+    flex: 2;
+  }
+}
+.global-audio-player .player-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: #e0e5ec;
+  color: #007AFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 3px 3px 6px #a3b1c6, -3px -3px 6px #f5f5f5;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.global-audio-player .player-btn:active {
+  box-shadow: inset 2px 2px 4px #a3b1c6, inset -2px -2px 4px #f5f5f5;
+  transform: scale(0.95);
+}
+.global-audio-player .player-btn.btn-close {
+  color: #8d97a5;
+  box-shadow: none;
+  background: transparent;
+}
+.global-audio-player .player-btn.btn-close:hover {
+  color: #FF3B30;
+  background: rgba(255, 255, 255, 0.4);
+}
+.global-audio-player .player-progress-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+.global-audio-player .player-time {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8d97a5;
+  font-variant-numeric: tabular-nums;
+  width: 32px;
+  text-align: center;
+}
+.global-audio-player input[type=range]#player-seekbar {
+  -webkit-appearance: none;
+  width: 100%;
+  background: transparent;
+  margin: 0;
+  cursor: pointer;
+}
+.global-audio-player input[type=range]#player-seekbar:focus {
+  outline: none;
+}
+.global-audio-player input[type=range]#player-seekbar::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #e2e8f0;
+  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.06);
+}
+.global-audio-player input[type=range]#player-seekbar::-webkit-slider-thumb {
+  height: 14px;
+  width: 14px;
+  border-radius: 50%;
+  background: #007AFF;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -4px;
+  box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
+  border: 2px solid #fff;
+  transition: transform 0.1s ease;
+}
+.global-audio-player input[type=range]#player-seekbar::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+.global-audio-player input[type=range]#player-seekbar::-moz-range-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #e2e8f0;
+}
+.global-audio-player input[type=range]#player-seekbar::-moz-range-thumb {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  background: #007AFF;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
+}
+
+/*# sourceMappingURL=style.css.map */
