@@ -2532,6 +2532,86 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        async function playWordAudio(word, btn) {
+            const currentVoice = voiceSelect.value;
+            const currentSpeed = 1.0; 
+
+            let audioUrl = btn.dataset.audioUrl || null;
+            let lastVoice = btn.dataset.lastVoice || null;
+
+            if (audioUrl && currentAudio && currentAudio.src.includes(audioUrl) && lastVoice === currentVoice) {
+                if (currentAudio.paused) {
+                    currentAudio.play().catch(e => console.log('Word playback failed', e));
+                } else {
+                    currentAudio.pause();
+                }
+                return;
+            }
+
+            stopAudio();
+
+            btn.classList.add('loading');
+
+            if (!audioUrl || lastVoice !== currentVoice) {
+                try {
+                    const res = await fetch('api/generate_speech.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            text: word,
+                            voice: currentVoice,
+                            speed: currentSpeed
+                        })
+                    });
+
+                    if (!res.ok) {
+                        throw new Error(`Server returned ${res.status}`);
+                    }
+
+                    const resData = await res.json();
+                    if (!resData.audio_url) {
+                        throw new Error('No audio URL returned');
+                    }
+                    audioUrl = resData.audio_url;
+                    btn.dataset.audioUrl = audioUrl;
+                    btn.dataset.lastVoice = currentVoice;
+                } catch (e) {
+                    console.error('Word speech generation failed:', e);
+                    alert('音声生成に失敗しました: ' + e.message);
+                    btn.classList.remove('loading');
+                    return;
+                }
+            }
+
+            btn.classList.remove('loading');
+
+            currentAudio = new Audio(audioUrl);
+            currentAudioBtn = btn;
+
+            currentAudio.addEventListener('play', () => {
+                btn.classList.add('playing');
+            });
+
+            currentAudio.addEventListener('pause', () => {
+                btn.classList.remove('playing');
+                if (currentAudioBtn === btn) {
+                    currentAudioBtn = null;
+                }
+            });
+
+            currentAudio.addEventListener('ended', () => {
+                btn.classList.remove('playing');
+                if (currentAudioBtn === btn) {
+                    currentAudioBtn = null;
+                }
+            });
+
+            currentAudio.play().catch(error => {
+                console.log('Word playback interrupted or prevented:', error);
+                btn.classList.remove('playing');
+            });
+        }
+
         function renderPronunciationResult(res) {
             if (!res || res.RecognitionStatus !== 'Success') {
                 alert('発音が聞き取れませんでした。もう一度お試しください。');
@@ -2633,6 +2713,62 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (res.advice) {
                         feedbackCommentEl.textContent = res.advice;
                         feedbackWrapper.classList.remove('hidden');
+
+                        // 要改善単語の表示
+                        const feedbackWordsList = resultArea.querySelector('.feedback-words-list');
+                        const feedbackWordsItems = resultArea.querySelector('.feedback-words-items');
+                        if (feedbackWordsList && feedbackWordsItems) {
+                            feedbackWordsItems.innerHTML = '';
+                            
+                            const badWords = [];
+                            if (res.Words && res.Words.length > 0) {
+                                res.Words.forEach(w => {
+                                    const error = w.PronunciationAssessment.ErrorType;
+                                    if (error && error !== 'None') {
+                                        const cleanW = w.Word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "").trim();
+                                        if (cleanW && !badWords.some(bw => bw.word.toLowerCase() === cleanW.toLowerCase())) {
+                                            badWords.push({
+                                                word: cleanW,
+                                                error: error
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+
+                            if (badWords.length > 0) {
+                                badWords.forEach(bw => {
+                                    const btn = document.createElement('button');
+                                    btn.className = 'feedback-word-btn';
+                                    
+                                    let errorLabel = '';
+                                    if (bw.error === 'Mispronunciation') errorLabel = '発音ミス';
+                                    else if (bw.error === 'Omission') errorLabel = '聞き取り漏れ';
+                                    else if (bw.error === 'Insertion') errorLabel = '余計な挿入';
+                                    else errorLabel = bw.error;
+
+                                    btn.innerHTML = `
+                                        <span class="btn-icon">
+                                            <svg viewBox="0 0 24 24">
+                                                <path d="M8 5v14l11-7z"/>
+                                            </svg>
+                                        </span>
+                                        <span class="word-name">${bw.word}</span>
+                                        <span class="word-error-label">${errorLabel}</span>
+                                    `;
+
+                                    btn.addEventListener('click', (e) => {
+                                        e.stopPropagation();
+                                        playWordAudio(bw.word, btn);
+                                    });
+
+                                    feedbackWordsItems.appendChild(btn);
+                                });
+                                feedbackWordsList.classList.remove('hidden');
+                            } else {
+                                feedbackWordsList.classList.add('hidden');
+                            }
+                        }
                     } else {
                         feedbackWrapper.classList.add('hidden');
                     }

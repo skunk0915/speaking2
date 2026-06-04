@@ -545,6 +545,10 @@
                                 <div class="pronounce-feedback-text">
                                     <h4>発音改善のアドバイス</h4>
                                     <div class="feedback-comment"></div>
+                                    <div class="feedback-words-list hidden">
+                                        <h5>発音改善が必要な単語:</h5>
+                                        <div class="feedback-words-items"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

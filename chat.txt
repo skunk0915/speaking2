@@ -962,3 +962,22 @@ AI: Gitの競合（README.md、api/evaluate_pronunciation.php、chat.txt、css/s
 - /Users/mizy/Dropbox/speaking2/sw.js
 - /Users/mizy/Dropbox/speaking2/css/style.css
 - /Users/mizy/Dropbox/speaking2/css/style.css.map
+
+2026-06-04 08:58:00
+USER: 発音改善のアドバイスでフィードバックしている単語をアドバイスの後にリストアップして、単語ごとの発音ボタンを押すとその単語の正しい発音を確認できるようにする。
+AI: 発音練習後の「発音改善のアドバイス」エリアにおいて、発音が不正確だった要改善単語を自動的にリストアップし、それぞれの単語のお手本発音（正しい発音）をワンタップで再生できる機能を追加しました。
+1. `index.php` にて、アドバイスコメント（`.feedback-comment`）の直後に要改善単語リスト（`.feedback-words-list`）を表示するコンテナを追加しました。
+2. `js/app.js` の `renderPronunciationResult` 内にて、Azure Speech Serviceの評価データからエラー判定があった（`ErrorType !== 'None'`）単語を抽出し、ユニークな単語リストとしてボタン（`.feedback-word-btn`）を動的生成・描画する処理を実装しました。
+3. `js/app.js` にて、単語発音ボタンをクリックした際に、個別に Google Text-to-Speech API （`api/generate_speech.php`）を呼び出してお手本音声を再生する `playWordAudio` 関数を実装しました。この再生はアプリ全体の再生状態と同期しており、他音声の再生時には自動的に停止・へこみ解除されます。
+4. `css/style.scss` において、要改善単語リストおよび単語ごとの Neumorphism（ニューモーフィズム）な pill ボタンデザインを定義し、再生中のインセット影やローディング中のカーソル変更、脈動アニメーション（`@keyframes pulse-audio`）をスタイリングしました。また、Sassの変更を `css/style.css` にビルドしました。
+5. `sw.js` の `CACHE_NAME` を `'english-training-v13'` にインクリメントしました。
+6. `README.md` に新機能の説明を追加しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/index.php
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
