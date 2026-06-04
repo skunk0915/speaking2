@@ -135,3 +135,29 @@ Trace: #0 C:\Users\OW\pj\speaking2\api\generate_text.php(796): callGeminiJson()
 [2026-06-04 05:51:58] [PRONUNCIATION] Request received. Text: 'I heard we have to pay for coffee starting next Monday.', Has Audio: Yes, Size: 229420 bytes, UploadError: 0
 [2026-06-04 05:51:59] [PRONUNCIATION] Azure API Response HTTP Code: 200
 [2026-06-04 05:51:59] [PRONUNCIATION] Azure API Raw Response: {"RecognitionStatus":"Success","Offset":22300000,"Duration":43900000,"DisplayText":"I heard we have to pay for coffee starting next Monday.","SNR":34.588154,"NBest":[{"Confidence":0.9614205,"Lexical":"I heard we have to pay for coffee starting next Monday","ITN":"I heard we have to pay for coffee starting next Monday","MaskedITN":"i heard we have to pay for coffee starting next monday","Display":"I heard we have to pay for coffee starting next Monday.","AccuracyScore":83.0,"FluencyScore":99.0,"CompletenessScore":82.0,"PronScore":85.6,"Words":[{"Word":"I","Offset":22300000,"Duration":2200000,"Confidence":0.0,"AccuracyScore":97.0,"ErrorType":"None"},{"Word":"heard","Offset":24600000,"Duration":5500000,"Confidence":0.0,"AccuracyScore":79.0,"ErrorType":"None"},{"Word":"we","Offset":30400000,"Duration":1900000,"Confidence":0.0,"AccuracyScore":97.0,"ErrorType":"None"},{"Word":"have","Offset":32400000,"Duration":3100000,"Confidence":0.0,"AccuracyScore":94.0,"ErrorType":"None"},{"Word":"to","Offset":35600000,"Duration":1700000,"Confidence":0.0,"AccuracyScore":97.0,"ErrorType":"None"},{"Word":"pay","Offset":37400000,"Duration":3900000,"Confidence":0.0,"AccuracyScore":97.0,"ErrorType":"None"},{"Word":"for","Offset":41400000,"Duration":3300000,"Confidence":0.0,"AccuracyScore":94.0,"ErrorType":"None"},{"Word":"coffee","Offset":44800000,"Duration":5300000,"Confidence":0.0,"AccuracyScore":85.0,"ErrorType":"None"},{"Word":"starting","Offset":50400000,"Duration":5500000,"Confidence":0.0,"AccuracyScore":23.0,"ErrorType":"Mispronunciation"},{"Word":"next","Offset":56000000,"Duration":3900000,"Confidence":0.0,"AccuracyScore":55.0,"ErrorType":"Mispronunciation"},{"Word":"Monday","Offset":60000000,"Duration":6200000,"Confidence":0.0,"AccuracyScore":91.0,"ErrorType":"None"}]}]}
+2026-06-04 19:49:11 Raw API Response: {
+  "japanese": "こんにちは。チェックインをお願いします。予約をしている田中です。",
+  "english": "Hello. I would like to check in, please. My name is Tanaka, and I have a reservation.",
+  "sample_user_answers": [
+    {
+      "ja": "いらっしゃいませ、田中様。パスポートを見せていただけますか？",
+      "en": "Welcome, Mr. Tanaka. Can I see your passport, please?"
+    },
+    {
+      "ja": "はい、かしこまりました。こちらにお名前を書いていただけますか？",
+      "en": "Yes, certainly. Can you write your name here, please?"
+    },
+    {
+      "ja": "少々お待ちください。予約を確認します。",
+      "en": "Please wait a moment. I will check your reservation."
+    },
+    {
+      "ja": "申し訳ありません。ご予約が見つかりません。予約番号はお持ちですか？",
+      "en": "I am sorry. I cannot find your reservation. Do you have your reservation number?"
+    },
+    {
+      "ja": "お荷物をお運びしましょうか？",
+      "en": "Shall I carry your bags for you?"
+    }
+  ]
+}

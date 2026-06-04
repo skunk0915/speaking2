@@ -1081,3 +1081,15 @@ AI: 音声のリピート再生時（ループ再生時）において、次の�
 - /Users/mizy/Dropbox/speaking2/sw.js
 - /Users/mizy/Dropbox/speaking2/README.md
 - /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-05 04:47:33
+USER: 内容を下記のように指定した日本語文章から作り出された英文が簡潔すぎる
+
+今日は少し身近な、けれど考えると少し根が深い「人間の本質」についての個人的な気づきを共有させてください。突然ですが、皆さんは「人間はもともと善い存在か、それとも悪い存在か」という問いに対して、どうお考えでしょうか。私は過去のいくつかの経験や世の中の出来事から、「人は自分に余裕がある時にしか他者に優しくできないのではないか」と感じており、どちらかといえば「性悪説」に近い見方をしています。今回は、そんな私の考えをさらに深めることになった、日々のちょっとした日常の出来事――会社での「エアコン問題」についてお話しします。
+
+Are humans good or bad? I think people are only kind when they are relaxed. Let me tell you about our office AC problem.
+AI: 日本語から英訳する「内容を指定（忠実な英訳）」モードにおいて、文字数制限（デフォルト値など）が適用されてしまい、AIが元の日本語文を要約して極端に短い英訳を出力してしまう問題を修正しました。
+「日本語から作成」を選択した場合は、文字数制限を行わず、入力された日本語文の全体を正確に漏れなく翻訳するようにプロンプトを改修しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/api/generate_text.php
+- /Users/mizy/Dropbox/speaking2/chat.txt
