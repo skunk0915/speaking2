@@ -4142,3 +4142,23 @@ button .loader {
         }
     }
 }
+
+// Word highlighting during audio playback
+.word-highlight-span {
+    transition: background-color 0.2s ease, color 0.2s ease, text-shadow 0.2s ease, transform 0.2s ease;
+    border-radius: 4px;
+    padding: 0 2px;
+    display: inline-block;
+    
+    &.word-highlight-active {
+        background-color: rgba($primary-color, 0.18);
+        color: color.adjust($primary-color, $lightness: -15%);
+        font-weight: 600;
+        text-shadow: 0 0 1px rgba($primary-color, 0.3);
+        transform: scale(1.02);
+    }
+    
+    &.word-highlight-passed {
+        color: rgba($text-primary, 0.7);
+    }
+}

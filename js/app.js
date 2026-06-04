@@ -790,6 +790,119 @@ document.addEventListener('DOMContentLoaded', () => {
     // Call initGlobalAudioPlayer during startup
     initGlobalAudioPlayer();
 
+    // Highlight Text During Audio Playback
+    let activeHighlights = [];
+
+    function cleanupActiveHighlights() {
+        activeHighlights.forEach(h => {
+            if (h.element) {
+                h.element.innerHTML = h.originalHTML;
+            }
+            if (h.audio && h.listener) {
+                h.audio.removeEventListener('timeupdate', h.listener);
+            }
+        });
+        activeHighlights = [];
+    }
+
+    function tokenizeEnglishText(text) {
+        // Tokenize words (including contractions) and punctuation/spaces
+        const regex = /[a-zA-Z0-9'-]+|[^a-zA-Z0-9'-]/g;
+        const tokens = [];
+        let match;
+        while ((match = regex.exec(text)) !== null) {
+            tokens.push(match[0]);
+        }
+        return tokens;
+    }
+
+    function escapeHTML(str) {
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function applyAudioHighlight(audio, element, text) {
+        if (!element || !text) return;
+
+        // Skip if this element already has an active highlight to avoid flickering
+        const exists = activeHighlights.some(h => h.element === element);
+        if (exists) return;
+
+        const originalHTML = element.innerHTML;
+        const tokens = tokenizeEnglishText(text);
+
+        let totalWeight = 0;
+        let htmlContent = '';
+
+        tokens.forEach((token) => {
+            let weight = 0;
+            const isWord = /[a-zA-Z0-9'-]+/.test(token);
+
+            if (isWord) {
+                weight = token.length;
+            } else if (token === ' ') {
+                weight = 2;
+            } else if (/[,,;:]/.test(token)) {
+                weight = 8;
+            } else if (/[.?!]/.test(token)) {
+                weight = 15;
+            } else {
+                weight = 1;
+            }
+
+            const startW = totalWeight;
+            const endW = totalWeight + weight;
+            totalWeight += weight;
+
+            if (isWord) {
+                htmlContent += `<span class="word-highlight-span" data-start-w="${startW}" data-end-w="${endW}">${escapeHTML(token)}</span>`;
+            } else {
+                htmlContent += escapeHTML(token);
+            }
+        });
+
+        element.innerHTML = htmlContent;
+        const spans = element.querySelectorAll('.word-highlight-span');
+
+        const timeupdateListener = () => {
+            const duration = audio.duration;
+            if (!duration) return;
+
+            const currentWeight = (audio.currentTime / duration) * totalWeight;
+
+            spans.forEach(span => {
+                const start = parseFloat(span.dataset.startW);
+                const end = parseFloat(span.dataset.endW);
+
+                if (currentWeight >= start && currentWeight < end) {
+                    span.classList.add('word-highlight-active');
+                    span.classList.remove('word-highlight-passed');
+                } else if (currentWeight >= end) {
+                    span.classList.remove('word-highlight-active');
+                    span.classList.add('word-highlight-passed');
+                } else {
+                    span.classList.remove('word-highlight-active', 'word-highlight-passed');
+                }
+            });
+        };
+
+        audio.addEventListener('timeupdate', timeupdateListener);
+
+        activeHighlights.push({
+            audio: audio,
+            element: element,
+            originalHTML: originalHTML,
+            listener: timeupdateListener
+        });
+
+        // Initialize state
+        timeupdateListener();
+    }
+
     function syncGlobalAudioPlayer(audio, text) {
         if (!playerEl || !playerSeekbar) return;
 
@@ -805,6 +918,9 @@ document.addEventListener('DOMContentLoaded', () => {
             abRepeatTimeoutId = null;
         }
 
+        // Cleanup any active highlights from previous audio
+        cleanupActiveHighlights();
+
         // Reset AB repeat times for the new audio
         timeA = null;
         timeB = null;
@@ -813,7 +929,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // Display player
         playerEl.classList.remove('hidden');
         if (text) {
-            playerTextEl.textContent = text;
+            applyAudioHighlight(audio, playerTextEl, text);
+
+            let activeEnglishEl = null;
+            if (currentAudioBtn) {
+                const itemGroup = currentAudioBtn.closest('.conversation-group');
+                if (itemGroup) {
+                    activeEnglishEl = itemGroup.querySelector('.english');
+                }
+            }
+            if (activeEnglishEl && !activeEnglishEl.classList.contains('hidden')) {
+                const cleanText = text.trim();
+                const engText = activeEnglishEl.textContent.trim();
+                if (engText === cleanText) {
+                    applyAudioHighlight(audio, activeEnglishEl, engText);
+                }
+            }
         }
 
         const updatePlayerUI = () => {
@@ -885,7 +1016,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             playerEl.classList.remove('hidden');
             if (text) {
-                playerTextEl.textContent = text;
+                applyAudioHighlight(audio, playerTextEl, text);
+
+                let activeEnglishEl = null;
+                if (currentAudioBtn) {
+                    const itemGroup = currentAudioBtn.closest('.conversation-group');
+                    if (itemGroup) {
+                        activeEnglishEl = itemGroup.querySelector('.english');
+                    }
+                }
+                if (activeEnglishEl && !activeEnglishEl.classList.contains('hidden')) {
+                    const cleanText = text.trim();
+                    const engText = activeEnglishEl.textContent.trim();
+                    if (engText === cleanText) {
+                        applyAudioHighlight(audio, activeEnglishEl, engText);
+                    }
+                }
             }
             updatePlayerUI();
         });
@@ -912,6 +1058,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 abRepeatTimeoutId = null;
             }
             updatePlayerUI();
+            cleanupActiveHighlights();
             
             const repeatBtn = document.querySelector('.btn-repeat.active') || (currentAudioBtn ? currentAudioBtn.parentNode.querySelector('.btn-repeat.active') : null);
             if (!repeatBtn) {
@@ -3230,6 +3377,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             updateInitialActions();
+
+            // Apply or clean highlight based on the visibility of english text
+            if (!english.classList.contains('hidden')) {
+                if (currentAudio && !currentAudio.paused && !currentAudio.ended && currentAudioBtn) {
+                    const activeGroup = currentAudioBtn.closest('.conversation-group');
+                    if (activeGroup === group) {
+                        const cleanText = playerTextEl.textContent.trim();
+                        const engText = english.textContent.trim();
+                        if (engText === cleanText || cleanText.includes(engText)) {
+                            applyAudioHighlight(currentAudio, english, engText);
+                        }
+                    }
+                }
+            } else {
+                const activeHighlightIdx = activeHighlights.findIndex(h => h.element === english);
+                if (activeHighlightIdx !== -1) {
+                    const h = activeHighlights[activeHighlightIdx];
+                    if (h.element) h.element.innerHTML = h.originalHTML;
+                    if (h.audio && h.listener) h.audio.removeEventListener('timeupdate', h.listener);
+                    activeHighlights.splice(activeHighlightIdx, 1);
+                }
+            }
         });
 
         // Practice Mode
@@ -3801,6 +3970,7 @@ document.addEventListener('DOMContentLoaded', () => {
             clearTimeout(abRepeatTimeoutId);
             abRepeatTimeoutId = null;
         }
+        cleanupActiveHighlights();
         if (currentAudio) {
             currentAudio.pause();
             currentAudio = null;
