@@ -527,10 +527,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const playerTextEl = document.getElementById('player-audio-text');
     const playerCloseBtn = document.getElementById('player-btn-close');
 
+    // AB Repeat Elements
+    const playerBtnAB = document.getElementById('player-btn-ab');
+    const playerAbSubControls = document.getElementById('player-ab-sub-controls');
+    const playerBtnA = document.getElementById('player-btn-a');
+    const playerBtnB = document.getElementById('player-btn-b');
+    const playerMarkerA = document.getElementById('player-marker-a');
+    const playerMarkerB = document.getElementById('player-marker-b');
+    const playerRangeAB = document.getElementById('player-range-ab');
+
     // Global Audio Player Variables
     let isUserDraggingSeekbar = false;
     let playerHideTimeoutId = null;
     let isHoveringPlayer = false;
+
+    // AB Repeat State
+    let isABRepeatMode = false;
+    let timeA = null;
+    let timeB = null;
+    let abRepeatTimeoutId = null;
 
     // Format seconds to M:SS
     function formatAudioTime(secs) {
@@ -566,11 +581,85 @@ document.addEventListener('DOMContentLoaded', () => {
         }, delay);
     }
 
+    function isRepeatActive() {
+        // Check if global settings repeat is active
+        const settingsRepeat = document.getElementById('btn-settings-repeat');
+        if (settingsRepeat && settingsRepeat.classList.contains('active')) {
+            return true;
+        }
+        // Check if current active item's repeat button is active
+        if (currentAudioBtn) {
+            const itemGroup = currentAudioBtn.closest('.conversation-group');
+            if (itemGroup) {
+                const itemRepeat = itemGroup.querySelector('.btn-repeat');
+                if (itemRepeat && itemRepeat.classList.contains('active')) {
+                    return true;
+                }
+            }
+            // Also check suggestion's repeat button if the button was passed
+            const parent = currentAudioBtn.parentNode;
+            if (parent) {
+                const suggestionRepeat = parent.querySelector('.btn-repeat-suggestion');
+                if (suggestionRepeat && suggestionRepeat.classList.contains('active')) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function updateABVisuals() {
+        if (!currentAudio || !currentAudio.duration) {
+            playerMarkerA.classList.add('hidden');
+            playerMarkerB.classList.add('hidden');
+            playerRangeAB.classList.add('hidden');
+            playerBtnA.classList.remove('active');
+            playerBtnB.classList.remove('active');
+            return;
+        }
+
+        if (timeA !== null) {
+            const pctA = (timeA / currentAudio.duration) * 100;
+            playerMarkerA.style.left = `${pctA}%`;
+            playerMarkerA.classList.remove('hidden');
+            playerBtnA.classList.add('active');
+        } else {
+            playerMarkerA.classList.add('hidden');
+            playerBtnA.classList.remove('active');
+        }
+
+        if (timeB !== null) {
+            const pctB = (timeB / currentAudio.duration) * 100;
+            playerMarkerB.style.left = `${pctB}%`;
+            playerMarkerB.classList.remove('hidden');
+            playerBtnB.classList.add('active');
+        } else {
+            playerMarkerB.classList.add('hidden');
+            playerBtnB.classList.remove('active');
+        }
+
+        if (timeA !== null && timeB !== null) {
+            const pctA = (timeA / currentAudio.duration) * 100;
+            const pctB = (timeB / currentAudio.duration) * 100;
+            const minPct = Math.min(pctA, pctB);
+            const maxPct = Math.max(pctA, pctB);
+            playerRangeAB.style.left = `${minPct}%`;
+            playerRangeAB.style.width = `${maxPct - minPct}%`;
+            playerRangeAB.classList.remove('hidden');
+        } else {
+            playerRangeAB.classList.add('hidden');
+        }
+    }
+
     // Initialize Global Audio Player Event Listeners (Run once)
     function initGlobalAudioPlayer() {
         if (!playerEl || !playerPlayPauseBtn || !playerSeekbar) return;
 
         playerPlayPauseBtn.addEventListener('click', () => {
+            if (abRepeatTimeoutId) {
+                clearTimeout(abRepeatTimeoutId);
+                abRepeatTimeoutId = null;
+            }
             if (!currentAudio) return;
             if (currentAudio.paused) {
                 currentAudio.play().catch(e => console.log('Playback error:', e));
@@ -608,6 +697,55 @@ document.addEventListener('DOMContentLoaded', () => {
                     playerHideTimeoutId = null;
                 }
                 playerEl.classList.add('hidden');
+            });
+        }
+
+        // AB Repeat Event Listeners
+        if (playerBtnAB) {
+            playerBtnAB.addEventListener('click', () => {
+                isABRepeatMode = !isABRepeatMode;
+                playerBtnAB.classList.toggle('active', isABRepeatMode);
+                
+                if (isABRepeatMode) {
+                    playerAbSubControls.classList.remove('hidden');
+                } else {
+                    playerAbSubControls.classList.add('hidden');
+                    timeA = null;
+                    timeB = null;
+                    updateABVisuals();
+                }
+            });
+        }
+
+        if (playerBtnA) {
+            playerBtnA.addEventListener('click', () => {
+                if (!currentAudio) return;
+                timeA = currentAudio.currentTime;
+                
+                // Swap if A is after B
+                if (timeB !== null && timeA > timeB) {
+                    const temp = timeA;
+                    timeA = timeB;
+                    timeB = temp;
+                }
+                
+                updateABVisuals();
+            });
+        }
+
+        if (playerBtnB) {
+            playerBtnB.addEventListener('click', () => {
+                if (!currentAudio) return;
+                timeB = currentAudio.currentTime;
+                
+                // Swap if B is before A
+                if (timeA !== null && timeB < timeA) {
+                    const temp = timeA;
+                    timeA = timeB;
+                    timeB = temp;
+                }
+                
+                updateABVisuals();
             });
         }
 
@@ -655,11 +793,22 @@ document.addEventListener('DOMContentLoaded', () => {
     function syncGlobalAudioPlayer(audio, text) {
         if (!playerEl || !playerSeekbar) return;
 
-        // Cancel any pending player hide timeout
+        let isAutopausingForABRepeat = false;
+
+        // Cancel any pending player hide timeout or repeat timeout
         if (playerHideTimeoutId) {
             clearTimeout(playerHideTimeoutId);
             playerHideTimeoutId = null;
         }
+        if (abRepeatTimeoutId) {
+            clearTimeout(abRepeatTimeoutId);
+            abRepeatTimeoutId = null;
+        }
+
+        // Reset AB repeat times for the new audio
+        timeA = null;
+        timeB = null;
+        updateABVisuals();
 
         // Display player
         playerEl.classList.remove('hidden');
@@ -681,6 +830,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const updateProgress = () => {
             if (isUserDraggingSeekbar) return;
+
+            // AB Repeat Range Enforcement
+            if (isABRepeatMode) {
+                const startLimit = timeA !== null ? timeA : 0;
+                if (timeB !== null && audio.currentTime >= timeB) {
+                    isAutopausingForABRepeat = true;
+                    audio.pause();
+                    audio.currentTime = startLimit;
+                    
+                    if (isRepeatActive()) {
+                        if (abRepeatTimeoutId) clearTimeout(abRepeatTimeoutId);
+                        abRepeatTimeoutId = setTimeout(() => {
+                            if (currentAudio === audio && isABRepeatMode) {
+                                audio.play().catch(e => console.log('Loop playback error:', e));
+                            }
+                        }, 1000);
+                    }
+                    return;
+                }
+                if (timeA !== null && audio.currentTime < timeA) {
+                    audio.currentTime = timeA;
+                }
+            }
+
             if (audio.duration) {
                 const val = (audio.currentTime / audio.duration) * 100;
                 playerSeekbar.value = val;
@@ -706,6 +879,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearTimeout(playerHideTimeoutId);
                 playerHideTimeoutId = null;
             }
+            if (abRepeatTimeoutId) {
+                clearTimeout(abRepeatTimeoutId);
+                abRepeatTimeoutId = null;
+            }
             playerEl.classList.remove('hidden');
             if (text) {
                 playerTextEl.textContent = text;
@@ -714,6 +891,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         audio.addEventListener('pause', () => {
+            if (isAutopausingForABRepeat) {
+                isAutopausingForABRepeat = false;
+            } else {
+                if (abRepeatTimeoutId) {
+                    clearTimeout(abRepeatTimeoutId);
+                    abRepeatTimeoutId = null;
+                }
+            }
             updatePlayerUI();
             resetAndStartHideTimer(5000);
         });
@@ -722,6 +907,10 @@ document.addEventListener('DOMContentLoaded', () => {
         audio.addEventListener('durationchange', onDurationChange);
 
         audio.addEventListener('ended', () => {
+            if (abRepeatTimeoutId) {
+                clearTimeout(abRepeatTimeoutId);
+                abRepeatTimeoutId = null;
+            }
             updatePlayerUI();
             
             const repeatBtn = document.querySelector('.btn-repeat.active') || (currentAudioBtn ? currentAudioBtn.parentNode.querySelector('.btn-repeat.active') : null);
@@ -1728,7 +1917,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (btnRepeat.classList.contains('active')) {
                 setTimeout(() => {
                     if (currentAudio === audioInstance) {
-                        audioInstance.currentTime = 0;
+                        audioInstance.currentTime = (isABRepeatMode && timeA !== null) ? timeA : 0;
                         const playPromise = audioInstance.play();
                         if (playPromise !== undefined) {
                             playPromise.catch(error => {
@@ -3380,7 +3569,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (btnRepeat.classList.contains('active')) {
                     setTimeout(() => {
                         if (currentAudio === audioInstance) {
-                            audioInstance.currentTime = 0;
+                            audioInstance.currentTime = (isABRepeatMode && timeA !== null) ? timeA : 0;
                             audioInstance.play();
                         }
                     }, 1000);
@@ -3608,6 +3797,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function stopAudio() {
+        if (abRepeatTimeoutId) {
+            clearTimeout(abRepeatTimeoutId);
+            abRepeatTimeoutId = null;
+        }
         if (currentAudio) {
             currentAudio.pause();
             currentAudio = null;

@@ -780,26 +780,38 @@
                 <span class="player-text" id="player-audio-text">...</span>
             </div>
             <div class="player-controls">
-                <button id="player-btn-play-pause" class="player-btn" title="再生/一時停止">
-                    <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                    </svg>
-                    <svg class="icon-pause hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="6" y="4" width="4" height="16"></rect>
-                        <rect x="14" y="4" width="4" height="16"></rect>
-                    </svg>
-                </button>
                 <div class="player-progress-container">
                     <span class="player-time" id="player-current-time">0:00</span>
-                    <input type="range" id="player-seekbar" min="0" max="100" value="0" step="0.1">
+                    <div class="seekbar-wrapper">
+                        <input type="range" id="player-seekbar" min="0" max="100" value="0" step="0.1">
+                        <div id="player-range-ab" class="player-range-ab hidden"></div>
+                        <div id="player-marker-a" class="player-marker hidden">A</div>
+                        <div id="player-marker-b" class="player-marker marker-b hidden">B</div>
+                    </div>
                     <span class="player-time" id="player-duration">0:00</span>
                 </div>
-                <button id="player-btn-close" class="player-btn btn-close" title="閉じる">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
+                <div class="player-buttons-row">
+                    <button id="player-btn-play-pause" class="player-btn" title="再生/一時停止">
+                        <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        <svg class="icon-pause hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="6" y="4" width="4" height="16"></rect>
+                            <rect x="14" y="4" width="4" height="16"></rect>
+                        </svg>
+                    </button>
+                    <button id="player-btn-ab" class="player-btn" title="ABリピート">AB</button>
+                    <div id="player-ab-sub-controls" class="player-ab-sub-controls hidden">
+                        <button id="player-btn-a" class="player-btn-sub" title="A地点を設定">A</button>
+                        <button id="player-btn-b" class="player-btn-sub" title="B地点を設定">B</button>
+                    </div>
+                    <button id="player-btn-close" class="player-btn btn-close" title="閉じる">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

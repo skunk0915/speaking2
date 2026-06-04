@@ -3905,13 +3905,29 @@ button .loader {
 
     .player-controls {
         display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+
+        @media (min-width: 640px) {
+            flex-direction: row;
+            align-items: center;
+            gap: 20px;
+            width: auto;
+            flex: 2;
+        }
+    }
+
+    .player-buttons-row {
+        display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 12px;
+        justify-content: center;
         width: 100%;
 
         @media (min-width: 640px) {
             width: auto;
-            flex: 2;
+            gap: 16px;
         }
     }
 
@@ -3945,14 +3961,121 @@ button .loader {
                 background: rgba(255, 255, 255, 0.4);
             }
         }
+
+        &#player-btn-ab {
+            font-size: 11px;
+            font-weight: 700;
+            
+            &.active {
+                background: $primary-color;
+                color: #fff;
+                box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.2);
+            }
+        }
+    }
+
+    .player-btn-sub {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: none;
+        background: $bg-color;
+        color: $text-secondary;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 2px 2px 4px $shadow-dark, -2px -2px 4px $shadow-light;
+        transition: all 0.2s ease;
+        font-size: 12px;
+        font-weight: 700;
+        flex-shrink: 0;
+
+        &:active {
+            box-shadow: inset 1px 1px 2px $shadow-dark, inset -1px -1px 2px $shadow-light;
+            transform: scale(0.95);
+        }
+
+        &.active {
+            background: $primary-color;
+            color: #fff;
+            box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+    }
+
+    .player-ab-sub-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        
+        &.hidden {
+            display: none !important;
+        }
     }
 
     .player-progress-container {
         display: flex;
         align-items: center;
         gap: 10px;
-        flex: 1;
+        width: 100%;
         min-width: 0;
+
+        @media (min-width: 640px) {
+            flex: 1;
+        }
+    }
+
+    .seekbar-wrapper {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        height: 20px;
+    }
+
+    .player-marker {
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: $primary-color;
+        color: #fff;
+        font-size: 9px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 10;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        border: 1px solid #fff;
+        line-height: 1;
+        
+        &.marker-b {
+            background: #ff3b30;
+        }
+
+        &.hidden {
+            display: none !important;
+        }
+    }
+
+    .player-range-ab {
+        position: absolute;
+        height: 6px;
+        background: rgba($primary-color, 0.25);
+        border-radius: 3px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        z-index: 5;
+        
+        &.hidden {
+            display: none !important;
+        }
     }
 
     .player-time {
