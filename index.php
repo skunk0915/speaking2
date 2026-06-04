@@ -540,7 +540,7 @@
                                 <div class="words-container"></div>
                                 <div class="words-legend">
                                     <span class="legend-item legend-good"><span class="color-dot"></span>正しく発音できています</span>
-                                    <span class="legend-item legend-bad"><span class="color-dot"></span>発音が不正確または漏れています</span>
+                                    <span class="legend-item legend-bad"><span class="color-dot"></span>発音が不正確です</span>
                                 </div>
                                 <div class="pronounce-feedback-text">
                                     <h4>発音改善のアドバイス</h4>

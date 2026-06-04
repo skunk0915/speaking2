@@ -981,3 +981,13 @@ AI: 発音練習後の「発音改善のアドバイス」エリアにおいて�
 - /Users/mizy/Dropbox/speaking2/README.md
 - /Users/mizy/Dropbox/speaking2/chat.txt
 
+2026-06-05 03:26:00
+USER: btn-practiceで回答後、添削の表示とともにpractice-timer-containerとpractice-input-areaは非表示。再挑戦時に再表示
+AI: 練習モードで回答を送信した際、添削の表示（「添削中...」のローディング表示も含む）と同時にタイマー（`practice-timer-container`）と入力エリア（`practice-input-area`）を非表示にし、再挑戦（`btn-retry`）時、またはAPIエラー等による送信失敗時にこれらを再表示するよう制御を実装しました。また、リロード等のUI状態復元時にすでに練習結果が表示されている場合も、初期状態で非表示となるよう調整しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
+

@@ -529,7 +529,7 @@ body {
                 padding: 10px;
                 background: rgba(255, 255, 255, 0.1);
                 border-radius: 8px;
-                border-left: 4px solid $primary-color;
+                // border-left: 4px solid $primary-color;
             }
         }
 
@@ -1097,7 +1097,7 @@ body {
                         color: $text-primary;
                         cursor: pointer;
                         transition: all 0.2s ease;
-                        
+
                         // Neumorphism shadow for button
                         box-shadow: 3px 3px 6px $shadow-dark, -3px -3px 6px $shadow-light;
 
@@ -1107,7 +1107,8 @@ body {
                             transform: translateY(1px);
                         }
 
-                        &:active, &.playing {
+                        &:active,
+                        &.playing {
                             color: $primary-color;
                             box-shadow: inset 2px 2px 5px $shadow-dark, inset -2px -2px 5px $shadow-light;
                             transform: translateY(0);
@@ -1125,7 +1126,7 @@ body {
                             width: 16px;
                             height: 16px;
                             color: inherit;
-                            
+
                             svg {
                                 width: 14px;
                                 height: 14px;
@@ -1152,9 +1153,20 @@ body {
     }
 
     @keyframes pulse-audio {
-        0% { opacity: 0.6; transform: scale(0.9); }
-        50% { opacity: 1; transform: scale(1.1); }
-        100% { opacity: 0.6; transform: scale(0.9); }
+        0% {
+            opacity: 0.6;
+            transform: scale(0.9);
+        }
+
+        50% {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        100% {
+            opacity: 0.6;
+            transform: scale(0.9);
+        }
     }
 
 

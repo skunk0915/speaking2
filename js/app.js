@@ -1975,6 +1975,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const practiceInput = clone.querySelector('.practice-input');
         const btnPracticeSend = clone.querySelector('.btn-practice-send');
         const practiceFeedback = clone.querySelector('.feedback-content');
+        const practiceInputArea = clone.querySelector('.practice-input-area');
  
         let userAudioUrl = null;
         let practiceStartTime = null;
@@ -2855,6 +2856,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 practiceInput.disabled = true;
                 btnPracticeSend.disabled = true;
 
+                // Hide timer and input area
+                if (practiceTimerContainer) {
+                    practiceTimerContainer.classList.add('hidden');
+                }
+                if (practiceInputArea) {
+                    practiceInputArea.classList.add('hidden');
+                }
+
                 // 経過時間の計算
                 let timeTaken = null;
                 if (practiceStartTime) {
@@ -2908,9 +2917,20 @@ document.addEventListener('DOMContentLoaded', () => {
                             btnHistory.classList.remove('hidden');
                             renderHistory(practiceRetryHistory, historyContainer);
                         }
+
+                        practiceInput.value = '';
+                    } else {
+                        // Failed to load correction -> restore
+                        item.dataset.isPracticeRetrying = 'true';
+                        if (practiceTimerContainer) {
+                            practiceTimerContainer.classList.remove('hidden');
+                        }
+                        if (practiceInputArea) {
+                            practiceInputArea.classList.remove('hidden');
+                        }
+                        practiceRetryHistory.pop();
                     }
  
-                    practiceInput.value = '';
                 } else {
                     // Initial correction
                     const historyItemRef = {
@@ -2950,9 +2970,18 @@ document.addEventListener('DOMContentLoaded', () => {
                             btnHistory.classList.remove('hidden');
                             renderHistory(practiceRetryHistory, historyContainer);
                         }
+
+                        practiceInput.value = '';
+                    } else {
+                        // Failed to load correction -> restore
+                        if (practiceTimerContainer) {
+                            practiceTimerContainer.classList.remove('hidden');
+                        }
+                        if (practiceInputArea) {
+                            practiceInputArea.classList.remove('hidden');
+                        }
+                        practiceRetryHistory.pop();
                     }
- 
-                    practiceInput.value = '';
                 }
 
                 practiceInput.disabled = false;
@@ -2978,6 +3007,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         feedback.classList.add('hidden');
                         practiceInput.focus();
                         startTimer();
+                        
+                        if (practiceTimerContainer) {
+                            practiceTimerContainer.classList.remove('hidden');
+                        }
+                        if (practiceInputArea) {
+                            practiceInputArea.classList.remove('hidden');
+                        }
                     } else {
                         // Main conversation retry
                         const group = btnRetry.closest('.conversation-group');
@@ -4009,6 +4045,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     if (gData.practice.feedback) {
                         practiceFeedback.classList.remove('hidden');
+                        
+                        // Hide practiceTimerContainer and practiceInputArea if feedback is restored
+                        const practiceTimerContainer = practiceSection.querySelector('.practice-timer-container');
+                        const practiceInputArea = practiceSection.querySelector('.practice-input-area');
+                        if (practiceTimerContainer) {
+                            practiceTimerContainer.classList.add('hidden');
+                        }
+                        if (practiceInputArea) {
+                            practiceInputArea.classList.add('hidden');
+                        }
                         
                         // Restore practice correction HTML
                         practiceFeedback.querySelector('.correction').innerHTML = gData.practice.feedback.correction_html;
