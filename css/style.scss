@@ -308,7 +308,7 @@ body {
     }
 
     .text-content {
-        margin-bottom: 20px;
+        // margin-bottom: 20px;
 
         p {
             margin: 0;
@@ -326,6 +326,7 @@ body {
             font-size: 16px;
             color: #007AFF;
             font-weight: 400;
+            margin-bottom: 20px;
 
             &.hidden {
                 display: none;
@@ -367,8 +368,8 @@ body {
                 &.playing {
                     color: white;
                     background: $success-color;
-                    box-shadow: inset 4px 4px 8px darken($success-color, 15%),
-                        inset -4px -4px 8px lighten($success-color, 15%);
+                    box-shadow: inset 4px 4px 8px color.adjust($success-color, $lightness: -15%),
+                        inset -4px -4px 8px color.adjust($success-color, $lightness: 15%);
 
                     svg {
                         color: white;
@@ -747,8 +748,8 @@ body {
                         &.active {
                             color: white;
                             background: $primary-color;
-                            box-shadow: inset 4px 4px 8px darken($primary-color, 15%),
-                                inset -4px -4px 8px lighten($primary-color, 15%);
+                            box-shadow: inset 4px 4px 8px color.adjust($primary-color, $lightness: -15%),
+                                inset -4px -4px 8px color.adjust($primary-color, $lightness: 15%);
 
                             svg {
                                 color: white;
@@ -775,8 +776,8 @@ body {
                         &.active {
                             color: white;
                             background: $success-color;
-                            box-shadow: inset 4px 4px 8px darken($success-color, 15%),
-                                inset -4px -4px 8px lighten($success-color, 15%);
+                            box-shadow: inset 4px 4px 8px color.adjust($success-color, $lightness: -15%),
+                                inset -4px -4px 8px color.adjust($success-color, $lightness: 15%);
 
                             svg {
                                 color: white;
@@ -3786,5 +3787,49 @@ button .loader {
 
     to {
         transform: scale(1.03);
+    }
+}
+
+// Initial prompt action choices container when text is hidden
+.initial-action-container {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    animation: fadeIn 0.4s ease-out;
+    margin-bottom: 20px;
+
+    .btn-initial-action {
+        @include neumorphism-flat;
+        border-radius: $border-radius-sm;
+        padding: 10px 18px;
+        font-size: 14px;
+        font-weight: 600;
+        color: $text-primary;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+
+        &:hover {
+            color: $primary-color;
+            box-shadow: 11px 11px 20px $shadow-dark, -11px -11px 20px $shadow-light;
+        }
+
+        &:active {
+            @include neumorphism-pressed;
+        }
+
+        &.btn-initial-translate-jp {
+            // border-left: 3px solid #ff9500;
+        }
+
+        &.btn-initial-listen {
+            // border-left: 3px solid #34c759;
+        }
+
+        &.btn-initial-practice {
+            // border-left: 3px solid #007aff;
+        }
     }
 }

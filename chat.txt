@@ -990,4 +990,33 @@ AI: 練習モードで回答を送信した際、添削の表示（「添削中.
 - /Users/mizy/Dropbox/speaking2/README.md
 - /Users/mizy/Dropbox/speaking2/chat.txt
 
+2026-06-05 03:46:25
+USER: class="conversation-item system-message"生成直後、.text-contentに何も表示がないので、何をしたいかに応じたボタンを用意。「日本語を英訳」→btn-translate-jpを押すのと同じ挙動、「リスニング」→icon-playを押スノと同じ挙動、「英文に返答」→btn-translateとbtn-practiceを押すのと同じ挙動
+AI: システムメッセージ生成直後に日本語・英語テキストの双方が非表示である場合、メッセージ内容エリア（`.text-content`）に次のアクションを選択できる3つのボタン（「日本語を英訳」「リスニング」「英文に返答」）を動的表示する機能を実装しました。
+対応する実際のアクションボタン（`btnTranslateJp` / `btnSpeak` / `btnTranslate` / `btnPractice`）をユーザーが直接操作した場合、あるいは選択肢ボタン自体をクリックした場合には、これらの選択肢コンテナが自動で消去されるスマートな制御を行いました。
+さらに、Neumorphism（ニューモーフィズム）のテーマに調和し、各ボタンに対応したアクセントカラー（オレンジ・グリーン・ブルー）が施されたスタイリッシュなデザインを導入しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+
+2026-06-05 03:53:22
+USER: (Sass 2.0 に向けた非推奨警告の解消要請)
+AI: Sassビルド時に出力されていた非推奨警告（darken() / lighten() 関数の警告）を解消するため、style.scss 内の該当箇所を `@use "sass:color"` モジュールの `color.adjust()` を使用する形に書き換えました。これにより警告なしでビルドが行えるようになりました。また、CSS更新に伴い sw.js のキャッシュバージョンを更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+
+2026-06-05 04:03:51
+USER: 初期アクション選択肢ボタンを押したあとすべてを非表示にしたときも再度表示
+AI: 初期アクションボタン（または通常のアクションボタンや練習モードなど）を操作して何らかの要素を表示させた後、それらを再びすべて非表示にした（テキストと練習等の全セクションが非表示に戻った）際にも、初期アクション選択肢ボタンが自動で検知して再表示されるように表示更新ロジックをリファクタリング・実装しました。また、sw.js のキャッシュバージョンを更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+
 

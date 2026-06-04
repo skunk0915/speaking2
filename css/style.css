@@ -117,9 +117,6 @@ body {
 .conversation-item.system-message:has(.btn-practice.active) .text-content .english {
   display: none !important;
 }
-.conversation-item .text-content {
-  margin-bottom: 20px;
-}
 .conversation-item .text-content p {
   margin: 0;
   line-height: 1.6;
@@ -134,6 +131,7 @@ body {
   font-size: 16px;
   color: #007AFF;
   font-weight: 400;
+  margin-bottom: 20px;
 }
 .conversation-item .text-content .english.hidden {
   display: none;
@@ -3927,4 +3925,35 @@ button .loader {
   to {
     transform: scale(1.03);
   }
+}
+.initial-action-container {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  animation: fadeIn 0.4s ease-out;
+  margin-bottom: 20px;
+}
+.initial-action-container .btn-initial-action {
+  background: #e0e5ec;
+  box-shadow: 9px 9px 16px #a3b1c6, -9px -9px 16px #f5f5f5;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4a4a4a;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+.initial-action-container .btn-initial-action:hover {
+  color: #007AFF;
+  box-shadow: 11px 11px 20px #a3b1c6, -11px -11px 20px #f5f5f5;
+}
+.initial-action-container .btn-initial-action:active {
+  background: #e0e5ec;
+  box-shadow: inset 6px 6px 10px #a3b1c6, inset -6px -6px 10px #f5f5f5;
+  border: none;
 }/*# sourceMappingURL=style.css.map */

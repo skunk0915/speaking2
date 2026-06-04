@@ -2306,6 +2306,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isOpening) {
                 btn.classList.add('active');
                 
+                // 開いたので初期アクション選択肢ボタンを非表示化
+                updateInitialActions();
+                
                 const openAndFocus = () => {
                     slideDown(section, 300).then(() => {
                         if (inputToFocus) {
@@ -2328,6 +2331,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 slideUp(section, 300).then(() => {
                     // 完全に非表示になって高さが縮んだ後にスクロール位置を調整する
                     scrollToParent();
+                    // 閉じ終わったので初期アクション選択肢ボタンの復活をチェック
+                    updateInitialActions();
                 });
             }
             if (typeof saveUIState === 'function') {
@@ -2793,11 +2798,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     clearTimeout(translateJpTimeout);
                     translateJpTimeout = setTimeout(() => {
                         japanese.classList.add('hidden');
+                        updateInitialActions();
                         if (typeof saveUIState === 'function') {
                             saveUIState();
                         }
                     }, 60000); // Hide after 1 min
                 }
+
+                updateInitialActions();
 
                 if (typeof saveUIState === 'function') {
                     saveUIState();
@@ -2833,8 +2841,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearTimeout(translateTimeout);
                 translateTimeout = setTimeout(() => {
                     english.classList.add('hidden');
+                    updateInitialActions();
                 }, 60000); // Hide after 1 min
             }
+
+            updateInitialActions();
         });
 
         // Practice Mode
@@ -3301,6 +3312,98 @@ document.addEventListener('DOMContentLoaded', () => {
 
             renderPronunciationResult(data.last_pronunciation);
         }
+
+        // 生成直後に日本語・英語ともに非表示の場合、初期アクションボタンを表示
+        let actionsContainer = null;
+
+        function updateInitialActions() {
+            const isJpHidden = japanese.classList.contains('hidden');
+            const isEnHidden = english.classList.contains('hidden');
+            
+            // 各セクションの開閉状態を確認
+            const isPracticeClosed = !practiceSection || practiceSection.classList.contains('hidden');
+            const isPronounceClosed = !pronounceSection || pronounceSection.classList.contains('hidden');
+            const isVariationClosed = !variationSection || variationSection.classList.contains('hidden');
+            const isQaClosed = !mainQa || mainQa.classList.contains('hidden');
+            const isHistoryClosed = !historySection || historySection.classList.contains('hidden');
+
+            const shouldShow = isJpHidden && isEnHidden && isPracticeClosed && isPronounceClosed && isVariationClosed && isQaClosed && isHistoryClosed;
+
+            if (shouldShow) {
+                // すでに要素が存在していてDOM内にある場合は作成しない
+                if (actionsContainer && item.contains(actionsContainer)) return;
+
+                actionsContainer = document.createElement('div');
+                actionsContainer.className = 'initial-action-container';
+                
+                const btnJp = document.createElement('button');
+                btnJp.className = 'btn-initial-action btn-initial-translate-jp';
+                btnJp.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect>
+                        <circle cx="12" cy="12" r="3.5" fill="currentColor"></circle>
+                    </svg>
+                    日本語を英訳
+                `;
+                btnJp.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    btnTranslateJp.click();
+                });
+                
+                const btnListen = document.createElement('button');
+                btnListen.className = 'btn-initial-action btn-initial-listen';
+                btnListen.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                    リスニング
+                `;
+                btnListen.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    btnSpeak.click();
+                    // リスニング動作自体は状態が変わらないため、明示的に非表示にする
+                    if (actionsContainer) {
+                        actionsContainer.remove();
+                        actionsContainer = null;
+                    }
+                });
+                
+                const btnPracticeAct = document.createElement('button');
+                btnPracticeAct.className = 'btn-initial-action btn-initial-practice';
+                btnPracticeAct.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect>
+                        <rect x="3" y="5" width="8" height="7" fill="currentColor" stroke="none"></rect>
+                        <line x1="11" y1="8.5" x2="21" y2="8.5"></line>
+                        <line x1="11" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="15.5" x2="21" y2="15.5"></line>
+                    </svg>
+                    英文に返答
+                `;
+                btnPracticeAct.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    btnTranslate.click();
+                    btnPractice.click();
+                });
+                
+                actionsContainer.appendChild(btnJp);
+                actionsContainer.appendChild(btnListen);
+                actionsContainer.appendChild(btnPracticeAct);
+                
+                const textContent = item.querySelector('.text-content');
+                if (textContent) {
+                    textContent.appendChild(actionsContainer);
+                }
+            } else {
+                if (actionsContainer) {
+                    actionsContainer.remove();
+                    actionsContainer = null;
+                }
+            }
+        }
+
+        // UIの復元や設定処理が終わった後に実行されるよう、setTimeoutで非同期に判定
+        setTimeout(updateInitialActions, 50);
 
         // Note: We don't scroll here because moveInputToBottom will handle scrolling
         group.updateSavedData = updateSavedData;
