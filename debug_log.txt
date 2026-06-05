@@ -1,163 +1,186 @@
-2025-11-23 07:37:23 Raw API Response: [
-  {
-    "japanese": "ああ、今日は本当に疲れた。早く家に帰ってゆっくりしたいなあ。何か美味しいものでも作って、のんびり過ごそう。",
-    "english": "Ah, I'm really tired today. I want to go home and relax soon. Maybe I'll make something delicious and take it easy."
-  }
-]
-2025-11-23 07:37:23 Error: Incomplete data from Gemini
-Data: Array
-(
-    [0] => Array
-        (
-            [japanese] => ああ、今日は本当に疲れた。早く家に帰ってゆっくりしたいなあ。何か美味しいものでも作って、のんびり過ごそう。
-            [english] => Ah, I'm really tired today. I want to go home and relax soon. Maybe I'll make something delicious and take it easy.
-        )
 
-)
+=== [AUTO-GENERATE PROCESS START] ===
+Timestamp: 2026-06-05 12:30:00
+Client Raw Request Body: {"type":"new","context":[],"length":"20","english_level":"simple","ai_style":"jk","situations":["お店","交流","仕事","体調","学校","旅行","生活","移動"],"exclude_situations":["これいくらですか？ 値札が見当たらなくて。","これすごく美味しいです！ 何ていう料理ですか？ 作り方教えてほしいくらい。","すみません、毛布もう一枚もらえますか？ あとお水もお願いします。","桜そろそろ満開かな？ 週末お花見でも行きたいね、お弁当持って。","帰りの航空券、スマホに入ってるんですけど見せた方がいいですか？","Wi-Fiのパスワード教えてもらえますか？ 家族に着いたって連絡したくて。","その服かわいい！ どこで買ったの？ 私もそういうの探してたんだ。","今度の週末、暇だったらご飯でも行かない？ 新しいお店見つけたんだ。","おはようございます。今日も暑くなりそうですね。お出かけですか？","バスの乗り方がわからず運転手に聞く","これ日本に送ってもらうことってできますか？ 持って帰るには大きすぎて。","電話会議の接続トラブルでITサポートに連絡する","上司に休暇の申請をする","私の英語、変じゃないですか？ おかしかったら遠慮なく言ってください。","ヤバい、めっちゃ楽しかった！ また絶対来ようよ。","お風呂掃除しといて。あとトイレットペーパーもなくなりそうだから補充して。","ガイドツアーって何時からですか？ 日本語のツアーもありますか？","このパソコン、急に固まっちゃって動かないんですけど、どうすればいいですか？","乗り継ぎ便があるんですけど、ここで荷物受け取らなくて大丈夫ですよね？"],"japanese_input":null,"input_mode":"translate","selected_situation":null}
+Successfully loaded situations.json. Total count in file: 360
+Selected Categories by UI: ["お店","交流","仕事","体調","学校","旅行","生活","移動"]
+Exclude Situations list (Recent 20): ["これいくらですか？ 値札が見当たらなくて。","これすごく美味しいです！ 何ていう料理ですか？ 作り方教えてほしいくらい。","すみません、毛布もう一枚もらえますか？ あとお水もお願いします。","桜そろそろ満開かな？ 週末お花見でも行きたいね、お弁当持って。","帰りの航空券、スマホに入ってるんですけど見せた方がいいですか？","Wi-Fiのパスワード教えてもらえますか？ 家族に着いたって連絡したくて。","その服かわいい！ どこで買ったの？ 私もそういうの探してたんだ。","今度の週末、暇だったらご飯でも行かない？ 新しいお店見つけたんだ。","おはようございます。今日も暑くなりそうですね。お出かけですか？","バスの乗り方がわからず運転手に聞く","これ日本に送ってもらうことってできますか？ 持って帰るには大きすぎて。","電話会議の接続トラブルでITサポートに連絡する","上司に休暇の申請をする","私の英語、変じゃないですか？ おかしかったら遠慮なく言ってください。","ヤバい、めっちゃ楽しかった！ また絶対来ようよ。","お風呂掃除しといて。あとトイレットペーパーもなくなりそうだから補充して。","ガイドツアーって何時からですか？ 日本語のツアーもありますか？","このパソコン、急に固まっちゃって動かないんですけど、どうすればいいですか？","乗り継ぎ便があるんですけど、ここで荷物受け取らなくて大丈夫ですよね？"]
+Filtered by category. Count: 360
+Filtered by exclude list. Remaining count: 341
+Uniform random index chosen: 244 out of 341
+Selected Situation Data: {"category":"交流","situation":"お酒飲める？ 私あんまり強くないから、軽いやつにしようかな。"}
+AI Style Key: jk (女子高生のような口調（例：「〜だね！」「〜じゃん？」「マジで」「うける」など）で、明るくフレンドリーに回答・解説してください。ただし、過度な褒め言葉や持ち上げすぎ（例：「天才じゃん！」など）は避け、建設的な内容を心がけてください。)
+English Level Key: simple (基本的で簡単な単語や文法（中学生レベル）を使用した、分かりやすい表現にしてください。)
+Constructed Prompt sent to Gemini:
+英語学習のロールプレイ開始用お題と英訳を生成してください。
+    
+    【入力された日本語】
+    
+    
+    役割定義:
+    - 'japanese': ユーザーが入力した日本語テキストをそのまま（一切変更せずに）格納してください。
+    - 'english': 入力された日本語テキスト全体に対する、自然で正確な英訳です。
+    
+    指示:
+    - 'japanese'のキーには、ユーザーの入力『』を「一字一句変えずにそのまま」設定してください。要約、言い換え、分割、省略、疑問文への変更は絶対にしないでください。
+    - 'english'のキーには、入力された日本語『』のすべての内容、ニュアンス、感情、詳細を漏れなく含んだ、正確で自然な英訳を生成してください。文字数の制限はありません。元の日本語の意味や長さに合わせて十分な長さで英訳してください。
+    - 生成する英語は、以下の基準に従ってください:
+      **基本的で簡単な単語や文法（中学生レベル）を使用した、分かりやすい表現にしてください。**
+    - 1人の発話としての翻訳のみを含めてください。複数人の会話形式にしないでください。
+    - 前置きや説明、話者名は一切含めず、純粋な英訳のみを出力してください。
+    
+    出力はJSON形式で、以下のキーを含めてください:
+      - 'japanese': ユーザーが入力した日本語テキスト（一字一句変えずにそのまま）
+      - 'english': その英訳
+      - 'sample_user_answers': この発話に対するユーザーの返答例のリスト（1〜5個程度）。提案数は固定せず、文脈に応じてできるだけ多くのバリエーションを提示してください。ただし、似たような表現ばかりを並めるのは避け、ポジティブ・ネガティブ・質問など様々な視点で提示してください。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。
 
-2025-11-23 07:39:39 Raw API Response: [
+2026-06-05 12:30:15 Raw API Response: [
   {
-    "japanese": "ああ、今日は疲れたな。早く家に帰ってゆっくりしたい。何か美味しいものでも作って食べようかな。",
-    "english": "Ah, I'm tired today. I want to go home and relax soon. Maybe I'll make something delicious to eat."
+    "japanese": "すみません。青いシャツを探しています。Mサイズはありますか？あと、試着室はどこですか？",
+    "english": "Excuse me. I am looking for a blue shirt. Do you have a medium size? And where is the fitting room?",
+    "sample_user_answers": [
+      {
+        "ja": "はい、こちらにMサイズがありますよ。どうぞ。",
+        "en": "Yes, we have a medium size here. Here you are."
+      },
+      {
+        "ja": "すみません、今はLサイズしか在庫がありません。",
+        "en": "I'm sorry, we only have large size in stock now."
+      },
+      {
+        "ja": "試着室はあちらの鏡の隣にあります。",
+        "en": "The fitting room is over there, next to the mirror."
+      },
+      {
+        "ja": "もちろんです。他の色も見てみますか？",
+        "en": "Of course. Do you want to see other colors, too?"
+      },
+      {
+        "ja": "少々お待ちください。奥にあるか確認してきます。",
+        "en": "Wait a moment, please. I will check if we have one in the back."
+      }
+    ]
   }
 ]
-2025-11-23 07:39:39 Error: Incomplete data from Gemini
-Data: Array
-(
-    [0] => Array
-        (
-            [japanese] => ああ、今日は疲れたな。早く家に帰ってゆっくりしたい。何か美味しいものでも作って食べようかな。
-            [english] => Ah, I'm tired today. I want to go home and relax soon. Maybe I'll make something delicious to eat.
-        )
 
-)
+Gemini Response:
+{
+    "japanese": "すみません。青いシャツを探しています。Mサイズはありますか？あと、試着室はどこですか？",
+    "english": "Excuse me. I am looking for a blue shirt. Do you have a medium size? And where is the fitting room?",
+    "sample_user_answers": [
+        {
+            "ja": "はい、こちらにMサイズがありますよ。どうぞ。",
+            "en": "Yes, we have a medium size here. Here you are."
+        },
+        {
+            "ja": "すみません、今はLサイズしか在庫がありません。",
+            "en": "I'm sorry, we only have large size in stock now."
+        },
+        {
+            "ja": "試着室はあちらの鏡の隣にあります。",
+            "en": "The fitting room is over there, next to the mirror."
+        },
+        {
+            "ja": "もちろんです。他の色も見てみますか？",
+            "en": "Of course. Do you want to see other colors, too?"
+        },
+        {
+            "ja": "少々お待ちください。奥にあるか確認してきます。",
+            "en": "Wait a moment, please. I will check if we have one in the back."
+        }
+    ]
+}
+=== [AUTO-GENERATE PROCESS END] ===
 
-2025-11-23 07:42:22 Raw API Response: [
-  {
-    "japanese": "ああ、もうこんな時間か。そろそろ帰らないと、晩ご飯の支度もあるし。今日はカレーにしようかな。",
-    "english": "Oh, is it this late already? I should head home soon, I need to prepare dinner. Maybe I'll make curry tonight."
-  }
-]
-2025-11-23 07:45:28 Raw API Response: [
-  {
-    "japanese": "あ、そうだ。明日、駅前のカフェで10時に待ち合わせで大丈夫だよね？",
-    "english": "Oh, that's right. Meeting at the cafe in front of the station at 10:00 AM tomorrow works for you, right?"
-  }
-]
-2025-11-23 07:45:40 Raw API Response: {
-  "japanese": "うん、大丈夫だよ！10時に駅前のカフェでね。了解！明日が楽しみだね。",
-  "english": "Yeah, that's fine! At the cafe in front of the station at 10. Got it! Looking forward to tomorrow."
-}
-2025-11-23 07:48:25 Raw API Response: [
-  {
-    "japanese": "あ、そうだ。今度の日曜日、近くの公園でフリーマーケットがあるんだけど、一緒に行ってみない？",
-    "english": "Oh, that's right. There's a flea market at the nearby park next Sunday, would you like to go together?"
-  }
-]
-2025-11-22 23:45:08 Raw API Response: [
-  {
-    "japanese": "進捗、順調ですか？今週中に資料をまとめる必要があるので、何か問題があれば早めに教えてください。",
-    "english": "Is the progress going well? We need to compile the documents by the end of the week, so please let me know if there are any problems as soon as possible."
-  }
-]
-2025-11-22 23:45:17 Raw API Response: [
-  {
-    "japanese": "やった！試験合格した！本当に嬉しい！努力が報われたよ。家族や友達にも早く伝えたいな。",
-    "english": "I did it! I passed the exam! I'm so happy! My hard work paid off. I can't wait to tell my family and friends."
-  }
-]
-2025-11-23 05:57:45 Raw API Response: {
-  "answer": "「Why is that wrong?」は、「なぜそれが間違っているのですか？」という意味です。相手の言動や考えに対して、その理由を尋ねる際に使われます。\n\nいくつか例を挙げます。\n\n*   **状況:** 宿題で間違えた箇所を先生に指摘された。\n    *   **あなた:** Why is that wrong?\n    *   **先生:** Because you need to carry the one from the ones column to the tens column.\n    *   **日本語訳:**\n        *   **あなた:** なぜここが間違っているのですか？\n        *   **先生:** 一の位から十の位に繰り上げなければならないからです。\n\n*   **状況:** 友達が新しいレストランを批判している。\n    *   **あなた:** Why is that wrong?\n    *   **友達:** The service was terrible, and the food was cold.\n    *   **日本語訳:**\n        *   **あなた:** なぜダメなの？\n        *   **友達:** サービスが悪かったし、料理は冷たかったんだ。\n\nこの質問は、相手の意見や行動の根拠を尋ねる際に非常に便利です。ただし、使い方によっては攻撃的に聞こえる場合もあるので、状況に応じて丁寧な言い方に変えることも大切です。例えば、「Could you explain why that is wrong?（なぜそれが間違っているのか説明していただけますか？）」のようにすると、より丁寧な印象になります。"
-}
-2025-11-23 05:58:00 Raw API Response: {
-  "answer": "ご質問ありがとうございます。「Why is that wrong?」は、相手の言動や考えがなぜ間違っているのかを尋ねる、非常に直接的な表現です。状況によっては、相手を不快にさせたり、非難しているように聞こえたりする可能性があります。\n\nより丁寧な表現を使いたい場合や、相手との関係性を考慮したい場合は、以下のような言い換えを検討してみてください。\n\n*   **Could you explain why you think that?** (なぜそう思うのか説明していただけますか？)\n*   **I'm not sure I understand why you say that. Could you elaborate?** (なぜそう言うのかよくわかりません。詳しく説明していただけますか？)\n*   **Is there a specific reason why you believe that?** (そう考える具体的な理由がありますか？)\n*   **I see it differently. Would you mind sharing your perspective?** (私は違う見方をしています。あなたの視点を共有していただけますか？)\n\nこれらの表現は、相手の意見を尊重しつつ、自分の疑問や異なる視点を伝えることができます。\n\n例えば、会議中に誰かが提案したアイデアに疑問を感じた場合、\n\n*   Direct: \"Why is that wrong?\" (なぜそれが間違っているのですか？)\n*   Polite: \"I'm not sure I understand how that would work. Could you explain the potential benefits?\" (それがどのように機能するのかよくわかりません。潜在的な利点を説明していただけますか？)\n\nのように、より丁寧な表現を使うことで、建設的な議論につながる可能性が高まります。"
-}
-2025-11-23 11:06:25 Raw API Response: {
-  "answer": "ご質問ありがとうございます。あなたの回答「I want holiday」が修正された理由についてご説明します。\n\n「I want holiday」は文法的に間違いではありませんが、少し直接的すぎる言い方で、場合によっては失礼に聞こえる可能性があります。より丁寧でフォーマルな言い方として、「I would like to request some time off.」を提案しました。\n\n理由としては、以下の点が挙げられます。\n\n*   **wantよりwould likeの方が丁寧:** \"want\" はストレートな欲求を伝える表現ですが、\"would like\" はより丁寧で控えめな表現です。ビジネスシーンやフォーマルな場面では、\"would like\" を使う方が適切です。\n    *   例: \n        *   カジュアル: \"I want coffee.\"（コーヒーが欲しい。）\n        *   フォーマル: \"I would like some coffee, please.\"（コーヒーをいただけますか。）\n*   **requestを使うことで、よりフォーマルな印象に:** 「request」は「要請する」「お願いする」という意味で、休暇を申請する際に適した動詞です。\n*   **time offを使うことで、休暇であることが明確に:** \"holiday\" は一般的に休日や祝日を指すことが多いですが、\"time off\" は休暇という意味でより具体的に伝わります。\n\n他にも、以下のような表現を使うことができます。\n\n*   \"I would like to request a leave of absence.\"\n*   \"I am writing to request a vacation.\"\n*   \"I would be grateful if I could take some time off.\"\n\nこれらの表現を使うことで、より丁寧でスムーズなコミュニケーションにつながります。状況に合わせて使い分けてみてください。"
-}
-2025-11-23 11:09:30 Raw API Response: [
-  {
-    "japanese": "今夜は何にしましょうか？何か食べたいものあります？",
-    "english": "What should we have for dinner tonight? Is there anything you'd like to eat?",
-    "sample_user_japanese": "魚がいいかな。焼き魚とかどう？"
-  },
-  {
-    "japanese": "あら、美味しそうなナスね。今夜は麻婆茄子なんてどうかしら？",
-    "english": "Oh, these eggplants look delicious. How about Mapo eggplant for tonight?",
-    "sample_user_japanese": "いいね！ご飯が進みそう！"
-  },
-  {
-    "japanese": "今日はちょっと疲れたから、簡単に済ませたいな。何かいいものないかしら？",
-    "english": "I'm a little tired today, so I want to keep it simple. Is there anything good?",
-    "sample_user_japanese": "お惣菜コーナーで何か買ってく？"
-  },
-  {
-    "japanese": "この鶏肉、安売りしてるわ！唐揚げにするのはどうかしら？",
-    "english": "This chicken is on sale! How about making fried chicken?",
-    "sample_user_japanese": "いいね！子どもも喜びそう。"
-  },
-  {
-    "japanese": "カレーのルーがたくさんあるんだけど、今夜カレーにしない？",
-    "english": "We have a lot of curry roux, how about curry for tonight?",
-    "sample_user_japanese": "賛成！野菜もたっぷり入れよう。"
-  }
-]
-2025-11-23 11:33:25 Raw API Response: {
-  "japanese": "おかげさまで、元気です。あなたは、いかがですか？",
-  "english": "Thanks to you, I'm fine. How about you?",
-  "sample_user_japanese": "私も元気ですよ。"
-}
-2025-11-23 11:33:28 Raw API Response: {
-  "answer": "The change from \"How are you?\" to \"How are you doing?\" is very subtle, but \"How are you doing?\" is often considered a slightly more casual and friendly greeting.\n\nThink of it this way:\n\n*   **How are you?** - This is a standard, polite greeting suitable for most situations.\n*   **How are you doing?** - This is also very common, and often used when you know the person a little better, or want to sound a bit more relaxed.\n\nBoth are perfectly acceptable, and native speakers use them interchangeably often! There isn't a *huge* difference, but \"How are you doing?\" can be more conversational.\n\nExample:\n\n*   \"Hi John, how are you?\" (Standard Greeting)\n*   \"Hey Mary, how are you doing?\" (Slightly more casual/friendly)\n\nIn simple English: \"How are you doing?\" is just another way to say \"How are you?\" It's a little more friendly."
-}
-2025-11-23 11:50:17 Raw API Response: {
-  "japanese": "どういたしまして。お気をつけて。",
-  "english": "You're welcome. Take care.",
-  "sample_user_japanese": "はい、ありがとうございます！"
-}
-2025-11-23 13:02:42 Raw API Response: [
-  {
-    "japanese": "結婚式のスピーチ、ぜひお願いしたいんだけど、引き受けてくれるかな？",
-    "english": "I'd really like you to give a speech at the wedding. Would you be willing to do it?",
-    "sample_user_japanese": "喜んで！お祝いさせてください。"
-  }
-]
-2026-05-26 05:42:41 Error: API Request Failed with HTTP Code: 0
-Details: 
-2026-05-26 05:42:41 Exception: An unexpected error occurred: API Request Failed with HTTP Code: 0
-Trace: #0 C:\Users\OW\pj\speaking2\api\generate_text.php(796): callGeminiJson()
-#1 {main}
-[2026-06-03 20:46:22] [PRONUNCIATION] Request received. Text: 'I heard we have to pay for coffee starting next Monday.', Has Audio: No
-[2026-06-04 05:49:07] [PRONUNCIATION] Request received. Text: 'I heard we have to pay for coffee starting next Monday.', Has Audio: Yes
-[2026-06-04 05:49:09] [PRONUNCIATION] Azure API Response HTTP Code: 200
-[2026-06-04 05:49:45] [PRONUNCIATION] Request received. Text: 'I heard we have to pay for coffee starting next Monday.', Has Audio: Yes
-[2026-06-04 05:49:47] [PRONUNCIATION] Azure API Response HTTP Code: 200
-[2026-06-04 05:51:58] [PRONUNCIATION] Request received. Text: 'I heard we have to pay for coffee starting next Monday.', Has Audio: Yes, Size: 229420 bytes, UploadError: 0
-[2026-06-04 05:51:59] [PRONUNCIATION] Azure API Response HTTP Code: 200
-[2026-06-04 05:51:59] [PRONUNCIATION] Azure API Raw Response: {"RecognitionStatus":"Success","Offset":22300000,"Duration":43900000,"DisplayText":"I heard we have to pay for coffee starting next Monday.","SNR":34.588154,"NBest":[{"Confidence":0.9614205,"Lexical":"I heard we have to pay for coffee starting next Monday","ITN":"I heard we have to pay for coffee starting next Monday","MaskedITN":"i heard we have to pay for coffee starting next monday","Display":"I heard we have to pay for coffee starting next Monday.","AccuracyScore":83.0,"FluencyScore":99.0,"CompletenessScore":82.0,"PronScore":85.6,"Words":[{"Word":"I","Offset":22300000,"Duration":2200000,"Confidence":0.0,"AccuracyScore":97.0,"ErrorType":"None"},{"Word":"heard","Offset":24600000,"Duration":5500000,"Confidence":0.0,"AccuracyScore":79.0,"ErrorType":"None"},{"Word":"we","Offset":30400000,"Duration":1900000,"Confidence":0.0,"AccuracyScore":97.0,"ErrorType":"None"},{"Word":"have","Offset":32400000,"Duration":3100000,"Confidence":0.0,"AccuracyScore":94.0,"ErrorType":"None"},{"Word":"to","Offset":35600000,"Duration":1700000,"Confidence":0.0,"AccuracyScore":97.0,"ErrorType":"None"},{"Word":"pay","Offset":37400000,"Duration":3900000,"Confidence":0.0,"AccuracyScore":97.0,"ErrorType":"None"},{"Word":"for","Offset":41400000,"Duration":3300000,"Confidence":0.0,"AccuracyScore":94.0,"ErrorType":"None"},{"Word":"coffee","Offset":44800000,"Duration":5300000,"Confidence":0.0,"AccuracyScore":85.0,"ErrorType":"None"},{"Word":"starting","Offset":50400000,"Duration":5500000,"Confidence":0.0,"AccuracyScore":23.0,"ErrorType":"Mispronunciation"},{"Word":"next","Offset":56000000,"Duration":3900000,"Confidence":0.0,"AccuracyScore":55.0,"ErrorType":"Mispronunciation"},{"Word":"Monday","Offset":60000000,"Duration":6200000,"Confidence":0.0,"AccuracyScore":91.0,"ErrorType":"None"}]}]}
-2026-06-04 19:49:11 Raw API Response: {
-  "japanese": "こんにちは。チェックインをお願いします。予約をしている田中です。",
-  "english": "Hello. I would like to check in, please. My name is Tanaka, and I have a reservation.",
+
+=== [AUTO-GENERATE PROCESS START] ===
+Timestamp: 2026-06-05 12:30:21
+Client Raw Request Body: {"type":"new","context":[],"length":"20","english_level":"simple","ai_style":"jk","situations":["お店","交流","仕事","体調","学校","旅行","生活","移動"],"exclude_situations":["これいくらですか？ 値札が見当たらなくて。","これすごく美味しいです！ 何ていう料理ですか？ 作り方教えてほしいくらい。","すみません、毛布もう一枚もらえますか？ あとお水もお願いします。","桜そろそろ満開かな？ 週末お花見でも行きたいね、お弁当持って。","帰りの航空券、スマホに入ってるんですけど見せた方がいいですか？","Wi-Fiのパスワード教えてもらえますか？ 家族に着いたって連絡したくて。","その服かわいい！ どこで買ったの？ 私もそういうの探してたんだ。","今度の週末、暇だったらご飯でも行かない？ 新しいお店見つけたんだ。","おはようございます。今日も暑くなりそうですね。お出かけですか？","バスの乗り方がわからず運転手に聞く","これ日本に送ってもらうことってできますか？ 持って帰るには大きすぎて。","電話会議の接続トラブルでITサポートに連絡する","上司に休暇の申請をする","私の英語、変じゃないですか？ おかしかったら遠慮なく言ってください。","ヤバい、めっちゃ楽しかった！ また絶対来ようよ。","お風呂掃除しといて。あとトイレットペーパーもなくなりそうだから補充して。","ガイドツアーって何時からですか？ 日本語のツアーもありますか？","このパソコン、急に固まっちゃって動かないんですけど、どうすればいいですか？","乗り継ぎ便があるんですけど、ここで荷物受け取らなくて大丈夫ですよね？","お酒飲める？ 私あんまり強くないから、軽いやつにしようかな。"],"japanese_input":null,"input_mode":"translate","selected_situation":null}
+Successfully loaded situations.json. Total count in file: 360
+Selected Categories by UI: ["お店","交流","仕事","体調","学校","旅行","生活","移動"]
+Exclude Situations list (Recent 20): ["これいくらですか？ 値札が見当たらなくて。","これすごく美味しいです！ 何ていう料理ですか？ 作り方教えてほしいくらい。","すみません、毛布もう一枚もらえますか？ あとお水もお願いします。","桜そろそろ満開かな？ 週末お花見でも行きたいね、お弁当持って。","帰りの航空券、スマホに入ってるんですけど見せた方がいいですか？","Wi-Fiのパスワード教えてもらえますか？ 家族に着いたって連絡したくて。","その服かわいい！ どこで買ったの？ 私もそういうの探してたんだ。","今度の週末、暇だったらご飯でも行かない？ 新しいお店見つけたんだ。","おはようございます。今日も暑くなりそうですね。お出かけですか？","バスの乗り方がわからず運転手に聞く","これ日本に送ってもらうことってできますか？ 持って帰るには大きすぎて。","電話会議の接続トラブルでITサポートに連絡する","上司に休暇の申請をする","私の英語、変じゃないですか？ おかしかったら遠慮なく言ってください。","ヤバい、めっちゃ楽しかった！ また絶対来ようよ。","お風呂掃除しといて。あとトイレットペーパーもなくなりそうだから補充して。","ガイドツアーって何時からですか？ 日本語のツアーもありますか？","このパソコン、急に固まっちゃって動かないんですけど、どうすればいいですか？","乗り継ぎ便があるんですけど、ここで荷物受け取らなくて大丈夫ですよね？","お酒飲める？ 私あんまり強くないから、軽いやつにしようかな。"]
+Filtered by category. Count: 360
+Filtered by exclude list. Remaining count: 340
+Uniform random index chosen: 262 out of 340
+Selected Situation Data: {"category":"仕事","situation":"送金したいんですけど、やり方教えてもらえますか？ 初めてで。"}
+AI Style Key: jk (女子高生のような口調（例：「〜だね！」「〜じゃん？」「マジで」「うける」など）で、明るくフレンドリーに回答・解説してください。ただし、過度な褒め言葉や持ち上げすぎ（例：「天才じゃん！」など）は避け、建設的な内容を心がけてください。)
+English Level Key: simple (基本的で簡単な単語や文法（中学生レベル）を使用した、分かりやすい表現にしてください。)
+Constructed Prompt sent to Gemini:
+英語学習のロールプレイ開始用お題と英訳を生成してください。
+    
+    【入力された日本語】
+    
+    
+    役割定義:
+    - 'japanese': ユーザーが入力した日本語テキストをそのまま（一切変更せずに）格納してください。
+    - 'english': 入力された日本語テキスト全体に対する、自然で正確な英訳です。
+    
+    指示:
+    - 'japanese'のキーには、ユーザーの入力『』を「一字一句変えずにそのまま」設定してください。要約、言い換え、分割、省略、疑問文への変更は絶対にしないでください。
+    - 'english'のキーには、入力された日本語『』のすべての内容、ニュアンス、感情、詳細を漏れなく含んだ、正確で自然な英訳を生成してください。文字数の制限はありません。元の日本語の意味や長さに合わせて十分な長さで英訳してください。
+    - 生成する英語は、以下の基準に従ってください:
+      **基本的で簡単な単語や文法（中学生レベル）を使用した、分かりやすい表現にしてください。**
+    - 1人の発話としての翻訳のみを含めてください。複数人の会話形式にしないでください。
+    - 前置きや説明、話者名は一切含めず、純粋な英訳のみを出力してください。
+    
+    出力はJSON形式で、以下のキーを含めてください:
+      - 'japanese': ユーザーが入力した日本語テキスト（一字一句変えずにそのまま）
+      - 'english': その英訳
+      - 'sample_user_answers': この発話に対するユーザーの返答例のリスト（1〜5個程度）。提案数は固定せず、文脈に応じてできるだけ多くのバリエーションを提示してください。ただし、似たような表現ばかりを並めるのは避け、ポジティブ・ネガティブ・質問など様々な視点で提示してください。各要素は 'ja' (日本語) と 'en' (英語) のキーを持つオブジェクトにしてください。
+
+2026-06-05 12:30:29 Raw API Response: {
+  "japanese": "いらっしゃいませ。カフェへようこそ。ご注文はお決まりですか？それとも、もう少しメニューをご覧になりますか？",
+  "english": "Hello. Welcome to the cafe. Are you ready to order? Or do you need more time to look at the menu?",
   "sample_user_answers": [
     {
-      "ja": "いらっしゃいませ、田中様。パスポートを見せていただけますか？",
-      "en": "Welcome, Mr. Tanaka. Can I see your passport, please?"
+      "ja": "はい、決まりました。ホットコーヒーを一つください。",
+      "en": "Yes, I'm ready. One hot coffee, please."
     },
     {
-      "ja": "はい、かしこまりました。こちらにお名前を書いていただけますか？",
-      "en": "Yes, certainly. Can you write your name here, please?"
+      "ja": "いいえ、もう少し時間がほしいです。あとでまた来てください。",
+      "en": "No, I need more time. Please come back later."
     },
     {
-      "ja": "少々お待ちください。予約を確認します。",
-      "en": "Please wait a moment. I will check your reservation."
+      "ja": "今日のおすすめは何ですか？",
+      "en": "What is your recommendation today?"
     },
     {
-      "ja": "申し訳ありません。ご予約が見つかりません。予約番号はお持ちですか？",
-      "en": "I am sorry. I cannot find your reservation. Do you have your reservation number?"
+      "ja": "すみません、まだメニューを見ています。5分待ってください。",
+      "en": "I'm sorry, I'm still looking at the menu. Please wait for five minutes."
     },
     {
-      "ja": "お荷物をお運びしましょうか？",
-      "en": "Shall I carry your bags for you?"
+      "ja": "カフェラテはありますか？",
+      "en": "Do you have a cafe latte?"
     }
   ]
 }
+
+Gemini Response:
+{
+    "japanese": "いらっしゃいませ。カフェへようこそ。ご注文はお決まりですか？それとも、もう少しメニューをご覧になりますか？",
+    "english": "Hello. Welcome to the cafe. Are you ready to order? Or do you need more time to look at the menu?",
+    "sample_user_answers": [
+        {
+            "ja": "はい、決まりました。ホットコーヒーを一つください。",
+            "en": "Yes, I'm ready. One hot coffee, please."
+        },
+        {
+            "ja": "いいえ、もう少し時間がほしいです。あとでまた来てください。",
+            "en": "No, I need more time. Please come back later."
+        },
+        {
+            "ja": "今日のおすすめは何ですか？",
+            "en": "What is your recommendation today?"
+        },
+        {
+            "ja": "すみません、まだメニューを見ています。5分待ってください。",
+            "en": "I'm sorry, I'm still looking at the menu. Please wait for five minutes."
+        },
+        {
+            "ja": "カフェラテはありますか？",
+            "en": "Do you have a cafe latte?"
+        }
+    ]
+}
+=== [AUTO-GENERATE PROCESS END] ===
+
