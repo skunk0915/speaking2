@@ -3879,7 +3879,7 @@ button .loader {
     }
 
     .player-info {
-        display: flex;
+        display: none; // Hide title and text to prevent revealing the answer
         flex-direction: column;
         gap: 2px;
         flex: 1;
@@ -3913,8 +3913,8 @@ button .loader {
             flex-direction: row;
             align-items: center;
             gap: 20px;
-            width: auto;
-            flex: 2;
+            width: 100%;
+            flex: 1;
         }
     }
 

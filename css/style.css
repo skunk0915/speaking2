@@ -3985,7 +3985,7 @@ button .loader {
   }
 }
 .global-audio-player .player-info {
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 2px;
   flex: 1;
@@ -4017,8 +4017,8 @@ button .loader {
     flex-direction: row;
     align-items: center;
     gap: 20px;
-    width: auto;
-    flex: 2;
+    width: 100%;
+    flex: 1;
   }
 }
 .global-audio-player .player-buttons-row {

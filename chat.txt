@@ -1180,3 +1180,13 @@ AI: 復習モード（および通常モード）において、英訳練習モ�
 - /Users/mizy/Dropbox/speaking2/sw.js
 - /Users/mizy/Dropbox/speaking2/README.md
 - /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-06 06:20:00
+USER: 音声再生プレイヤーに読み上げ中の英文を表示しない。リスニングボタン（btn-initial-listen）を押して音声再生したときは何の英文かを音だけでわかるためのリスニングなのにその英文で答えがわかってしまう。英文をプレイヤーに表示しないかわりにプログレスバーをその分広げる
+AI: 音声再生プレイヤー上で再生中の英文テキスト（.player-info）を非表示（display: none）にすることで、リスニングボタン（btn-initial-listen）を押した際に視覚的に英文の答えがわかってしまうのを防ぎました。また、英文表示領域を非表示にしたスペースを活用し、プログレスバー（シークバー）を含む操作領域（.player-controls）の横幅をプレイヤー全体の最大幅まで広げるスタイリング調整を css/style.scss に適用し、css/style.css にビルドしました。さらに、サービスワーカー（sw.js）のキャッシュバージョンを english-training-v32 に更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
