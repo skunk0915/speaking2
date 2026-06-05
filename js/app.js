@@ -2924,10 +2924,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         saveUIState();
                     }
                     if (practiceFeedback && practiceFeedback.classList.contains('hidden')) {
+                        item.classList.add('practice-hide-english');
+                        english.classList.add('hidden');
                         startTimer();
+                    } else {
+                        item.classList.remove('practice-hide-english');
+                        english.classList.remove('hidden');
                     }
                 } else {
                     stopTimer();
+                    item.classList.remove('practice-hide-english');
                 }
                 toggleSection(btnPractice, practiceSection, practiceInput);
             });
@@ -3496,6 +3502,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         historyItemRef.reactions = dataCorr.reactions || [];
                         historyItemRef.intended_japanese = dataCorr.intended_japanese || null;
                         
+                        item.classList.remove('practice-hide-english');
+                        english.classList.remove('hidden');
+                        
                         // Bind user memo for retry item
                         const retryItems = practiceFeedback.querySelectorAll('.retry-result-item');
                         const lastRetryItem = retryItems[retryItems.length - 1];
@@ -3553,6 +3562,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         historyItemRef.reactions = dataCorr.reactions || [];
                         historyItemRef.intended_japanese = dataCorr.intended_japanese || null;
                         
+                        item.classList.remove('practice-hide-english');
+                        english.classList.remove('hidden');
+                        
                         // Bind user memo for initial feedback item
                         const memoInput = practiceFeedback.querySelector('.user-memo-input');
                         setupUserMemo(memoInput, historyItemRef, () => {
@@ -3599,6 +3611,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         practiceInput.style.height = 'auto';
                         btnPracticeSend.disabled = true;
                         feedback.classList.add('hidden');
+                        item.classList.add('practice-hide-english');
+                        english.classList.add('hidden');
                         practiceInput.focus();
                         startTimer();
                         
@@ -4742,6 +4756,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     practiceSection.classList.remove('hidden');
                     btnPractice.classList.add('active');
+                    
+                    const itemEl = groupEl.querySelector('.conversation-item');
+                    const englishEl = groupEl.querySelector('.english');
+                    if (gData.practice.feedback) {
+                        if (itemEl) itemEl.classList.remove('practice-hide-english');
+                        if (englishEl) englishEl.classList.remove('hidden');
+                    } else {
+                        if (itemEl) itemEl.classList.add('practice-hide-english');
+                        if (englishEl) englishEl.classList.add('hidden');
+                    }
                     
                     const practiceInput = groupEl.querySelector('.practice-input');
                     if (practiceInput && gData.practice.input_value) {

@@ -548,45 +548,74 @@ if ($type === 'new') {
             $specificInstruction = "ユーザーが入力した『{$japaneseInput}』という状況・意図を汲み取り、そのシーンで相手（AI）がユーザーに話しかける最初の言葉として最も自然でリアリティのある発話を生成してください。単なる直訳ではなく、その状況を具体化（場所や関係性など）して、会話が弾むような一言にしてください。";
         }
     } else {
+        $processLog = [];
+        $processLog[] = "=== [AUTO-GENERATE PROCESS START] ===";
+        $processLog[] = "Timestamp: " . date('Y-m-d H:i:s');
+        $processLog[] = "Client Raw Request Body: " . json_encode($input, JSON_UNESCAPED_UNICODE);
+
         if (file_exists($situationsFile)) {
             $allSituations = json_decode(file_get_contents($situationsFile), true);
             if ($allSituations && is_array($allSituations)) {
+                $processLog[] = "Successfully loaded situations.json. Total count in file: " . count($allSituations);
+
                 $selectedCategories = $input['situations'] ?? [];
                 $excludeSituations = $input['exclude_situations'] ?? [];
+
+                $processLog[] = "Selected Categories by UI: " . json_encode($selectedCategories, JSON_UNESCAPED_UNICODE);
+                $processLog[] = "Exclude Situations list (Recent 20): " . json_encode($excludeSituations, JSON_UNESCAPED_UNICODE);
 
                 $filteredSituations = $allSituations;
                 if (!empty($selectedCategories)) {
                     $filteredSituations = array_filter($allSituations, function ($s) use ($selectedCategories) {
                         return in_array($s['category'], $selectedCategories);
                     });
+                    $processLog[] = "Filtered by category. Count: " . count($filteredSituations);
                     if (empty($filteredSituations)) {
+                        $processLog[] = "Filtered result by category was empty! Falling back to all situations.";
                         $filteredSituations = $allSituations;
                     }
+                } else {
+                    $processLog[] = "No category filters selected. Using all situations.";
                 }
 
-                // Filter out recently played situations to avoid repeats
                 if (!empty($excludeSituations)) {
                     $trulyFiltered = array_filter($filteredSituations, function ($s) use ($excludeSituations) {
                         return !in_array($s['situation'], $excludeSituations);
                     });
-                    // Fallback if all situations are excluded
+                    $processLog[] = "Filtered by exclude list. Remaining count: " . count($trulyFiltered);
                     if (!empty($trulyFiltered)) {
                         $filteredSituations = $trulyFiltered;
+                    } else {
+                        $processLog[] = "All matched situations were in the exclude list. Fallback: Ignored exclude filter.";
                     }
                 }
 
                 // Reset keys to sequential index to ensure perfectly uniform random selection
                 $filteredSituations = array_values($filteredSituations);
+                $randIndex = array_rand($filteredSituations);
+                $randomSituation = $filteredSituations[$randIndex];
 
-                $randomSituation = $filteredSituations[array_rand($filteredSituations)];
+                $processLog[] = "Uniform random index chosen: " . $randIndex . " out of " . count($filteredSituations);
+                $processLog[] = "Selected Situation Data: " . json_encode($randomSituation, JSON_UNESCAPED_UNICODE);
+
                 $situationText = "シチュエーション: " . $randomSituation['situation'] . " (" . $randomSituation['category'] . ")";
                 $selectedSituationText = $randomSituation['situation'];
+            } else {
+                $processLog[] = "ERROR: Failed to json_decode situations.json (invalid JSON format or empty).";
             }
+        } else {
+            $processLog[] = "ERROR: situations.json file does not exist at: " . $situationsFile;
         }
+
+        $processLog[] = "AI Style Key: " . $aiStyle . " (" . $currentStyleInst . ")";
+        $processLog[] = "English Level Key: " . $englishLevel . " (" . $currentLevelInst . ")";
+
+        $GLOBALS['auto_process_log'] = $processLog;
+
         $specificInstruction = "指定されたシチュエーションをさらに具体的に深掘りし、そのシーンでしかあり得ないような、具体的でリアリティのある発話を生成してください。どこでも言えるような汎用的なフレーズ（例：「こんにちは」「お元気ですか」など）は避け、学習者がそのシーンの語彙を学べるような内容にしてください。また、毎回同じようなフレーズになるのを防ぐため、具体的な曜日、時間、人間関係、あるいはその状況特有の細かな背景やちょっとした出来事（例：忘れ物、時間の遅れ、特別なリクエストなど）をランダムに想定し、オリジナリティとリアリティのある発話にしてください。";
     }
 
-    if (isset($inputMode) && $inputMode === 'translate') {
+    if (isset($inputMode) && $inputMode === 'translate' && !empty($japaneseInput)) {
         $prompt = "英語学習のロールプレイ開始用お題と英訳を生成してください。
     
     【入力された日本語】
@@ -917,7 +946,22 @@ if ($type === 'new') {
 
 try {
     $tempParam = (isset($inputMode) && $inputMode === 'url') ? 0.85 : null;
+
+    // 完全に自動生成で開始する場合の、Geminiリクエスト前の詳細プロセスと構築プロンプトをログ記録
+    if ($type === 'new' && empty($japaneseInput)) {
+        $logHeader = implode("\n", $GLOBALS['auto_process_log'] ?? []);
+        $logHeader .= "\nConstructed Prompt sent to Gemini:\n" . $prompt . "\n";
+        file_put_contents(__DIR__ . '/../debug_log.txt', "\n" . $logHeader . "\n", FILE_APPEND);
+    }
+
     $json = callGeminiJson($prompt, $tempParam);
+
+    // Geminiからのレスポンスをログ記録
+    if ($type === 'new' && empty($japaneseInput)) {
+        $logFooter = "Gemini Response:\n" . json_encode($json, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . "\n";
+        $logFooter .= "=== [AUTO-GENERATE PROCESS END] ===\n";
+        file_put_contents(__DIR__ . '/../debug_log.txt', "\n" . $logFooter . "\n", FILE_APPEND);
+    }
 
     if ($type === 'situation_options') {
         $allCandidates = dedupeSituationOptions($json['options'] ?? [], $excludeList);

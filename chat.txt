@@ -1190,3 +1190,17 @@ AI: 音声再生プレイヤー上で再生中の英文テキスト（.player-in
 - /Users/mizy/Dropbox/speaking2/sw.js
 - /Users/mizy/Dropbox/speaking2/README.md
 - /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-06 06:30:00
+USER: 309d1e6425d390c923ccdc5e9de1c8e21c18d1c3 とか b1d86da0b9028219a4cb2cc225bf5f8c0cfc396bの改修が失われている
+AI: gitの競合マージによってデグレードし失われていた、コミット 309d1e6 および b1d86da の改修を復元しました。
+1. `api/generate_text.php` において、日本語入力が空（自動生成）の場合に翻訳モードをスキップして状況データベースからランダムにお題を生成する処理を復元し、同時にGeminiとの通信ログを `debug_log.txt` に出力するデバッグ支援ロジックも復元しました。これで空入力時に毎回カフェの例文しか出なくなるバグが再発するのを解消しました。
+2. `js/app.js` および `css/style.scss` において、英訳練習モード（btn-practice）の解答入力中に英文テキスト（.english）を確実に非表示にし（practice-hide-englishクラスの適用）、添削結果が表示された時点で元の英文を再表示する制御ロジックを復元しました。また、Sassのビルドを実行して css/style.css とそのマップを更新し、PWAキャッシュ（sw.js）を v33 にバンプしました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/api/generate_text.php
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
