@@ -3385,9 +3385,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const section = activeBtn === btnPractice ? practiceSection :
                     activeBtn === btnVariationMenu ? variationSection :
                         activeBtn === btnQa ? mainQa : historySection;
-                const input = activeBtn === btnPractice ? practiceInput :
-                    (activeBtn === btnQa ? mainQa.querySelector('.item-qa-input') : null);
-                toggleSection(activeBtn, section, input);
+                
+                // 強制的に active クラスを取り除く（状態の不整合を防ぐため）
+                activeBtn.classList.remove('active');
+                
+                if (section && !section.classList.contains('hidden')) {
+                    slideUp(section, 300).then(() => {
+                        updateInitialActions();
+                    });
+                }
 
                 // If practice was active, always show english (remove .hidden)
                 if (activeBtn === btnPractice) {
@@ -3974,10 +3980,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     textContent.appendChild(actionsContainer);
                 }
             } else {
-                if (actionsContainer) {
-                    actionsContainer.remove();
-                    actionsContainer = null;
+                const existingContainer = item.querySelector('.initial-action-container');
+                if (existingContainer) {
+                    existingContainer.remove();
                 }
+                actionsContainer = null;
             }
         }
 

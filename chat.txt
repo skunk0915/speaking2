@@ -1169,3 +1169,14 @@ USER: git競合解決
 AI: ローカルとリモート（origin/main）で分岐していたコミットをマージし、競合を解決して最新状態に更新しました。その後、リモートリポジトリ（origin/main）にプッシュを実行し同期させました。
 編集ファイル:
 - /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-06 06:11:00
+USER: 復習モードでbtn-practice押したあとbtn-translate押しても英訳が出ない。btn-practice状態が解除されて英訳が出るのが正しい挙動。関連して英訳だけ出そうとしてるのに何も出ない状態になることがある。
+AI: 復習モード（および通常モード）において、英訳練習モード（btn-practice）がアクティブな状態から英訳表示ボタン（btn-translate）を押した際に、練習モードの状態（アクティブクラスおよび表示領域）が確実に解除され、元の英訳テキストが正しく表示されるようにバグを修正しました。
+また、初期アクション選択肢ボタン（「日本語を英訳」「リスニング」「英文に返答」）が表示されている状態で英訳ボタンを押した際に、コンテナがDOMから完全にクリーンアップされず画面表示が狂ってしまう不具合についても、DOMから直接特定して削除する堅牢なロジックを実装することで解消しました。
+さらに、サービスワーカー（sw.js）のキャッシュバージョンを更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
