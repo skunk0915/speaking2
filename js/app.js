@@ -931,7 +931,7 @@ document.addEventListener('DOMContentLoaded', () => {
         playerEl.classList.remove('hidden');
         if (text) {
             if (isListeningModeActive) {
-                playerTextEl.textContent = 'リスニング中...';
+                playerTextEl.textContent = '';
             } else {
                 applyAudioHighlight(audio, playerTextEl, text);
 
@@ -1022,7 +1022,7 @@ document.addEventListener('DOMContentLoaded', () => {
             playerEl.classList.remove('hidden');
             if (text) {
                 if (isListeningModeActive) {
-                    playerTextEl.textContent = 'リスニング中...';
+                    playerTextEl.textContent = '';
                 } else {
                     applyAudioHighlight(audio, playerTextEl, text);
 
@@ -3674,6 +3674,14 @@ document.addEventListener('DOMContentLoaded', () => {
             stopAudio(); // Stop other audio
             isListeningModeActive = isListening;
 
+            if (playerEl) {
+                if (isListeningModeActive) {
+                    playerEl.classList.add('listening-mode');
+                } else {
+                    playerEl.classList.remove('listening-mode');
+                }
+            }
+
             const iconPlay = btnTrigger ? btnTrigger.querySelector('.icon-play') : null;
             const loader = btnTrigger ? btnTrigger.querySelector('.loader') : null;
 
@@ -4000,6 +4008,9 @@ document.addEventListener('DOMContentLoaded', () => {
             currentAudio = null;
         }
         isListeningModeActive = false;
+        if (playerEl) {
+            playerEl.classList.remove('listening-mode');
+        }
         resetAndStartHideTimer(5000);
         if (currentAudioBtn) {
             const iconPlay = currentAudioBtn.querySelector('.icon-play');

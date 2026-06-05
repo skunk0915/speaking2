@@ -3961,6 +3961,13 @@ button .loader {
   opacity: 0;
   pointer-events: none;
 }
+.global-audio-player.listening-mode .player-info {
+  display: none !important;
+}
+.global-audio-player.listening-mode .player-controls {
+  flex: 1 !important;
+  width: 100% !important;
+}
 .global-audio-player .player-container {
   width: 100%;
   max-width: 720px;
@@ -4236,4 +4243,6 @@ button .loader {
 }
 .word-highlight-span.word-highlight-passed {
   color: rgba(74, 74, 74, 0.7);
-}/*# sourceMappingURL=style.css.map */
+}
+
+/*# sourceMappingURL=style.css.map */

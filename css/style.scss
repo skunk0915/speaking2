@@ -3850,6 +3850,16 @@ button .loader {
         pointer-events: none;
     }
 
+    &.listening-mode {
+        .player-info {
+            display: none !important;
+        }
+        .player-controls {
+            flex: 1 !important;
+            width: 100% !important;
+        }
+    }
+
     .player-container {
         width: 100%;
         max-width: 720px;
