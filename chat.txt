@@ -1155,3 +1155,22 @@ AI: 音声がすでに再生開始されている状態で、英文の表示ト�
 - /Users/mizy/Dropbox/speaking2/js/app.js
 - /Users/mizy/Dropbox/speaking2/sw.js
 - /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-05 10:07:00
+USER: .btn-practiceを押して英訳を入力時は英訳を非表示にしているが、入力後、添削表示とともに英訳を表示。再挑戦時は再度英訳を非表示。
+AI: 英訳練習（.btn-practice）開始時および再挑戦（Retry）時に英訳を非表示にし、添削結果の受信・表示が完了した際に英訳を再表示する制御クラス（practice-hide-english）を実装しました。これにより、英訳を入力している間は英文を非表示にして自力で考えるトレーニングが行え、添削結果を確認するタイミングで正解の英訳を同時に見ることができるように改善しました。また、sw.jsのキャッシュバージョンを english-training-v30 に更新しました。
+編集したファイルパス:
+- css/style.scss
+- css/style.css
+- js/app.js
+- sw.js
+- README.md
+- chat.txt
+
+2026-06-05 11:05:00
+USER: 改善してない　& 'c:\Users\OW\Pictures\Screenshots\スクリーンショット 2026-06-05 110358.png'
+AI: 添削結果が表示されても元の英訳（答え）が表示されない問題（元の英訳が `.hidden` クラスを保持したままになっていたため）を修正しました。添削表示完了時に英訳要素（`.english`）から直接 `.hidden` クラスを削除して確実に再表示し、再挑戦（Retry）時や練習モード開始時には `.hidden` を追加して再度非表示にするように制御を修正しました。また、sw.jsのキャッシュバージョンを english-training-v31 に更新しました。
+編集したファイルパス:
+- js/app.js
+- sw.js
+- chat.txt
