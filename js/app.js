@@ -515,6 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentAudio = null;
     let currentAudioBtn = null;
     let isRepeating = false;
+    let isListeningModeActive = false;
     let currentContext = ""; // Store the last Japanese prompt
     let currentSampleAnswers = []; // Store current sample answers
 
@@ -929,20 +930,24 @@ document.addEventListener('DOMContentLoaded', () => {
         // Display player
         playerEl.classList.remove('hidden');
         if (text) {
-            applyAudioHighlight(audio, playerTextEl, text);
+            if (isListeningModeActive) {
+                playerTextEl.textContent = 'リスニング中...';
+            } else {
+                applyAudioHighlight(audio, playerTextEl, text);
 
-            let activeEnglishEl = null;
-            if (currentAudioBtn) {
-                const itemGroup = currentAudioBtn.closest('.conversation-group');
-                if (itemGroup) {
-                    activeEnglishEl = itemGroup.querySelector('.english');
+                let activeEnglishEl = null;
+                if (currentAudioBtn) {
+                    const itemGroup = currentAudioBtn.closest('.conversation-group');
+                    if (itemGroup) {
+                        activeEnglishEl = itemGroup.querySelector('.english');
+                    }
                 }
-            }
-            if (activeEnglishEl && !activeEnglishEl.classList.contains('hidden')) {
-                const cleanText = text.trim();
-                const engText = activeEnglishEl.textContent.trim();
-                if (engText === cleanText) {
-                    applyAudioHighlight(audio, activeEnglishEl, engText);
+                if (activeEnglishEl && !activeEnglishEl.classList.contains('hidden')) {
+                    const cleanText = text.trim();
+                    const engText = activeEnglishEl.textContent.trim();
+                    if (engText === cleanText) {
+                        applyAudioHighlight(audio, activeEnglishEl, engText);
+                    }
                 }
             }
         }
@@ -1016,20 +1021,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             playerEl.classList.remove('hidden');
             if (text) {
-                applyAudioHighlight(audio, playerTextEl, text);
+                if (isListeningModeActive) {
+                    playerTextEl.textContent = 'リスニング中...';
+                } else {
+                    applyAudioHighlight(audio, playerTextEl, text);
 
-                let activeEnglishEl = null;
-                if (currentAudioBtn) {
-                    const itemGroup = currentAudioBtn.closest('.conversation-group');
-                    if (itemGroup) {
-                        activeEnglishEl = itemGroup.querySelector('.english');
+                    let activeEnglishEl = null;
+                    if (currentAudioBtn) {
+                        const itemGroup = currentAudioBtn.closest('.conversation-group');
+                        if (itemGroup) {
+                            activeEnglishEl = itemGroup.querySelector('.english');
+                        }
                     }
-                }
-                if (activeEnglishEl && !activeEnglishEl.classList.contains('hidden')) {
-                    const cleanText = text.trim();
-                    const engText = activeEnglishEl.textContent.trim();
-                    if (engText === cleanText) {
-                        applyAudioHighlight(audio, activeEnglishEl, engText);
+                    if (activeEnglishEl && !activeEnglishEl.classList.contains('hidden')) {
+                        const cleanText = text.trim();
+                        const engText = activeEnglishEl.textContent.trim();
+                        if (engText === cleanText) {
+                            applyAudioHighlight(audio, activeEnglishEl, engText);
+                        }
                     }
                 }
             }
@@ -3642,7 +3651,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         };
 
-        const playAudio = async (btnTrigger = btnSpeak) => {
+        const playAudio = async (btnTrigger = btnSpeak, isListening = false) => {
             const currentVoice = voiceSelect.value;
             const currentSpeed = speedRange.value;
 
@@ -3663,6 +3672,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             stopAudio(); // Stop other audio
+            isListeningModeActive = isListening;
 
             const iconPlay = btnTrigger ? btnTrigger.querySelector('.icon-play') : null;
             const loader = btnTrigger ? btnTrigger.querySelector('.loader') : null;
@@ -3929,7 +3939,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 btnListen.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    btnSpeak.click();
+                    playAudio(btnSpeak, true);
                     // リスニング動作自体は状態が変わらないため、明示的に非表示にする
                     if (actionsContainer) {
                         actionsContainer.remove();
@@ -3989,6 +3999,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentAudio.pause();
             currentAudio = null;
         }
+        isListeningModeActive = false;
         resetAndStartHideTimer(5000);
         if (currentAudioBtn) {
             const iconPlay = currentAudioBtn.querySelector('.icon-play');
