@@ -1202,5 +1202,15 @@ AI: gitの競合マージによってデグレードし失われていた、コ�
 - /Users/mizy/Dropbox/speaking2/css/style.scss
 - /Users/mizy/Dropbox/speaking2/css/style.css
 - /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-06 06:45:00
+USER: 音声再生に合わせて英文の色を変える機能で、カンマ、ピリオドなど単語以外が読み上げ前後で色が変わらないままになっている
+AI: 英文の音声再生中に再生位置とテキスト色を同期するハイライト機能で、カンマやピリオド等の記号が再生前後で元の色のまま残ってしまう不具合を解決しました。スペース以外の記号もハイライト対象（word-highlight-symbolクラス）として個別にspanタグで囲むようjs/app.jsのロジックを修正し、読み終えた箇所と同様に薄くフェードアウトするようにしました。また、css/style.scssにおいて記号のアクティブ時の余白拡大や背景色ハイライトを無効化するスタイル定義を追加し、Sass of コンパイルを行いました。さらに、PWAのキャッシュ（sw.js）を v34 に更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+- /Users/mizy/Dropbox/speaking2/sw.js
 - /Users/mizy/Dropbox/speaking2/README.md
 - /Users/mizy/Dropbox/speaking2/chat.txt

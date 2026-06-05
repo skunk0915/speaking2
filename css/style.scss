@@ -4159,4 +4159,17 @@ button .loader {
     &.word-highlight-passed {
         color: rgba($text-primary, 0.7);
     }
+
+    &.word-highlight-symbol {
+        display: inline;
+        padding: 0;
+        
+        &.word-highlight-active {
+            background-color: transparent;
+            text-shadow: none;
+            transform: none;
+            font-weight: normal;
+            color: inherit;
+        }
+    }
 }

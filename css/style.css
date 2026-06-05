@@ -4237,5 +4237,16 @@ button .loader {
 .word-highlight-span.word-highlight-passed {
   color: rgba(74, 74, 74, 0.7);
 }
+.word-highlight-span.word-highlight-symbol {
+  display: inline;
+  padding: 0;
+}
+.word-highlight-span.word-highlight-symbol.word-highlight-active {
+  background-color: transparent;
+  text-shadow: none;
+  transform: none;
+  font-weight: normal;
+  color: inherit;
+}
 
 /*# sourceMappingURL=style.css.map */

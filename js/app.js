@@ -841,6 +841,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tokens.forEach((token) => {
             let weight = 0;
             const isWord = /[a-zA-Z0-9'-]+/.test(token);
+            const isSpace = /^\s+$/.test(token);
 
             if (isWord) {
                 weight = token.length;
@@ -860,8 +861,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (isWord) {
                 htmlContent += `<span class="word-highlight-span" data-start-w="${startW}" data-end-w="${endW}">${escapeHTML(token)}</span>`;
-            } else {
+            } else if (isSpace) {
                 htmlContent += escapeHTML(token);
+            } else {
+                htmlContent += `<span class="word-highlight-span word-highlight-symbol" data-start-w="${startW}" data-end-w="${endW}">${escapeHTML(token)}</span>`;
             }
         });
 
