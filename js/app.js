@@ -2619,6 +2619,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
+
+        function updateToggleButtonsState() {
+            if (btnTranslateJp) {
+                if (!japanese.classList.contains('hidden')) {
+                    btnTranslateJp.classList.add('active');
+                } else {
+                    btnTranslateJp.classList.remove('active');
+                }
+            }
+            if (btnTranslate) {
+                if (!english.classList.contains('hidden')) {
+                    btnTranslate.classList.add('active');
+                } else {
+                    btnTranslate.classList.remove('active');
+                }
+            }
+        }
+
+        updateToggleButtonsState();
  
         // History Toggle
         if (btnHistory) {
@@ -2939,6 +2958,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     item.classList.remove('practice-hide-english');
                 }
                 toggleSection(btnPractice, practiceSection, practiceInput);
+                updateToggleButtonsState();
             });
         }
 
@@ -3377,6 +3397,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnTranslateJp) {
             btnTranslateJp.addEventListener('click', () => {
                 japanese.classList.toggle('hidden');
+                updateToggleButtonsState();
 
                 updateInitialActions();
 
@@ -3406,6 +3427,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // If practice was active, always show english (remove .hidden)
                 if (activeBtn === btnPractice) {
+                    stopTimer();
+                    item.classList.remove('practice-hide-english');
                     english.classList.remove('hidden');
                 } else {
                     english.classList.toggle('hidden');
@@ -3415,6 +3438,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 english.classList.toggle('hidden');
             }
 
+            updateToggleButtonsState();
             updateInitialActions();
 
             // Apply or clean highlight based on the visibility of english text
@@ -3595,6 +3619,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 practiceInput.disabled = false;
                 btnPracticeSend.disabled = false;
+                updateToggleButtonsState();
                 if (typeof saveUIState === 'function') {
                     saveUIState();
                 }
@@ -3616,6 +3641,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         feedback.classList.add('hidden');
                         item.classList.add('practice-hide-english');
                         english.classList.add('hidden');
+                        updateToggleButtonsState();
                         practiceInput.focus();
                         startTimer();
                         

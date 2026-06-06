@@ -375,6 +375,15 @@ body {
                 }
             }
 
+            &.btn-translate-jp,
+            &.btn-translate {
+                &.active {
+                    color: $primary-color;
+                    box-shadow: inset 4px 4px 8px $shadow-dark,
+                        inset -4px -4px 8px $shadow-light;
+                }
+            }
+
             &:disabled {
                 opacity: 0.5;
                 box-shadow: none;

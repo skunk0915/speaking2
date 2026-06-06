@@ -1234,3 +1234,25 @@ AI: メッセージ生成直後に表示される「初期アクション選択�
 - /Users/mizy/Dropbox/speaking2/sw.js
 - /Users/mizy/Dropbox/speaking2/README.md
 - /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-07 08:03:25
+USER: btn-translate-jp、btn-translateを押したときのボタンの表示はON/OFFに応じたトグルデザインにする
+AI: 日本語訳表示ボタン（btn-translate-jp）および英訳表示ボタン（btn-translate）について、それぞれの表示・非表示状態（hiddenクラスの有無）に合わせてボタン自身に active クラスを動的にトグルする updateToggleButtonsState ヘルパーを実装しました。これにより、初期表示、トグルクリック、練習モード開始、添削結果表示、再挑戦時など、テキストの表示状態が変化するすべての場面でボタンがアクティブ状態（押し込まれたトグルデザイン・プライマリカラー）に正しく連動するようになりました。また、css/style.scss においてアクティブ時のスタイル定義を明示化し、Sassのビルドを実行して css/style.css と sw.js (v37) および README.md を更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-07 08:07:02
+USER: btn-practiceを押したあとbtn-translateを押すと英訳が表示されない
+AI: 練習モード（btn-practice）起動中に英訳表示ボタン（btn-translate）をクリックした際、練習を中止して英訳を表示する挙動において、回答入力中に英訳を隠すためのCSSクラス（practice-hide-english）がカード要素に残ってしまい、英訳が画面上に表示されないデグレードバグを修正しました。また、この練習中断のタイミングで練習用タイマーも正しく自動停止（stopTimer()）するように制御を追加しました。これに伴い、sw.jsのキャッシュバージョンを v38 に更新し、README.md を更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
+
