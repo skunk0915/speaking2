@@ -3969,28 +3969,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         actionsContainer = null;
                     }
                 });
-                
-                const btnPracticeAct = document.createElement('button');
-                btnPracticeAct.className = 'btn-initial-action btn-initial-practice';
-                btnPracticeAct.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect>
-                        <rect x="3" y="5" width="8" height="7" fill="currentColor" stroke="none"></rect>
-                        <line x1="11" y1="8.5" x2="21" y2="8.5"></line>
-                        <line x1="11" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="15.5" x2="21" y2="15.5"></line>
-                    </svg>
-                    英文に返答
-                `;
-                btnPracticeAct.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    btnTranslate.click();
-                    btnPractice.click();
-                });
-                
                 actionsContainer.appendChild(btnJp);
                 actionsContainer.appendChild(btnListen);
-                actionsContainer.appendChild(btnPracticeAct);
                 
                 const textContent = item.querySelector('.text-content');
                 if (textContent) {

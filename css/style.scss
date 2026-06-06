@@ -3825,10 +3825,6 @@ button .loader {
         &.btn-initial-listen {
             // border-left: 3px solid #34c759;
         }
-
-        &.btn-initial-practice {
-            // border-left: 3px solid #007aff;
-        }
     }
 }
 
@@ -3860,7 +3856,7 @@ button .loader {
         backdrop-filter: blur(15px);
         -webkit-backdrop-filter: blur(15px);
         border: 1px solid rgba(255, 255, 255, 0.6);
-        box-shadow: 
+        box-shadow:
             0 10px 30px rgba(0, 0, 0, 0.08),
             0 1px 3px rgba(0, 0, 0, 0.02);
         display: flex;
@@ -3963,7 +3959,7 @@ button .loader {
         &#player-btn-ab {
             font-size: 11px;
             font-weight: 700;
-            
+
             &.active {
                 background: $primary-color;
                 color: #fff;
@@ -4006,7 +4002,7 @@ button .loader {
         align-items: center;
         gap: 8px;
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        
+
         &.hidden {
             display: none !important;
         }
@@ -4048,10 +4044,10 @@ button .loader {
         transform: translate(-50%, -50%);
         pointer-events: none;
         z-index: 10;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
         border: 1px solid #fff;
         line-height: 1;
-        
+
         &.marker-b {
             background: #ff3b30;
         }
@@ -4070,7 +4066,7 @@ button .loader {
         transform: translateY(-50%);
         pointer-events: none;
         z-index: 5;
-        
+
         &.hidden {
             display: none !important;
         }
@@ -4102,7 +4098,7 @@ button .loader {
             height: 6px;
             border-radius: 3px;
             background: #e2e8f0;
-            box-shadow: inset 1px 1px 3px rgba(0,0,0,0.06);
+            box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.06);
         }
 
         &::-webkit-slider-thumb {
@@ -4147,7 +4143,7 @@ button .loader {
     border-radius: 4px;
     padding: 0 2px;
     display: inline-block;
-    
+
     &.word-highlight-active {
         background-color: rgba($primary-color, 0.18);
         color: color.adjust($primary-color, $lightness: -15%);
@@ -4155,7 +4151,7 @@ button .loader {
         text-shadow: 0 0 1px rgba($primary-color, 0.3);
         transform: scale(1.02);
     }
-    
+
     &.word-highlight-passed {
         color: rgba($text-primary, 0.7);
     }
@@ -4163,7 +4159,7 @@ button .loader {
     &.word-highlight-symbol {
         display: inline;
         padding: 0;
-        
+
         &.word-highlight-active {
             background-color: transparent;
             text-shadow: none;

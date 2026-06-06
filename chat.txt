@@ -1214,3 +1214,14 @@ AI: 英文の音声再生中に再生位置とテキスト色を同期するハ�
 - /Users/mizy/Dropbox/speaking2/sw.js
 - /Users/mizy/Dropbox/speaking2/README.md
 - /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-07 07:56:32
+USER: 「英文に返答」ボタン（class="btn-initial-action btn-initial-practice"）削除
+AI: メッセージ生成直後に日本語・英語テキストの双方が非表示である場合に表示される「初期アクション選択肢ボタン」から、「英文に返答」ボタン（class="btn-initial-action btn-initial-practice"）を削除しました。これにより、初期アクションの選択肢は「日本語を英訳」と「リスニング」の2つのみとなり、それに合わせて関連するCSS（Sass）のスタイル定義を削除および再ビルドし、README.mdの解説内容も更新しました。また、PWAのキャッシュ（sw.js）を v35 に更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
