@@ -4152,6 +4152,11 @@ button .loader {
     border-radius: 4px;
     padding: 0 2px;
     display: inline-block;
+    cursor: pointer;
+
+    &:hover {
+        background-color: rgba($primary-color, 0.08);
+    }
 
     &.word-highlight-active {
         background-color: rgba($primary-color, 0.18);
@@ -4168,6 +4173,12 @@ button .loader {
     &.word-highlight-symbol {
         display: inline;
         padding: 0;
+        cursor: pointer;
+
+        &:hover {
+            background-color: transparent;
+            text-decoration: underline;
+        }
 
         &.word-highlight-active {
             background-color: transparent;

@@ -655,6 +655,29 @@ document.addEventListener('DOMContentLoaded', () => {
     function initGlobalAudioPlayer() {
         if (!playerEl || !playerPlayPauseBtn || !playerSeekbar) return;
 
+        if (playerTextEl) {
+            playerTextEl.addEventListener('click', (e) => {
+                const span = e.target.closest('.word-highlight-span');
+                if (!span) return;
+
+                e.stopPropagation();
+                if (!currentAudio || !currentAudio.duration) return;
+
+                const startW = parseFloat(span.dataset.startW);
+                const lastSpan = playerTextEl.querySelector('.word-highlight-span:last-child');
+                const totalWeight = lastSpan ? parseFloat(lastSpan.dataset.endW) : 0;
+                if (totalWeight === 0) return;
+
+                const ratio = startW / totalWeight;
+                currentAudio.currentTime = ratio * currentAudio.duration;
+
+                if (currentAudio.paused) {
+                    currentAudio.play().catch(err => console.log('Playback resume failed', err));
+                }
+                resetAndStartHideTimer(5000);
+            });
+        }
+
         playerPlayPauseBtn.addEventListener('click', () => {
             if (abRepeatTimeoutId) {
                 clearTimeout(abRepeatTimeoutId);
@@ -825,14 +848,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/'/g, '&#039;');
     }
 
-    function applyAudioHighlight(audio, element, text) {
+    function prepareEnglishTextSpans(element, text) {
         if (!element || !text) return;
-
-        // Skip if this element already has an active highlight to avoid flickering
-        const exists = activeHighlights.some(h => h.element === element);
-        if (exists) return;
-
-        const originalHTML = element.innerHTML;
         const tokens = tokenizeEnglishText(text);
 
         let totalWeight = 0;
@@ -869,7 +886,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         element.innerHTML = htmlContent;
+    }
+
+    function applyAudioHighlight(audio, element, text) {
+        if (!element || !text) return;
+
+        // Skip if this element already has an active highlight to avoid flickering
+        const exists = activeHighlights.some(h => h.element === element);
+        if (exists) return;
+
+        const originalHTML = element.innerHTML;
+        const hasSpans = element.querySelector('.word-highlight-span') !== null;
+
+        if (!hasSpans) {
+            prepareEnglishTextSpans(element, text);
+        }
+
         const spans = element.querySelectorAll('.word-highlight-span');
+        const lastSpan = spans[spans.length - 1];
+        const totalWeight = lastSpan ? parseFloat(lastSpan.dataset.endW) : 0;
 
         const timeupdateListener = () => {
             const duration = audio.duration;
@@ -2603,7 +2638,39 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         japanese.textContent = data.japanese;
-        english.textContent = data.english;
+        prepareEnglishTextSpans(english, data.english);
+
+        english.addEventListener('click', (e) => {
+            const span = e.target.closest('.word-highlight-span');
+            if (!span) return;
+
+            e.stopPropagation();
+
+            const startW = parseFloat(span.dataset.startW);
+            const lastSpan = english.querySelector('.word-highlight-span:last-child');
+            const totalWeight = lastSpan ? parseFloat(lastSpan.dataset.endW) : 0;
+            if (totalWeight === 0) return;
+
+            const ratio = startW / totalWeight;
+
+            // Check if settings have changed
+            const currentVoice = voiceSelect.value;
+            const currentSpeed = speedRange.value;
+            const settingsChanged = (lastVoice && lastSpeed) &&
+                (lastVoice !== currentVoice || lastSpeed !== currentSpeed);
+
+            if (audioUrl && currentAudio && currentAudio.src.includes(audioUrl) && !settingsChanged) {
+                if (currentAudio.duration) {
+                    currentAudio.currentTime = ratio * currentAudio.duration;
+                    if (currentAudio.paused) {
+                        currentAudio.play().catch(err => console.log('Playback resume failed', err));
+                    }
+                }
+            } else {
+                english.dataset.pendingSeekRatio = ratio;
+                playAudio(btnSpeak);
+            }
+        });
  
         if (isReviewMode) {
             english.classList.add('hidden');
@@ -3796,6 +3863,17 @@ document.addEventListener('DOMContentLoaded', () => {
             currentAudio = new Audio(audioUrl);
             currentAudioBtn = btnTrigger;
             syncGlobalAudioPlayer(currentAudio, data.english);
+
+            currentAudio.addEventListener('loadedmetadata', () => {
+                const ratio = english.dataset.pendingSeekRatio;
+                if (ratio !== undefined && ratio !== null) {
+                    const r = parseFloat(ratio);
+                    if (!isNaN(r) && currentAudio.duration) {
+                        currentAudio.currentTime = r * currentAudio.duration;
+                    }
+                    delete english.dataset.pendingSeekRatio;
+                }
+            });
 
             currentAudio.addEventListener('play', () => {
                 toggleModelAudioUI(true);

@@ -1255,4 +1255,13 @@ AI: 練習モード（btn-practice）起動中に英訳表示ボタン（btn-tra
 - /Users/mizy/Dropbox/speaking2/README.md
 - /Users/mizy/Dropbox/speaking2/chat.txt
 
-
+2026-06-07 08:16:17
+USER: 英文の任意の位置をクリックして、そこから音声再生をする。
+AI: 英文テキスト（メッセージカード内およびグローバルオーディオプレイヤー内）をクリックした際、クリックされた単語の発音開始位置に音声を即座にシークして再生（または再開）する機能を実装しました。音声がまだ再生されていない状態の英文をクリックした場合でも、自動的に音声の生成・ロードを開始し、ロード完了後にクリックした単語から再生が始まります。また、クリック可能であることを示すため、ホバー時に薄くハイライト（記号は下線）される `cursor: pointer` スタイルを適用し、PWAのキャッシュ（sw.js）を v39 に更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
