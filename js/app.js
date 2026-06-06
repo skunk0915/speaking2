@@ -3949,7 +3949,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 btnJp.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    btnTranslateJp.click();
+                    btnPractice.click();
                 });
                 
                 const btnListen = document.createElement('button');

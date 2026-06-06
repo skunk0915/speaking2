@@ -1225,3 +1225,12 @@ AI: メッセージ生成直後に日本語・英語テキストの双方が非�
 - /Users/mizy/Dropbox/speaking2/sw.js
 - /Users/mizy/Dropbox/speaking2/README.md
 - /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-07 08:01:03
+USER: 「日本語を英訳」ボタンを押したときは.btn-translate-jpを押す挙動ではなくbtn-practiceを押したときの挙動にする。
+AI: メッセージ生成直後に表示される「初期アクション選択肢」の「日本語を英訳」ボタンをクリックした際の動作を、日本語訳を表示するトグル（.btn-translate-jp）の実行から、英訳練習モードを開始する（btn-practice）の実行に変更しました。これに伴い、README.mdの該当箇所の説明文を修正し、サービスワーカー（sw.js）のキャッシュバージョンを v36 に更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
