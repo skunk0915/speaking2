@@ -452,8 +452,7 @@
                     <h3>発音練習</h3>
                     <div class="pronounce-container">
                         <div class="pronounce-instruction">
-                            <p>「発声開始」ボタンを押し、マイクに向かって以下の英文を発音してください。</p>
-                            <div class="pronounce-target-text"></div>
+                            <p>「発声開始」ボタンを押し、マイクに向かって英文を発音してください。</p>
                         </div>
                         <div class="pronounce-controls">
                             <button class="btn-pronounce-record">

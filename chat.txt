@@ -1324,3 +1324,24 @@ AI: 発音添削結果の下部にあるQ&A入力欄からの質問について�
 - /Users/mizy/Dropbox/speaking2/sw.js
 - /Users/mizy/Dropbox/speaking2/README.md
 - /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-08 03:46:27
+USER: 発音録音時にpronounce-target-text表示不要。（上に同じ英文が既に表示されているため）
+AI: 発音練習セクションに表示されていた英文テキスト（.pronounce-target-text）を削除し、説明テキストから「以下の」という文言を除去しました。また、PWA対応キャッシュ（sw.js）を v46 に更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/index.php
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-08 04:01:15
+USER: btn-pronounce-toggleをONにしたらbtn-translateもONにする
+AI: 発音練習ボタン（btn-pronounce-toggle）をONにして発音セクションを展開した際、答えである英訳表示（btn-translate）が非表示状態の場合、自動的に英訳表示をON（展開）にする連動処理を実装しました。これにより、復習モード等の英文が隠された状態でも、発音練習開始時に自動的に英文が表示されるようになります。また、PWA対応キャッシュ（sw.js）を v47 に更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt

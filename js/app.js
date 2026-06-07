@@ -3082,16 +3082,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnPronounceToggle && pronounceSection) {
             btnPronounceToggle.addEventListener('click', () => {
                 const isOpening = pronounceSection.classList.contains('hidden');
-                if (isOpening) {
-                    // 対象テキストを表示
-                    const targetTextEl = pronounceSection.querySelector('.pronounce-target-text');
-                    if (targetTextEl) {
-                        targetTextEl.textContent = data.english;
-                    }
-                } else {
+                if (!isOpening) {
                     // 閉じる時に録音中であれば停止（キャンセル）
                     if (activeRecordingBtn === btnPronounceRecord) {
                         handleStopRecording(true);
+                    }
+                } else {
+                    // 発音練習ON（開く）の際、英訳が非表示であれば自動でONにする
+                    if (btnTranslate && !btnTranslate.classList.contains('active')) {
+                        btnTranslate.click();
                     }
                 }
                 toggleSection(btnPronounceToggle, pronounceSection);
