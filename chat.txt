@@ -1345,3 +1345,13 @@ AI: 発音練習ボタン（btn-pronounce-toggle）をONにして発音セクシ
 - /Users/mizy/Dropbox/speaking2/sw.js
 - /Users/mizy/Dropbox/speaking2/README.md
 - /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-08 04:05:53
+USER: 発音練習セクションでの質問は発音についての質問前提にする。下記のように発音の添削について質問しているのに文法の解説になっていて質問の意図とずれている。thisはなにが駄目なん
+AI: 発音添削結果に対するQ&Aにおいて、フロントエンドからのリクエスト時に `is_pronunciation_qa`、`pronunciation_scores`、および `pronunciation_advice` などのコンテキストデータが送信されておらず、結果として通常の文法/表現解説用プロンプトがバックエンドで適用されていた不具合を修正しました。フロントエンドの API リクエスト（sendItemQuestion）にこれらのパラメータを含めることで、発音Q&Aで送信された質問が「発音（特定の単語の発音方法や母音・子音の物理的な出し方、リンキング、イントネーション、強勢等）」前提で適切に回答されるようになりました。また、PWAキャッシュ（sw.js）を v48 に更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
+

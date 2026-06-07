@@ -1809,6 +1809,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         user_input: contextData.user_input,
                         correction: contextData.correction,
                         english: contextData.english,
+                        is_pronunciation_qa: contextData.is_pronunciation_qa || false,
+                        pronunciation_scores: contextData.pronunciation_scores || '',
+                        pronunciation_advice: contextData.pronunciation_advice || '',
                         history: history
                     },
                     text: text,
