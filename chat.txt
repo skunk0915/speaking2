@@ -1303,3 +1303,24 @@ AI: 録音時間の動的タイムアウト化に伴い、不要となった録�
 - /Users/mizy/Dropbox/speaking2/sw.js
 - /Users/mizy/Dropbox/speaking2/README.md
 - /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-08 03:36:43
+USER: 発音の添削について自由入力欄で質問できるようにする
+AI: 発音練習結果（評価スコア、AI発音アドバイス）の下部に、自由に入力してAI発音コーチに直接質問できるQ&A欄を追加しました。質問履歴は他のQ&A機能と同様に、ブックマーク（お気に入り）時に自動的にサーバーへ保存され、リロード時や復習タブでも正常に復元・閲覧が可能です。また、PWA対応キャッシュ（sw.js）を v44 に更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/index.php
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/api/generate_text.php
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-08 03:41:38
+USER: 発音の添削について自由入力欄で質問できるようにする（発音についてのQA前提に）
+AI: 発音添削結果の下部にあるQ&A入力欄からの質問については、文法や作文の解説ではなく「発音（特定の単語の発音方法、母音や子音の物理的な出し方、リンキング、イントネーション、強勢等）」に関する解説のみに回答を限定するよう、AIプロンプトの指示を厳格化しました。あわせて、JSから送信されるQ&Aリクエストに発音特化の判定フラグを含めるよう改修し、PWAキャッシュ（sw.js）を v45 に更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/api/generate_text.php
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt

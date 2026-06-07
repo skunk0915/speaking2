@@ -2912,7 +2912,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     audio_url: audioUrl,
                     last_voice: lastVoice,
                     last_speed: lastSpeed,
-                    last_pronunciation: group.dataset.lastPronunciation ? JSON.parse(group.dataset.lastPronunciation) : (data.last_pronunciation || null)
+                    last_pronunciation: group.dataset.lastPronunciation ? JSON.parse(group.dataset.lastPronunciation) : (data.last_pronunciation || null),
+                    pronounce_qa_history: data.pronounce_qa_history || []
                 };
 
                 const mainHistoryStr = group.dataset.retryHistory;
@@ -3479,6 +3480,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         feedbackWrapper.classList.add('hidden');
                     }
+                }
+
+                // 発音Q&Aのセットアップ
+                const pronounceQaSection = resultArea.querySelector('.item-qa-section');
+                if (pronounceQaSection) {
+                    pronounceQaSection.classList.remove('hidden');
+
+                    const scores = res.PronunciationAssessment;
+                    const scoreDetails = `総合スコア: ${Math.round(scores.PronScore)}点, 正確性: ${Math.round(scores.AccuracyScore)}%, 流暢さ: ${Math.round(scores.FluencyScore)}%, 完全性: ${Math.round(scores.CompletenessScore)}%`;
+
+                    setupItemQa(pronounceQaSection, {
+                        situation: data.japanese,
+                        english: data.english,
+                        user_input: 'なし',
+                        correction: 'なし',
+                        pronunciation_scores: scoreDetails,
+                        pronunciation_advice: res.advice || '',
+                        is_pronunciation_qa: true
+                    }, data.pronounce_qa_history || [], (newHistory) => {
+                        data.pronounce_qa_history = newHistory;
+                        updateSavedData('pronounce_qa_history', newHistory);
+                    });
                 }
             }
             
@@ -4687,6 +4710,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             }
             
+            // Pronunciation QA
+            const pronounceSection = group.querySelector('.pronounce-section');
+            const pronounceQaEl = pronounceSection?.querySelector('.item-qa-section');
+            const pronounceQaHistory = pronounceQaEl?.itemQaHistory || [];
+
             // Variations
             const variationSection = group.querySelector('.variation-section');
             const variationVisible = variationSection && !variationSection.classList.contains('hidden');
@@ -4710,7 +4738,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     audio_url: group.dataset.audioUrl || '',
                     last_voice: group.dataset.lastVoice || '',
                     last_speed: group.dataset.lastSpeed || '',
-                    last_pronunciation: group.dataset.lastPronunciation ? JSON.parse(group.dataset.lastPronunciation) : null
+                    last_pronunciation: group.dataset.lastPronunciation ? JSON.parse(group.dataset.lastPronunciation) : null,
+                    pronounce_qa_history: pronounceQaHistory
                 },
                 user_msg: {
                     visible: userMsgVisible,
@@ -4783,7 +4812,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     audio_url: gData.prompt.audio_url || '',
                     last_voice: gData.prompt.last_voice || '',
                     last_speed: gData.prompt.last_speed || '',
-                    last_pronunciation: gData.prompt.last_pronunciation || null
+                    last_pronunciation: gData.prompt.last_pronunciation || null,
+                    pronounce_qa_history: gData.prompt.pronounce_qa_history || []
                 };
                 
                 const groupEl = addConversationItem(promptData);

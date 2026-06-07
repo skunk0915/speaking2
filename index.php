@@ -549,6 +549,18 @@
                                         <h5>発音改善が必要な単語:</h5>
                                         <div class="feedback-words-items"></div>
                                     </div>
+                                    <div class="item-qa-section hidden">
+                                        <div class="item-qa-container"></div>
+                                        <div class="item-qa-input-area">
+                                            <textarea class="item-qa-input" placeholder="この発音について質問..." rows="1"></textarea>
+                                            <button class="btn-icon btn-item-qa-send" disabled>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
