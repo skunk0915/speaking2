@@ -1265,3 +1265,23 @@ AI: 英文テキスト（メッセージカード内およびグローバルオ�
 - /Users/mizy/Dropbox/speaking2/sw.js
 - /Users/mizy/Dropbox/speaking2/README.md
 - /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-08 03:12:46
+USER: .japanese や .englishなどアコーディオン開閉はアニメーションでスライドインアウトする
+AI: 日本語訳（.japanese）および英訳（.english）テキストの表示・非表示切り替え時の挙動を、アコーディオン形式のスライドイン・アウト（スライドダウン・アップ）アニメーションへ改修しました。練習モード（btn-practice）の開始・終了時や、添削結果（フィードバック）表示時、および「もう一度挑戦」ボタン（btn-retry）のクリック時も滑らかにスライド切り替えが走ります。アニメーション中（スライド中）もトグルボタンの active クラス（押し込みトグルデザイン）が即座に連動します。また、音声読み上げ中のリアルタイム単語ハイライト機能とも連携し、非表示開始と同時にハイライトが速やかにクリアされるように状態判定を修正しました。さらに、Sassコンパイルを実行し、PWAのキャッシュ（sw.js）を v40 に更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/css/style.scss
+- /Users/mizy/Dropbox/speaking2/css/style.css
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-08 03:16:35
+USER: アコーディオン開閉時は、常にその対象となるアコーディオンの上端にスクロールする
+AI: 日本語訳や英訳、練習モードセクションなどのアコーディオン開閉アクションが発生した際、常にその対象アコーディオン（またはそれを含む会話カード）の上端が画面最上部（20pxの余白付き）にフィットするようにスムーズに自動スクロールする scrollToAccordionTop 共通ヘルパー関数を導入しました。これにより、各表示切替時にコンテンツが見失われることなくスムーズに追従します。また、PWAのキャッシュ（sw.js）を v41 に更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt

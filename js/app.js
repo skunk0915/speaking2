@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Slide transition helper functions
     const slideUp = (target, duration = 300) => {
+        target.classList.add('sliding-up');
+        target.classList.remove('sliding-down');
         target.style.transitionProperty = 'height, margin, padding, opacity, border-top-width, border-bottom-width';
         target.style.transitionDuration = duration + 'ms';
         target.style.boxSizing = 'border-box';
@@ -19,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return new Promise(resolve => {
             window.setTimeout(() => {
+                target.classList.remove('sliding-up');
                 target.classList.add('hidden');
                 target.style.removeProperty('height');
                 target.style.removeProperty('padding-top');
@@ -38,7 +41,19 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const slideDown = (target, duration = 300) => {
+        target.classList.add('sliding-down');
+        target.classList.remove('sliding-up');
         target.classList.remove('hidden');
+        
+        // Save current inline styles to reset temporarily for measuring
+        const oldHeight = target.style.height;
+        const oldOverflow = target.style.overflow;
+        const oldTransition = target.style.transitionProperty;
+
+        target.style.height = 'auto';
+        target.style.overflow = 'visible';
+        target.style.transitionProperty = 'none';
+
         const computed = window.getComputedStyle(target);
         
         const targetHeight = target.offsetHeight;
@@ -50,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const hasBorder = computed.borderTopWidth !== '0px';
         const targetBorderTopWidth = computed.borderTopWidth;
 
+        // Reset to initial state of transition
         target.style.overflow = 'hidden';
         target.style.height = '0';
         target.style.paddingTop = '0';
@@ -79,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return new Promise(resolve => {
             window.setTimeout(() => {
+                target.classList.remove('sliding-down');
                 target.style.removeProperty('height');
                 target.style.removeProperty('padding-top');
                 target.style.removeProperty('padding-bottom');
@@ -94,6 +111,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 resolve();
             }, duration);
         });
+    };
+
+    const scrollToAccordionTop = (target) => {
+        if (!target) return;
+        const scrollTarget = target.closest('.conversation-item') || target.closest('.conversation-group') || target;
+        const rect = scrollTarget.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const targetY = scrollTop + rect.top - 20; // 20px margin at top
+        window.scrollTo({ top: targetY, behavior: 'smooth' });
     };
 
     const container = document.getElementById('conversation-container');
@@ -997,7 +1023,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     activeEnglishEl = itemGroup.querySelector('.english');
                 }
             }
-            if (activeEnglishEl && !activeEnglishEl.classList.contains('hidden')) {
+            if (activeEnglishEl && !activeEnglishEl.classList.contains('hidden') && !activeEnglishEl.classList.contains('sliding-up')) {
                 const cleanText = text.trim();
                 const engText = activeEnglishEl.textContent.trim();
                 if (engText === cleanText) {
@@ -1084,7 +1110,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         activeEnglishEl = itemGroup.querySelector('.english');
                     }
                 }
-                if (activeEnglishEl && !activeEnglishEl.classList.contains('hidden')) {
+                if (activeEnglishEl && !activeEnglishEl.classList.contains('hidden') && !activeEnglishEl.classList.contains('sliding-up')) {
                     const cleanText = text.trim();
                     const engText = activeEnglishEl.textContent.trim();
                     if (engText === cleanText) {
@@ -2689,14 +2715,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function updateToggleButtonsState() {
             if (btnTranslateJp) {
-                if (!japanese.classList.contains('hidden')) {
+                const isJpVisible = (!japanese.classList.contains('hidden') && !japanese.classList.contains('sliding-up')) || japanese.classList.contains('sliding-down');
+                if (isJpVisible) {
                     btnTranslateJp.classList.add('active');
                 } else {
                     btnTranslateJp.classList.remove('active');
                 }
             }
             if (btnTranslate) {
-                if (!english.classList.contains('hidden')) {
+                const isEngVisible = (!english.classList.contains('hidden') && !english.classList.contains('sliding-up')) || english.classList.contains('sliding-down');
+                if (isEngVisible) {
                     btnTranslate.classList.add('active');
                 } else {
                     btnTranslate.classList.remove('active');
@@ -2948,15 +2976,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
             const scrollToParent = () => {
-                // conversation-groupだと縦長すぎる場合に入力欄が見えなくなるため、
-                // 操作中の個別メッセージ枠である conversation-item を優先的に上端に合わせる
-                const targetElement = section.closest('.conversation-item') || section.closest('.conversation-group');
-                if (targetElement) {
-                    const rect = targetElement.getBoundingClientRect();
-                    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                    const targetY = scrollTop + rect.top - 20; // 20px space at the top
-                    window.scrollTo({ top: targetY, behavior: 'smooth' });
-                }
+                scrollToAccordionTop(section);
             };
 
             const closePromises = [];
@@ -3008,17 +3028,23 @@ document.addEventListener('DOMContentLoaded', () => {
             btnPractice.addEventListener('click', () => {
                 const isOpening = practiceSection.classList.contains('hidden');
                 if (isOpening) {
-                    japanese.classList.remove('hidden');
+                    if (japanese.classList.contains('hidden')) {
+                        slideDown(japanese, 300);
+                    }
                     if (typeof saveUIState === 'function') {
                         saveUIState();
                     }
                     if (practiceFeedback && practiceFeedback.classList.contains('hidden')) {
                         item.classList.add('practice-hide-english');
-                        english.classList.add('hidden');
+                        if (!english.classList.contains('hidden')) {
+                            slideUp(english, 300);
+                        }
                         startTimer();
                     } else {
                         item.classList.remove('practice-hide-english');
-                        english.classList.remove('hidden');
+                        if (english.classList.contains('hidden')) {
+                            slideDown(english, 300);
+                        }
                     }
                 } else {
                     stopTimer();
@@ -3463,7 +3489,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Japanese Translation Toggle
         if (btnTranslateJp) {
             btnTranslateJp.addEventListener('click', () => {
-                japanese.classList.toggle('hidden');
+                if (japanese.classList.contains('hidden')) {
+                    slideDown(japanese, 300);
+                } else {
+                    slideUp(japanese, 300);
+                }
+                scrollToAccordionTop(japanese);
                 updateToggleButtonsState();
 
                 updateInitialActions();
@@ -3496,20 +3527,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (activeBtn === btnPractice) {
                     stopTimer();
                     item.classList.remove('practice-hide-english');
-                    english.classList.remove('hidden');
+                    if (english.classList.contains('hidden')) {
+                        slideDown(english, 300);
+                    }
                 } else {
-                    english.classList.toggle('hidden');
+                    if (english.classList.contains('hidden')) {
+                        slideDown(english, 300);
+                    } else {
+                        slideUp(english, 300);
+                    }
                 }
             } else {
                 // Normal toggle
-                english.classList.toggle('hidden');
+                if (english.classList.contains('hidden')) {
+                    slideDown(english, 300);
+                } else {
+                    slideUp(english, 300);
+                }
             }
 
+            scrollToAccordionTop(english);
             updateToggleButtonsState();
             updateInitialActions();
 
             // Apply or clean highlight based on the visibility of english text
-            if (!english.classList.contains('hidden')) {
+            const isEnglishCurrentlyVisible = !english.classList.contains('hidden') && !english.classList.contains('sliding-up');
+            if (isEnglishCurrentlyVisible) {
                 if (currentAudio && !currentAudio.paused && !currentAudio.ended && currentAudioBtn) {
                     const activeGroup = currentAudioBtn.closest('.conversation-group');
                     if (activeGroup === group) {
@@ -3597,7 +3640,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         historyItemRef.intended_japanese = dataCorr.intended_japanese || null;
                         
                         item.classList.remove('practice-hide-english');
-                        english.classList.remove('hidden');
+                        if (english.classList.contains('hidden')) {
+                            slideDown(english, 300);
+                            scrollToAccordionTop(english);
+                        }
                         
                         // Bind user memo for retry item
                         const retryItems = practiceFeedback.querySelectorAll('.retry-result-item');
@@ -3657,7 +3703,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         historyItemRef.intended_japanese = dataCorr.intended_japanese || null;
                         
                         item.classList.remove('practice-hide-english');
-                        english.classList.remove('hidden');
+                        if (english.classList.contains('hidden')) {
+                            slideDown(english, 300);
+                            scrollToAccordionTop(english);
+                        }
                         
                         // Bind user memo for initial feedback item
                         const memoInput = practiceFeedback.querySelector('.user-memo-input');
@@ -3707,7 +3756,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         btnPracticeSend.disabled = true;
                         feedback.classList.add('hidden');
                         item.classList.add('practice-hide-english');
-                        english.classList.add('hidden');
+                        if (!english.classList.contains('hidden')) {
+                            slideUp(english, 300);
+                        }
+                        scrollToAccordionTop(english);
                         updateToggleButtonsState();
                         practiceInput.focus();
                         startTimer();
@@ -4100,7 +4152,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentAudioBtn = btnSpeak;
                 syncAudioBtnUI(true);
 
-                if (!english.classList.contains('hidden')) {
+                if (!english.classList.contains('hidden') && !english.classList.contains('sliding-up')) {
                     applyAudioHighlight(currentAudio, english, cleanText);
                 }
             }
@@ -4650,8 +4702,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     japanese: jpEl?.textContent || '',
                     english: enEl?.textContent || '',
                     sample_user_answers: sampleAnswers,
-                    english_hidden: enEl?.classList.contains('hidden'),
-                    japanese_hidden: jpEl?.classList.contains('hidden'),
+                    english_hidden: enEl?.classList.contains('hidden') || enEl?.classList.contains('sliding-up'),
+                    japanese_hidden: jpEl?.classList.contains('hidden') || jpEl?.classList.contains('sliding-up'),
                     audio_url: group.dataset.audioUrl || '',
                     last_voice: group.dataset.lastVoice || '',
                     last_speed: group.dataset.lastSpeed || '',

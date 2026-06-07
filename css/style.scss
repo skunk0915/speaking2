@@ -301,7 +301,7 @@ body {
 
         // border-top-left-radius: 4px;
         &.practice-hide-english {
-            .text-content .english {
+            .text-content .english:not(.sliding-up):not(.sliding-down) {
                 display: none !important;
             }
         }

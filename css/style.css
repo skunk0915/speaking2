@@ -114,7 +114,7 @@ body {
   animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
-.conversation-item.system-message.practice-hide-english .text-content .english {
+.conversation-item.system-message.practice-hide-english .text-content .english:not(.sliding-up):not(.sliding-down) {
   display: none !important;
 }
 .conversation-item .text-content {
@@ -1933,6 +1933,10 @@ body {
   outline: none;
   box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #f5f5f5, 0 0 0 2px rgba(0, 122, 255, 0.1);
 }
+.input-group .input-row textarea::-moz-placeholder {
+  color: #8d97a5;
+  opacity: 0.7;
+}
 .input-group .input-row textarea::placeholder {
   color: #8d97a5;
   opacity: 0.7;
@@ -2164,7 +2168,9 @@ body {
   border: 1px solid #ddd;
 }
 .settings-panel .setting-item select {
-  appearance: none;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
   background: #e0e5ec;
   box-shadow: inset 6px 6px 10px #a3b1c6, inset -6px -6px 10px #f5f5f5;
   border: none;
@@ -3034,7 +3040,9 @@ button .loader {
   align-items: center;
   justify-content: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 .situation-tag .tag-label {
   font-size: 13px;
@@ -3203,6 +3211,10 @@ button .loader {
   outline: none;
   border-color: rgba(0, 122, 255, 0.3);
   box-shadow: inset 8px 8px 12px #a3b1c6, inset -8px -8px 12px #f5f5f5;
+}
+.initial-input-container .input-section textarea::-moz-placeholder, .initial-input-container .input-section .url-input-wrapper input[type=url]::-moz-placeholder {
+  color: #8d97a5;
+  opacity: 0.5;
 }
 .initial-input-container .input-section textarea::placeholder,
 .initial-input-container .input-section .url-input-wrapper input[type=url]::placeholder {
@@ -3806,7 +3818,8 @@ button .loader {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 16px 30px rgba(163, 177, 198, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.7);
   outline: none;
-  appearance: none;
+  -moz-appearance: none;
+       appearance: none;
   -webkit-appearance: none;
 }
 .situation-options-wrapper .situation-options-list .situation-option-item .option-num {
@@ -4204,6 +4217,7 @@ button .loader {
   margin-top: -4px;
   box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
   border: 2px solid #fff;
+  -webkit-transition: transform 0.1s ease;
   transition: transform 0.1s ease;
 }
 .global-audio-player input[type=range]#player-seekbar::-webkit-slider-thumb:hover {
@@ -4260,6 +4274,4 @@ button .loader {
   transform: none;
   font-weight: normal;
   color: inherit;
-}
-
-/*# sourceMappingURL=style.css.map */
+}/*# sourceMappingURL=style.css.map */
