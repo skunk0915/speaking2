@@ -1285,3 +1285,21 @@ AI: 日本語訳や英訳、練習モードセクションなどのアコーデ�
 - /Users/mizy/Dropbox/speaking2/sw.js
 - /Users/mizy/Dropbox/speaking2/README.md
 - /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-08 03:29:45
+USER: 発音の録音が途中で勝手に終了する。長文読んでるときに
+AI: 発音の録音最長時間を一律15秒固定から、英文の単語数に応じて動的に算出・延長する方式（最小30秒〜最大120秒、1単語あたり2秒＋15秒の猶予）に改修しました。これにより、長文を音読している際でも途中で勝手に録音が終了してしまう問題を解消しました。また、PWA対応キャッシュ（sw.js）を v42 に更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/js/app.js
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt
+
+2026-06-08 03:33:15
+USER: 「（最長１５秒）」の表記不要。
+AI: 録音時間の動的タイムアウト化に伴い、不要となった録音中ステータス表示の「（最長１５秒）」表記を削除し、「録音中...」に統一しました。また、PWA対応キャッシュ（sw.js）を v43 に更新しました。
+編集ファイル:
+- /Users/mizy/Dropbox/speaking2/index.php
+- /Users/mizy/Dropbox/speaking2/sw.js
+- /Users/mizy/Dropbox/speaking2/README.md
+- /Users/mizy/Dropbox/speaking2/chat.txt

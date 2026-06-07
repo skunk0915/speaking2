@@ -1,4 +1,4 @@
-const CACHE_NAME = 'english-training-v41';
+const CACHE_NAME = 'english-training-v43';
 const ASSETS_TO_CACHE = [
     './',
     './index.php',

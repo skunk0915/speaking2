@@ -3116,10 +3116,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     // WAV録音開始
                     await startWavRecording();
 
-                    // 最長15秒の制限
+                    // 単語数に応じてタイムアウト時間を動的に決定（1単語あたり2秒 + 15秒の猶予、最小30秒、最大120秒）
+                    const wordCount = (data.english || '').split(/\s+/).filter(Boolean).length;
+                    const timeoutMs = Math.min(Math.max(wordCount * 2000 + 15000, 30000), 120000);
+
                     recordingTimeoutId = setTimeout(() => {
                         handleStopRecording();
-                    }, 15000);
+                    }, timeoutMs);
 
                 } catch (err) {
                     console.error('録音開始エラー:', err);

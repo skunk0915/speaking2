@@ -469,7 +469,7 @@
                                 <div class="audio-wave">
                                     <span></span><span></span><span></span><span></span><span></span>
                                 </div>
-                                <span class="time-limit">録音中 (最長15秒)...</span>
+                                <span class="time-limit">録音中...</span>
                             </div>
                             <div class="pronounce-playbacks hidden">
                                 <button class="btn-pronounce-play" title="自分の発音を再生">
