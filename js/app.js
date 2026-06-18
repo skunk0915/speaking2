@@ -543,6 +543,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let isRepeating = false;
     let currentContext = ""; // Store the last Japanese prompt
     let currentSampleAnswers = []; // Store current sample answers
+    let isHintUsed = false;
+    let usedSampleAnswers = [];
 
     // Global Audio Player Elements
     const playerEl = document.getElementById('global-audio-player');
@@ -1240,6 +1242,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     btnSend.addEventListener('click', async () => {
+        const savedHints = isHintUsed ? [...usedSampleAnswers] : null;
         const text = userInput.value.trim();
         const textJp = userInputJp.value.trim();
         if (!text) return;
@@ -1277,7 +1280,14 @@ document.addEventListener('DOMContentLoaded', () => {
  
                 // Update retry history with the latest result
                 if (data && data.correction) {
-                    const historyItemRef = { user_input: text, correction: data.correction, intended_japanese: textJp, memo: '', time_taken: timeTaken };
+                    const historyItemRef = { 
+                        user_input: text, 
+                        correction: data.correction, 
+                        intended_japanese: textJp, 
+                        memo: '', 
+                        time_taken: timeTaken,
+                        ...(savedHints ? { used_hints: savedHints } : {})
+                    };
                     retryHistory.push(historyItemRef);
                     lastGroup.dataset.retryHistory = JSON.stringify(retryHistory);
 
@@ -1310,7 +1320,14 @@ document.addEventListener('DOMContentLoaded', () => {
  
                 // Update retry history with the latest result
                 if (data && data.correction) {
-                    const historyItemRef = { user_input: text, correction: data.correction, intended_japanese: textJp, memo: '', time_taken: timeTaken };
+                    const historyItemRef = { 
+                        user_input: text, 
+                        correction: data.correction, 
+                        intended_japanese: textJp, 
+                        memo: '', 
+                        time_taken: timeTaken,
+                        ...(savedHints ? { used_hints: savedHints } : {})
+                    };
                     retryHistory.push(historyItemRef);
                     lastGroup.dataset.retryHistory = JSON.stringify(retryHistory);
 
@@ -1353,6 +1370,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
 
                 div.addEventListener('click', (e) => {
+                    isHintUsed = true;
+                    usedSampleAnswers = currentSampleAnswers.map(ans => {
+                        const isSelected = (typeof ans === 'object' ? ans.ja : ans) === jaText;
+                        if (typeof ans === 'object') {
+                            return { ...ans, selected: isSelected };
+                        } else {
+                            return { ja: ans, en: '', selected: isSelected };
+                        }
+                    });
                     // Fill Japanese input
                     userInputJp.value = jaText;
                     userInputJp.style.display = 'block'; // Show it
@@ -1889,6 +1915,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const suggestionsHeader = feedbackElement.querySelector('h3:nth-of-type(2)'); // "提案" header
 
         if (isRetry) {
+            isHintUsed = false;
+            usedSampleAnswers = [];
             // In retry mode, show the feedback section (which was hidden)
             feedbackElement.classList.remove('hidden');
 
@@ -1971,6 +1999,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 userInputDisplay.classList.remove('hidden');
             }
+
+            const correctionHintDisplay = feedbackElement.querySelector('.correction-hint-display');
+            if (correctionHintDisplay) {
+                if (isHintUsed && usedSampleAnswers.length > 0) {
+                    renderCorrectionHints(usedSampleAnswers, correctionHintDisplay);
+                } else {
+                    correctionHintDisplay.innerHTML = '';
+                    correctionHintDisplay.classList.add('hidden');
+                }
+            }
+            isHintUsed = false;
+            usedSampleAnswers = [];
 
             try {
                 const response = await fetch('api/correct_text.php', {
@@ -2556,6 +2596,8 @@ document.addEventListener('DOMContentLoaded', () => {
         hintDisplay.classList.add('hidden');
         btnHint.classList.remove('active');
         hintList.innerHTML = '';
+        isHintUsed = false;
+        usedSampleAnswers = [];
         userInput.value = '';
         userInputJp.value = '';
         userInputJp.style.display = 'none'; // Hide again
@@ -2741,7 +2783,110 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnHistory) {
             btnHistory.addEventListener('click', () => toggleSection(btnHistory, historySection));
         }
- 
+
+        function renderCorrectionHints(hints, displayElement) {
+            if (!displayElement) return;
+            displayElement.innerHTML = '';
+
+            if (!hints || hints.length === 0) {
+                displayElement.classList.add('hidden');
+                return;
+            }
+
+            const hasSelected = hints.some(ans => typeof ans === 'object' && ans.selected === true);
+
+            if (hasSelected) {
+                const selectedHints = hints.filter(ans => typeof ans === 'object' && ans.selected === true);
+                const otherHints = hints.filter(ans => !(typeof ans === 'object' && ans.selected === true));
+
+                // 1. Selected group
+                if (selectedHints.length > 0) {
+                    const groupDiv = document.createElement('div');
+                    groupDiv.className = 'hint-group selected-group';
+
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = 'hint-group-title';
+                    titleDiv.textContent = '選択したヒント';
+                    groupDiv.appendChild(titleDiv);
+
+                    const listDiv = document.createElement('div');
+                    listDiv.className = 'correction-hint-list';
+
+                    selectedHints.forEach(ans => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'correction-hint-item selected';
+
+                        const jaText = typeof ans === 'object' ? ans.ja : ans;
+                        const enText = typeof ans === 'object' ? ans.en : '';
+
+                        itemDiv.innerHTML = `
+                            <div class="ja-hint">${jaText}</div>
+                            ${enText ? `<div class="en-hint">${enText}</div>` : ''}
+                        `;
+                        listDiv.appendChild(itemDiv);
+                    });
+                    groupDiv.appendChild(listDiv);
+                    displayElement.appendChild(groupDiv);
+                }
+
+                // 2. Other group
+                if (otherHints.length > 0) {
+                    const groupDiv = document.createElement('div');
+                    groupDiv.className = 'hint-group other-group';
+
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = 'hint-group-title';
+                    titleDiv.textContent = 'その他のヒント';
+                    groupDiv.appendChild(titleDiv);
+
+                    const listDiv = document.createElement('div');
+                    listDiv.className = 'correction-hint-list';
+
+                    otherHints.forEach(ans => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'correction-hint-item';
+
+                        const jaText = typeof ans === 'object' ? ans.ja : ans;
+                        const enText = typeof ans === 'object' ? ans.en : '';
+
+                        itemDiv.innerHTML = `
+                            <div class="ja-hint">${jaText}</div>
+                            ${enText ? `<div class="en-hint">${enText}</div>` : ''}
+                        `;
+                        listDiv.appendChild(itemDiv);
+                    });
+                    groupDiv.appendChild(listDiv);
+                    displayElement.appendChild(groupDiv);
+                }
+            } else {
+                // Fallback for old data with no selected flag
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'label';
+                labelDiv.textContent = '使用したヒント:';
+                displayElement.appendChild(labelDiv);
+
+                const listDiv = document.createElement('div');
+                listDiv.className = 'correction-hint-list';
+
+                hints.forEach(ans => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'correction-hint-item';
+
+                    const jaText = typeof ans === 'object' ? ans.ja : ans;
+                    const enText = typeof ans === 'object' ? ans.en : '';
+
+                    itemDiv.innerHTML = `
+                        <div class="ja-hint">${jaText}</div>
+                        ${enText ? `<div class="en-hint">${enText}</div>` : ''}
+                    `;
+                    listDiv.appendChild(itemDiv);
+                });
+                displayElement.appendChild(listDiv);
+            }
+
+            displayElement.classList.remove('hidden');
+        }
+
         function renderHistory(history, container) {
             container.innerHTML = '';
             history.forEach(h => {
@@ -2763,6 +2908,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${h.intended_japanese ? `<div class="intended-jp">${h.intended_japanese}</div>` : ''}
                         <div class="text">${h.user_input} ${h.time_taken !== null && h.time_taken !== undefined ? `<span class="time-taken-badge" title="解答時間">⏱️ ${h.time_taken}s</span>` : ''}</div>
                     </div>
+                    <div class="correction-hint-display hidden"></div>
                     <div class="reactions-container hidden">
                         <div class="reactions-header">
                             <h3>伝わりやすさの反応</h3>
@@ -2799,6 +2945,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 hItem.appendChild(qaSection);
  
+                // Initialize correction-hint-display if present in history item
+                const hintDisplayEl = hItem.querySelector('.correction-hint-display');
+                if (hintDisplayEl) {
+                    if (h.used_hints && h.used_hints.length > 0) {
+                        renderCorrectionHints(h.used_hints, hintDisplayEl);
+                    } else {
+                        hintDisplayEl.innerHTML = '';
+                        hintDisplayEl.classList.add('hidden');
+                    }
+                }
+
                 // Initialize reactions if present in history item
                 if (h.reactions && h.reactions.length > 0) {
                     renderReactions(h.reactions, hItem);
@@ -3612,6 +3769,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             btnPracticeSend.addEventListener('click', async () => {
+                const savedHints = isHintUsed ? [...usedSampleAnswers] : null;
                 const text = practiceInput.value.trim();
                 if (!text) return;
 
@@ -3649,7 +3807,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         intended_japanese: null,
                         qa_history: [],
                         memo: '',
-                        time_taken: timeTaken
+                        time_taken: timeTaken,
+                        ...(savedHints ? { used_hints: savedHints } : {})
                     };
                     practiceRetryHistory.push(historyItemRef);
  
@@ -3712,7 +3871,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         intended_japanese: null,
                         qa_history: [],
                         memo: '',
-                        time_taken: timeTaken
+                        time_taken: timeTaken,
+                        ...(savedHints ? { used_hints: savedHints } : {})
                     };
                     practiceRetryHistory.push(historyItemRef);
  

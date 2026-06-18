@@ -1355,3 +1355,40 @@ AI: 発音添削結果に対するQ&Aにおいて、フロントエンドから�
 - /Users/mizy/Dropbox/speaking2/README.md
 - /Users/mizy/Dropbox/speaking2/chat.txt
 
+
+2026-06-18 16:11:00
+USER: 履歴カード (.feedback-content) にヒント表示機能を追加して。
+1. index.php の practice-section と feedback-section の user-input-display の下に correction-hint-display を挿入。
+2. js/app.js でヒント使用有無 (isHintUsed) と使用したサンプル回答のコピー (usedSampleAnswers) を管理し、ヒントクリック時に保存する。getCorrection の initial 時にヒント表示をレンダリングし、変数をクリア。各 historyItemRef (btnSend, btnPracticeSend) に used_hints フィールドを含め、renderHistory でも used_hints から描画する。
+3. css/style.scss に correction-hint-display のスタイルを追加し、ホバー・クリック効果を無効化。
+4. sw.js のキャッシュバージョンを english-training-v49 に引き上げる。
+AI: 履歴カードの添削結果表示にヒント表示機能を追加しました。ヒントをクリックして入力した履歴を記録し、練習セクションおよび復習セクション（過去の履歴）の添削内容の上に「使用したヒント」として表示します。また、スタイリングでホバー・クリック効果が無効になるように `pointer-events: none` 等を設定し、SassコンパイルおよびPWAキャッシュバージョンの更新（v49）を行いました。
+編集したファイルパス:
+- index.php
+- js/app.js
+- css/style.scss
+- css/style.css
+- sw.js
+
+2026-06-18 16:28:00
+USER: js/app.js 内の moveInputToBottom(shouldScroll = true) と getCorrection (isRetry 時) で、ヒント状態変数 (isHintUsed, usedSampleAnswers) をリセットして状態汚染を防ぐ。
+AI: moveInputToBottom(shouldScroll = true) のヒント表示リセット部および getCorrection 内の isRetry ブロック開始時に、ヒント状態変数である isHintUsed を false に、usedSampleAnswers を空配列 [] にリセットする処理を追加し、状態汚染バグを修正しました。
+編集したファイルパス:
+- js/app.js
+
+2026-06-18 16:30:00
+USER: 新しく実装されたヒント表示機能をREADME.mdにドキュメント化して。
+AI: README.mdに「履歴カード（feedback-content）への英訳付きヒント表示機能の追加」に関するドキュメント（ヒント表示、ホバー・クリック効果の無効化、復習履歴への保存と復元、キャッシュバージョンv49の引き上げ）を追記しました。
+編集したファイルパス:
+- README.md
+
+2026-06-18 17:20:00
+USER: correction-hint-displayは選んだ返事例とそれ以外の例を分けて表示。
+AI: 添削結果および履歴内に表示されるヒント表示（.correction-hint-display）について、実際に選択したヒントとそれ以外のヒントを分けてグループ表示（.hint-group）し、選択したヒントに目立つ枠線と淡い背景色による強調スタイルを適用しました。また、Sassのビルドを実行し、PWA対応キャッシュ（sw.js）を v50 に引き上げ、README.mdに本仕様を追記しました。
+編集したファイルパス:
+- js/app.js
+- css/style.scss
+- css/style.css
+- sw.js
+- README.md
+- chat.txt

@@ -395,6 +395,7 @@
                     </div>
                     <div class="feedback-content hidden">
                         <div class="user-input-display hidden"></div>
+                        <div class="correction-hint-display hidden"></div>
                         <div class="reactions-container hidden">
                             <div class="reactions-header">
                                 <h3>伝わりやすさの反応</h3>
@@ -575,6 +576,7 @@
                 <div class="feedback-section hidden">
                     <div class="feedback-content">
                         <div class="user-input-display hidden"></div>
+                        <div class="correction-hint-display hidden"></div>
                         <div class="reactions-container hidden">
                             <div class="reactions-header">
                                 <h3>伝わりやすさの反応</h3>

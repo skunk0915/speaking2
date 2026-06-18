@@ -3,3 +3,9 @@ config.php
 !/audio/.gitkeep
 .DS_Store
 .env
+
+# Agent temporary directories and draft documents
+.agents/*/
+ORIGINAL_REQUEST.md
+PROJECT.md
+scratch/
